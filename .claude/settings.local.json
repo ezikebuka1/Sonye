@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -d /Users/ebukaezike/*/package.json /Users/ebukaezike/*/*/package.json /Users/ebukaezike/*/manage.py /Users/ebukaezike/*/*/manage.py /Users/ebukaezike/*/docker-compose*.yml /Users/ebukaezike/*/*/docker-compose*.yml)",
+      "Bash(npx create-next-app@latest . --ts)",
+      "Bash(npm --version)",
+      "Bash(echo \"PATH: $PATH\")",
+      "Read(//Users/ebukaezike/.nvm/versions/**)",
+      "Read(//Users/ebukaezike/.fnm/**)",
+      "Bash(brew --prefix)",
+      "Read(//Users/ebukaezike/Squad Up/$\\(brew --prefix\\)/bin/**)",
+      "Read(//Users/ebukaezike/**)",
+      "Bash(export PATH=\"/usr/local/bin:$PATH\")",
+      "Bash(npx create-next-app@latest . --ts --eslint --tailwind --src-dir --app --import-alias \"@/*\" --use-npm)",
+      "Bash(npx create-next-app@latest . --ts --eslint --tailwind --src-dir --app --import-alias \"@/*\" --use-npm 2)",
+      "Bash(1:*)",
+      "Bash(npx create-next-app@latest squad-up --ts --eslint --tailwind --src-dir --app --import-alias \"@/*\" --use-npm)",
+      "Bash(shopt -s dotglob)",
+      "Bash(mv /Users/ebukaezike/squad-up/* /Users/ebukaezike/squad-up/.* \"/Users/ebukaezike/Squad Up/\")",
+      "Bash(rmdir /Users/ebukaezike/squad-up)",
+      "Bash(cp -a /Users/ebukaezike/squad-up/. \"/Users/ebukaezike/Squad Up/\")",
+      "Bash(rm -rf /Users/ebukaezike/squad-up)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(sudo npm:*)"
+    ]
+  }
+}
