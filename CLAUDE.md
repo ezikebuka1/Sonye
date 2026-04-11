@@ -29,10 +29,7 @@ Users can browse activities near them, join a queue, and get matched into a grou
 4. **Clear explanations** — Always explain what code does in plain English after writing it.
 
 ## Design System
-- **Primary color:** blue
- (`blue
--600`, `blue
--500`)
+- **Primary color:** Blue (`blue-600`, `blue-500`)
 - **Background:** Black (`bg-black`)
 - **Cards:** Dark gray (`bg-gray-900`)
 - **Text:** White + gray (`text-white`, `text-gray-400`)
@@ -43,7 +40,15 @@ Users can browse activities near them, join a queue, and get matched into a grou
 | Page | Route | Status |
 |------|--------|--------|
 | Onboarding | `/onboarding` | ✅ Done |
-| Queue | `/queue` | 🔄 In Progress |
+| Queue | `/queue` | ✅ Done |
 | Group Lobby | `/group-lobby` | ⏳ Not started |
+
+## Memory Bank Protocol (REQUIRED)
+
+The `memory-bank/` directory is the shared source of truth across multiple AI sessions (Claude Code, Claude.ai, Gemini). Drift breaks the other sessions.
+
+- At the start of every task, read `memory-bank/activeContext.md` and `memory-bank/progress.md`.
+- Before completing any task that changes code under `src/`, update `memory-bank/activeContext.md` with what you changed and what's next.
+- A pre-commit hook enforces this — git will refuse the commit if `src/` changes are staged without `memory-bank/activeContext.md`.
 
 ## Folder Structure

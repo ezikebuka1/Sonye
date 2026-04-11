@@ -1,0 +1,15 @@
+# Enforce memory-bank update when src/ changes are staged
+if git diff --cached --name-only | grep -q '^src/'; then
+  if ! git diff --cached --name-only | grep -q '^memory-bank/activeContext.md'; then
+    echo ""
+    echo "✗ Memory bank out of sync."
+    echo ""
+    echo "     You staged changes under src/ but did not update memory-bank/activeContext.md."
+    echo ""
+    echo "     Update it to reflect what you changed, then:"
+    echo "       git add memory-bank/activeContext.md"
+    echo "       git commit"
+    echo ""
+    exit 1
+  fi
+fi
