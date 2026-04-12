@@ -1,22 +1,26 @@
 # Active Context
 
-## Current Week
-Week 2-3 — Building the frontend skeleton
+## Current State
+M1 in progress — frontend skeleton. No backend, no auth, no API calls yet.
 
-## What We Are Doing Right Now
-- Building 3 static pages with hardcoded fake data
-- No backend, no auth, no API calls yet
-- Pages: Onboarding, Queue, GroupLobby
+## What Exists
+- Onboarding page (`/onboarding`) — ✅ Done
+- Root page (`/`) — redirects to `/onboarding` (server-side redirect)
+
+## What Does NOT Exist Yet
+- Queue page (`/queue`) — not started. Was never built at this route. An activity-browse UI existed at `/` but did not match the M1 queue spec (no animated search state, no criteria chips, no cancel button). Deleted 2026-04-12 as part of drift cleanup.
+- Group Lobby page (`/group-lobby`) — not started.
+- Mock data module (`src/lib/mockData.ts`) — not started.
+- Reusable components (`CommitmentTracker`, `ChatBubble`, `Avatar`, etc.) — not started.
 
 ## Current Focus
-- Building Group Lobby page (`/group-lobby`)
-- Adding navigation between all 3 pages
-- Pushing all pages to GitHub
+- Build queue page at `/queue` per M1 spec
+- Then build group lobby page at `/group-lobby`
 
-## Recently Completed
-- Queue page (`/queue`) — ✅ Done
-- Switched color system to blue (blue-600/blue-500 primary)
-- Onboarding page (`/onboarding`) — ✅ Done
+## Drift Cleanup (2026-04-12)
+- Discovered memory bank claimed queue page was done, but `/queue` route never existed
+- Activity-browse code at `/` deleted, replaced with redirect to `/onboarding`
+- activeContext.md, progress.md, and CLAUDE.md corrected to match filesystem reality
 
 ## Decisions Made
 - Using Next.js instead of Vite (already scaffolded)

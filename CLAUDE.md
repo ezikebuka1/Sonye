@@ -40,7 +40,7 @@ Users can browse activities near them, join a queue, and get matched into a grou
 | Page | Route | Status |
 |------|--------|--------|
 | Onboarding | `/onboarding` | ✅ Done |
-| Queue | `/queue` | ✅ Done |
+| Queue | `/queue` | ⏳ Not started |
 | Group Lobby | `/group-lobby` | ⏳ Not started |
 
 ## Memory Bank Protocol (REQUIRED)

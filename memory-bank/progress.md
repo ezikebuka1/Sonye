@@ -8,17 +8,21 @@
 - Next.js project scaffolded
 - Tailwind CSS v4 installed and configured
 - Onboarding page built (`/onboarding`)
+- Root page (`/`) set to redirect to `/onboarding`
+- Drift cleanup: corrected memory bank files to match filesystem (2026-04-12)
 
-## In Progress 🔄
-- Queue page (`/queue`)
+## Not Started ⏳
+- Queue page (`/queue`) — never built at this route
 - Group Lobby page (`/group-lobby`)
-
-## Up Next ⏳
+- Mock data module (`src/lib/mockData.ts`)
+- Reusable components extraction
 - Navigation between pages
+
+## Up Next
+- Build queue page at `/queue` per M1 spec
+- Build group lobby page at `/group-lobby`
+- Extract reusable components
 - Push all pages to GitHub
-- Week 4: Backend + Supabase setup
-- Week 5: Auth (login/signup)
-- Week 6: Real-time features
 
 ## Blockers
 - None currently
