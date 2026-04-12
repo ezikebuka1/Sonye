@@ -21,6 +21,7 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls yet.
 - Discovered memory bank claimed queue page was done, but `/queue` route never existed
 - Activity-browse code at `/` deleted, replaced with redirect to `/onboarding`
 - activeContext.md, progress.md, and CLAUDE.md corrected to match filesystem reality
+- PLAN.md rewritten from week-based format to milestone-based plan with decisions register (M0-M6)
 
 ## Decisions Made
 - Using Next.js instead of Vite (already scaffolded)
