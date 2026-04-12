@@ -22,6 +22,7 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls yet.
 - Activity-browse code at `/` deleted, replaced with redirect to `/onboarding`
 - activeContext.md, progress.md, and CLAUDE.md corrected to match filesystem reality
 - PLAN.md rewritten from week-based format to milestone-based plan with decisions register (M0-M6)
+- PLAN.md refined 2026-04-12: tightened one-line definition (casual sports, PWA, liquidity density), added queue spec details (radar pulse, scan text, criteria chips with TODO:D1), added CriteriaChip to components list, added waitlist onboarding to M6, added activity-browse to icebox
 
 ## Decisions Made
 - Using Next.js instead of Vite (already scaffolded)
