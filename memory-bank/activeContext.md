@@ -42,3 +42,10 @@ specific time slot picker, and real-time autonomous matching as v1 features.
 - Using Next.js instead of Vite (already scaffolded)
 - Claude Code + Cursor AI running simultaneously on same project
 - Blue + Black design system chosen (blue-600 primary, black bg, gray-900 cards)
+
+## 2026-04-15 — Memory Bank Aligned to D7
+- projectbrief.md rewritten to reflect D7 v1 mechanics and v2 vision
+- systemPatterns.md gained V1 Product Mechanics section + Sketches Before Code rule; fixed Week 4+ stale reference and broken color line
+- progress.md corrected: `/onboarding` reclassified as misnamed splash (not the form); home screen added to roadmap; queue page concept retired
+- PLAN.md: D7 added to decisions register; M1 onboarding done-when updated to 7-field D7 schema; queue page replaced with home screen showing slots; M5 rescoped (no real-time matching algorithm in v1, slot-fill replaces it); icebox typo fixed (basketball → pickleball)
+- techContext.md left unchanged (D7 doesn't affect tech stack)

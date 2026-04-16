@@ -24,6 +24,7 @@ Architectural decisions that shape everything downstream. Make them deliberately
 | D4 | 🏗️ Matching algorithm (FCFS vs optimal, client vs edge function, immediate vs round-based) | M5 matching | ⏳ pending |
 | D5 | 🏗️ Loading and error state design system | M2 onward | ⏳ pending |
 | D6 | 🏗️ Realtime architecture (Supabase channels vs polling vs hybrid) | M5 realtime | ⏳ pending |
+| D7 | 🏗️ V1 product mechanics (slot model, group size, waitlist, onboarding schema) | M1 onward | ✅ decided 2026-04-15 |
 
 Each decision becomes a one-page doc in `memory-bank/decisions/` before becoming implementable.
 
@@ -46,16 +47,19 @@ Each decision becomes a one-page doc in `memory-bank/decisions/` before becoming
 
 **Goal:** three mobile-first pages exist as routes, render with mock data, look like the real app. No backend, no auth, no realtime.
 
-- [x] 🔨 Onboarding page at `/onboarding`
-  - **Done when:** skill selector, radius slider, availability picker work; submit disabled until valid; renders correctly at 390px.
+- [ ] 🔨 Onboarding form at `/onboarding` (per D7 schema — currently a splash screen, must be rebuilt)
+  - **Done when:** captures all 7 D7 fields (name, phone, sport, skill_level, general_availability, preferred_venues, willing_to_drive); submit disabled until name, phone, skill, availability, and at least one venue are set; renders correctly at 390px.
+- [ ] 🔨 Welcome screen at `/` (move existing splash here, redesign per approved sketch)
+  - **Done when:** replaces current redirect; uses approved aesthetic; "Get Started" routes to `/onboarding`; renders correctly at 390px.
 - [x] 🔨 Root route `/` redirects to `/onboarding`
   - **Done when:** server-side redirect, no UI, minimal implementation.
-- [ ] 🔨 Queue page at `/queue`
-  - **Done when:** animated radar pulse visible, scan text cycles, 3 criteria chips visible (hardcoded values OK with `// TODO: D1` comment), cancel button routes to `/onboarding`, demo skip button routes to `/group-lobby`, after 3.5s auto-routes to `/group-lobby`, `setTimeout` cleanup verified (no fire after navigation), renders correctly at 390px.
+- [ ] 🔨 Home screen at `/` showing available slots (per D7)
+  - **Done when:** displays opt-in-able published slots with skill/time/day/venue; tapping a slot opts the user in (mock data only at M1); shows user's current matched session if one exists; renders correctly at 390px.
+- Note: original M1 plan included a `/queue` "searching" page; D7 retired this concept. Slot-based opt-in replaces real-time queueing for v1.
 - [ ] 🔨 Group Lobby page at `/group-lobby`
-  - **Done when:** displays mock session, location card, commitment tracker showing 3/4 filled, read-only chat with 3 mock messages, "commit to play" button (non-functional), renders correctly at 390px.
+  - **Done when:** displays mock locked session at venue/time, commitment tracker showing 5/6 filled (D7 group size), read-only chat with 3 mock messages, "leave session" button (non-functional in M1), renders correctly at 390px.
 - [ ] 🔨 Mock data module at `src/lib/mockData.ts`
-  - **Done when:** flat ID-referenced shapes for `users`, `locations`, `availabilitySlots`, `groupSessions`; pure helper functions; no mutation; matches architect blueprint.
+  - **Done when:** flat ID-referenced shapes for `users` (with all D7 fields), `venues` (Cole/Churchill/Fretz Park), `slots` (recurring publishable slots), `sessions` (locked groups). Pure helper functions. No mutation. Matches D7 schema including v2 breadcrumb fields.
 - [ ] 🔨 Reusable components extracted: `CommitmentTracker`, `ChatBubble`, `Avatar`, `PrimaryButton`, `SecondaryButton`, `Badge`, `CriteriaChip`
   - **Done when:** components live in `src/components/`, take props per architect prop contracts, no business logic.
 - [ ] 🧪 All three pages tested manually at 390px
@@ -132,23 +136,25 @@ Each decision becomes a one-page doc in `memory-bank/decisions/` before becoming
 
 ---
 
-## M5 — Matching & Realtime (the hard part)
+## M5 — Slot Mechanics & Realtime
 
-**Depends on:** M4 complete, D4 made, D6 made.
+**Depends on:** M4 complete, D6 made. (D4 substantially reduced in scope by D7.)
 
-**Goal:** the actual product. Users join a queue, get matched, lobby updates in realtime, chat works.
+**Goal:** the actual product. Slot opt-in works against real data, sessions lock at capacity, lobby updates in realtime, chat works.
 
-This milestone decides whether SquadUp is real. Don't rush. Note: liquidity density is by design — single location, few time frames — which means D4 can be much simpler than "optimal grouping over a giant pool." FCFS within skill+time may be enough for v1.
+D7 dramatically simplified what "matching" means in v1. There is no real-time matching algorithm — slots are pre-published, users opt in, slot fills, session locks. The "hard part" is now realtime UI + chat + lock semantics, not algorithm design. Real-time autonomous matching ("Play Now") is deferred to v2.
 
-- [ ] 🏗️ D4 decision doc committed
-- [ ] 🏗️ D6 decision doc committed
-- [ ] 🔨 Matching algorithm implemented per D4
-- [ ] 🔨 Queue → Lobby transition wired to real matching (replaces `setTimeout`)
-- [ ] 🔨 Realtime queue updates
-- [ ] 🔨 Write-capable group chat
-- [ ] 🔨 Session lock-in logic (status → `locked` at capacity, members notified)
-- [ ] 🧪 Two browser windows, two users, one queue, end-to-end match + chat
-- [ ] 🧪 Stress test: 20 simulated users matched into valid sessions in <2s
+- [ ] 🏗️ D6 decision doc committed (realtime architecture)
+- [ ] 🔨 Owner-facing slot creation (admin form or seed-script-only — TBD)
+- [ ] 🔨 Opt-in transaction logic (atomic: slot capacity must not be exceeded under concurrent opt-ins)
+- [ ] 🔨 Session lock-in logic when slot reaches capacity (status → `locked`, members notified)
+- [ ] 🔨 Sole-occupant detection job (notify single user 6h before slot, offer alternatives)
+- [ ] 🔨 Waitlist mechanics (overflow when slot full, owner notification at waitlist size 3)
+- [ ] 🔨 Realtime slot/session updates (per D6)
+- [ ] 🔨 Write-capable group chat in locked sessions
+- [ ] 🔨 Cancellation flow with reason capture
+- [ ] 🧪 Two browser windows, two users, opt into same slot, both see updated count in realtime
+- [ ] 🧪 Concurrent opt-in stress: simulate 10 users opt into a 6-capacity slot — exactly 6 succeed, 2 land on waitlist, 2 see "slot full" message
 
 **Checkpoint M5:**
 1. Re-read D4. Is the algorithm doing what users want, or what was easy?
@@ -200,7 +206,7 @@ Adding to this list is good — it means you noticed the temptation and resisted
 
 - Push notifications
 - Native mobile apps
-- Multi-sport beyond basketball
+- Multi-sport beyond pickleball (paintball, tennis, etc. — see D7 V2 vision)
 - Tournament brackets, carpooling, equipment coordination
 - Friend lists / social graph
 - Ratings / reviews after sessions
