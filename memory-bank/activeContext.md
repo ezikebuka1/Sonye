@@ -25,7 +25,7 @@ Aesthetic direction conversation (words → sketch → approval → spec → Cod
 ## Decisions Made
 - Next.js App Router (already scaffolded; not Vite)
 - Claude Code + Cursor AI running simultaneously on same project
-- Blue + Black design system (blue-600 primary, black bg, gray-900 cards) — **may be revised in the aesthetic conversation; not load-bearing**
+- D8 design system: soft blue wash (#EEF4FA), warm coral accent (#D4724A), DM Sans + Instrument Serif italic (approved 2026-04-17)
 - D7: slot-based v1 mechanics (see `decisions/D7-product-mechanics-v1.md`)
 - Sketches Before Code rule effective 2026-04-15
 
