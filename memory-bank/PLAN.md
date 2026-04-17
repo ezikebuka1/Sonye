@@ -2,7 +2,7 @@
 
 **One-line definition:** SquadUp is a frictionless group formation and coordination engine for casual sports — users input availability, skill, and location, and the system autonomously forms reliable critical-mass groups. Mobile-first PWA. Single location, few time frames at launch, by design, for liquidity density.
 
-**Status:** M1 in progress. Drift cleanup completed 2026-04-12. Queue page is the next build task.
+**Status:** M1 in progress. D7 v1 mechanics decided 2026-04-15. Memory bank fully aligned. Next step: aesthetic direction conversation (per Sketches Before Code rule), then welcome screen redesign as first sketch deliverable.
 
 **How to read this plan:**
 - Milestones, not weeks. Order matters; duration doesn't. Don't estimate dates.

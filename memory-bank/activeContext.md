@@ -1,51 +1,49 @@
 # Active Context
 
 ## Current State
-M1 in progress — frontend skeleton. No backend, no auth, no API calls yet.
+M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 product mechanics decided 2026-04-15; memory bank aligned to D7 same day.
 
 ## What Exists
-- Onboarding page (`/onboarding`) — ✅ Done
-- Root page (`/`) — redirects to `/onboarding` (server-side redirect)
+- Welcome/splash screen at `/onboarding` (misnamed — see "Known Issues" below)
+- Root page (`/`) redirects to `/onboarding` (placeholder; will be replaced when welcome moves to `/`)
 
 ## What Does NOT Exist Yet
-- Queue page (`/queue`) — not started. Was never built at this route. An activity-browse UI existed at `/` but did not match the M1 queue spec (no animated search state, no criteria chips, no cancel button). Deleted 2026-04-12 as part of drift cleanup.
-- Group Lobby page (`/group-lobby`) — not started.
-- Mock data module (`src/lib/mockData.ts`) — not started.
-- Reusable components (`CommitmentTracker`, `ChatBubble`, `Avatar`, etc.) — not started.
+- Welcome screen at `/` (splash must be moved here and redesigned per approved sketch)
+- Real onboarding form at `/onboarding` per D7 7-field schema
+- Home screen at `/` showing published slots per D7
+- Group Lobby page at `/group-lobby`
+- Mock data module at `src/lib/mockData.ts` per D7 schema
+- Reusable components (`CommitmentTracker`, `ChatBubble`, `Avatar`, etc.)
+- Navigation between pages
+
+## Known Issues
+- `/onboarding` is currently a splash screen, not the onboarding form it claims to be. Will be resolved by splitting into `/` (welcome) and `/onboarding` (form) per D7.
 
 ## Current Focus
-- Build queue page at `/queue` per M1 spec
-- Then build group lobby page at `/group-lobby`
-
-## Drift Cleanup (2026-04-12)
-- Discovered memory bank claimed queue page was done, but `/queue` route never existed
-- Activity-browse code at `/` deleted, replaced with redirect to `/onboarding`
-- activeContext.md, progress.md, and CLAUDE.md corrected to match filesystem reality
-- PLAN.md rewritten from week-based format to milestone-based plan with decisions register (M0-M6)
-- PLAN.md refined 2026-04-12: tightened one-line definition (casual sports, PWA, liquidity density), added queue spec details (radar pulse, scan text, criteria chips with TODO:D1), added CriteriaChip to components list, added waitlist onboarding to M6, added activity-browse to icebox
-
-## 2026-04-15 — D7 Committed
-v1 product mechanics formally specified in memory-bank/decisions/D7-product-mechanics-v1.md.
-Key points:
-- V1 = manually curated recurring slots + opt-in (slot-based matching)
-- Group size: 6 (absorbs 1-2 flakes)
-- Onboarding schema: 7 fields incl. venue multi-select (Cole/Churchill/Fretz Park) and willing-to-drive
-- Waitlist import via pre-seeded accounts + magic claim link at launch
-- V2 features (Play Now, multi-sport, automation) explicitly deferred
-- Cascading slot logic deliberately cut for v1 — owner manages manually for first month
-- New rule: design proposals come as sketches before code (architect session enforces)
-
-This decision supersedes original blueprint assumptions about radius slider,
-specific time slot picker, and real-time autonomous matching as v1 features.
+Aesthetic direction conversation (words → sketch → approval → spec → Code) per the Sketches Before Code rule. Welcome screen is the first sketch deliverable.
 
 ## Decisions Made
-- Using Next.js instead of Vite (already scaffolded)
+- Next.js App Router (already scaffolded; not Vite)
 - Claude Code + Cursor AI running simultaneously on same project
-- Blue + Black design system chosen (blue-600 primary, black bg, gray-900 cards)
+- Blue + Black design system (blue-600 primary, black bg, gray-900 cards) — **may be revised in the aesthetic conversation; not load-bearing**
+- D7: slot-based v1 mechanics (see `decisions/D7-product-mechanics-v1.md`)
+- Sketches Before Code rule effective 2026-04-15
 
-## 2026-04-15 — Memory Bank Aligned to D7
-- projectbrief.md rewritten to reflect D7 v1 mechanics and v2 vision
-- systemPatterns.md gained V1 Product Mechanics section + Sketches Before Code rule; fixed Week 4+ stale reference and broken color line
-- progress.md corrected: `/onboarding` reclassified as misnamed splash (not the form); home screen added to roadmap; queue page concept retired
-- PLAN.md: D7 added to decisions register; M1 onboarding done-when updated to 7-field D7 schema; queue page replaced with home screen showing slots; M5 rescoped (no real-time matching algorithm in v1, slot-fill replaces it); icebox typo fixed (basketball → pickleball)
-- techContext.md left unchanged (D7 doesn't affect tech stack)
+## History
+
+### 2026-04-12 — Drift Cleanup #1
+- Memory bank claimed queue page was done; `/queue` route never existed
+- Activity-browse code at `/` deleted, replaced with redirect to `/onboarding`
+- activeContext.md, progress.md, CLAUDE.md corrected to match filesystem
+- PLAN.md rewritten from week-based to milestone-based plan with decisions register (M0-M6)
+
+### 2026-04-15 — Infrastructure & Strategy Day
+- Husky pre-commit hook installed to enforce memory bank updates on `src/` changes
+- Drift Cleanup #2: identified `/onboarding` is splash-not-form; fix deferred into D7-aligned rebuild
+- D7 product mechanics decision committed (`8283f18`): slot-based v1, group size 6, manual curation, 7-field onboarding schema, pre-seed waitlist import, v2 breadcrumbs
+- Memory bank aligned to D7 across projectbrief.md, systemPatterns.md, progress.md, PLAN.md (`f3244d5`)
+- Sketches Before Code rule added to systemPatterns.md
+
+### 2026-04-15 — Follow-up reconciliation
+- This file (activeContext.md) reconciled: previously had split-brain content (top sections pre-D7, bottom sections post-D7). Top now matches bottom.
+- PLAN.md status line corrected (no longer says "queue page is next build task")
