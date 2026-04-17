@@ -28,13 +28,19 @@ Users can browse activities near them, join a queue, and get matched into a grou
 3. **Best coding practices** — Use TypeScript types, clean component structure, and reusable components.
 4. **Clear explanations** — Always explain what code does in plain English after writing it.
 
-## Design System
-- **Primary color:** Blue (`blue-600`, `blue-500`)
-- **Background:** Black (`bg-black`)
-- **Cards:** Dark gray (`bg-gray-900`)
-- **Text:** White + gray (`text-white`, `text-gray-400`)
-- **Border radius:** Rounded-2xl for cards, rounded-xl for buttons
-- **Font:** Default Next.js (Geist)
+## Design System (per D8 — updated 2026-04-17)
+- **Background:** Soft blue wash `#EEF4FA`
+- **Cards:** White `#FFFFFF` with `0.5px solid #DAE7F1` border
+- **Primary accent (actions):** Warm coral `#D4724A` — used on buttons and hero text only
+- **Text primary:** Dark navy `#1A3650`
+- **Text secondary:** Steel blue `#7A9AB8`
+- **Borders/dividers:** `#DAE7F1`
+- **Skill badges:** Blue badge `#E0EEF9`/`#0C447C`, Amber badge `#FAF0DC`/`#854F0B`
+- **Border radius:** `rounded-2xl` (20px) for cards, `rounded-xl` (14px) for buttons
+- **Fonts:** DM Sans (headings + body), Instrument Serif italic (hero accent word only)
+- **Avatars:** Blue palette (`#1A3650`, `#3A7CB8`, `#5A9FD4`) — never coral
+- **50% rule:** Player count + avatars shown on slot cards only when fill ≥ 50% of capacity
+- See `memory-bank/decisions/D8-design-system.md` for full spec
 
 ## Pages Built So Far
 | Page | Route | Status |

@@ -47,3 +47,9 @@ Aesthetic direction conversation (words → sketch → approval → spec → Cod
 ### 2026-04-15 — Follow-up reconciliation
 - This file (activeContext.md) reconciled: previously had split-brain content (top sections pre-D7, bottom sections post-D7). Top now matches bottom.
 - PLAN.md status line corrected (no longer says "queue page is next build task")
+
+### 2026-04-17 — D8 Design System Approved
+- Aesthetic pivot from blue+black to "Pickup Ready" direction: soft blue wash background, warm coral accent, DM Sans + Instrument Serif italic
+- Approved via sketch iteration in architect session (3 rounds)
+- 50% fill threshold rule: slot cards show player count/avatars only when ≥50% capacity filled
+- CLAUDE.md design system section updated to match D8
