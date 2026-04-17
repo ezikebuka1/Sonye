@@ -22,7 +22,12 @@
       "Bash(rm -rf /Users/ebukaezike/squad-up)",
       "Bash(npm run:*)",
       "Bash(npm install:*)",
-      "Bash(sudo npm:*)"
+      "Bash(sudo npm:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(rm -f /Users/ebukaezike/squadup/.git/index.lock)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
