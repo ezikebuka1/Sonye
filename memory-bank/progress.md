@@ -15,18 +15,17 @@
 - D7 product mechanics decision committed (2026-04-15)
 
 ## Not Started ⏳
-- Welcome screen redesign + move to `/` (per D7 + sketches-before-code rule)
+- Home screen at `/` per Option A (merged welcome + slot browse, conditional onboarding banner)
 - Real onboarding form at `/onboarding` (per D7 7-field schema)
-- Home screen (`/`) showing available slots — net new per D7
 - Group Lobby page (`/group-lobby`) — per D7 slot-fill model
 - Mock data module (`src/lib/mockData.ts`) — per D7 schema
 - Reusable components extraction
 - Navigation between pages
 
 ## Up Next
-- Aesthetic direction conversation (words → sketch → approval → spec → Code)
-- Welcome screen redesign as first sketch deliverable
-- Then onboarding form, home screen, group lobby in sequence
+- Home screen implementation at `/` per Option A (mock data + SlotCard + OnboardingBanner + greeting + hero + social proof + bottom tab bar)
+- Then real onboarding form at `/onboarding` per D7 7-field schema
+- Then Group Lobby at `/group-lobby`
 
 ## Blockers
 - None currently

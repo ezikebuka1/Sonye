@@ -11,12 +11,26 @@
 - Tailwind only — no inline styles, no CSS modules
 - TypeScript strict — no `any` types
 
-## Color System
-- Background: `bg-black`
-- Cards: `bg-gray-900`
-- Primary: `blue-600`
-- Text: `text-white` + `text-gray-400`
-- Buttons: `rounded-xl`, Cards: `rounded-2xl`
+## Color System (D8 — "Pickup Ready")
+
+Canonical source: `memory-bank/decisions/D8-design-system.md`. This section summarizes the tokens the codebase must use.
+
+- Background: `#EEF4FA` (soft blue wash)
+- Cards: `#FFFFFF` with `0.5px` border `#DAE7F1`
+- Inset panels: `#F6F9FC`
+- Accent (CTAs, hero italic word, active nav): `#D4724A` (warm coral)
+- Text primary: `#1A3650` (dark navy)
+- Text secondary: `#7A9AB8`
+- Skill badges:
+  - Beginner: bg `#E0EEF9` / text `#0C447C`
+  - Advanced Beginner: bg `#FAF0DC` / text `#854F0B`
+  - Intermediate: bg `#E8F5E9` / text `#27500A`
+  - Advanced: bg `#FBEAF0` / text `#72243E`
+- Typography: DM Sans (all UI); Instrument Serif italic reserved for the hero accent word only
+- Avatars: blue palette only, never coral
+- Corners: buttons `rounded-xl`, cards `rounded-2xl`
+
+**50% fill rule:** slot cards show player count and avatar dots only when opt-ins ≥ 50% of capacity. Below that, show the Join button only.
 
 ## File Naming
 - Pages: `page.tsx`

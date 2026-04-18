@@ -2,7 +2,7 @@
 
 **One-line definition:** SquadUp is a frictionless group formation and coordination engine for casual sports — users input availability, skill, and location, and the system autonomously forms reliable critical-mass groups. Mobile-first PWA. Single location, few time frames at launch, by design, for liquidity density.
 
-**Status:** M1 in progress. D7 v1 mechanics decided 2026-04-15. Memory bank fully aligned. Next step: aesthetic direction conversation (per Sketches Before Code rule), then welcome screen redesign as first sketch deliverable.
+**Status:** M1 in progress. D7 v1 mechanics decided 2026-04-15. D8 design system approved 2026-04-17. Memory bank reconciled 2026-04-18. Next step: home screen implementation at `/` per Option A.
 
 **How to read this plan:**
 - Milestones, not weeks. Order matters; duration doesn't. Don't estimate dates.
@@ -49,12 +49,10 @@ Each decision becomes a one-page doc in `memory-bank/decisions/` before becoming
 
 - [ ] 🔨 Onboarding form at `/onboarding` (per D7 schema — currently a splash screen, must be rebuilt)
   - **Done when:** captures all 7 D7 fields (name, phone, sport, skill_level, general_availability, preferred_venues, willing_to_drive); submit disabled until name, phone, skill, availability, and at least one venue are set; renders correctly at 390px.
-- [ ] 🔨 Welcome screen at `/` (move existing splash here, redesign per approved sketch)
-  - **Done when:** replaces current redirect; uses approved aesthetic; "Get Started" routes to `/onboarding`; renders correctly at 390px.
+- [ ] 🔨 Home screen at `/` per Option A (merged welcome + slot browse)
+  - **Done when:** single screen at `/` replaces the redirect; greeting adapts to onboarded state ("Hey there" → "Hey [Name]"); hero text "Find your squad." with Instrument Serif italic coral accent; social proof strip; coral-bordered onboarding banner visible only when user has no profile, routes to `/onboarding`, hides once 7 D7 fields are captured; slot cards render per D8 with 50% fill rule; bottom tab bar (Home / Squad / Profile) with Home active in coral; renders correctly at 390px.
 - [x] 🔨 Root route `/` redirects to `/onboarding`
   - **Done when:** server-side redirect, no UI, minimal implementation.
-- [ ] 🔨 Home screen at `/` showing available slots (per D7)
-  - **Done when:** displays opt-in-able published slots with skill/time/day/venue; tapping a slot opts the user in (mock data only at M1); shows user's current matched session if one exists; renders correctly at 390px.
 - Note: original M1 plan included a `/queue` "searching" page; D7 retired this concept. Slot-based opt-in replaces real-time queueing for v1.
 - [ ] 🔨 Group Lobby page at `/group-lobby`
   - **Done when:** displays mock locked session at venue/time, commitment tracker showing 5/6 filled (D7 group size), read-only chat with 3 mock messages, "leave session" button (non-functional in M1), renders correctly at 390px.

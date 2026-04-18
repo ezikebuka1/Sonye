@@ -8,9 +8,8 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 p
 - Root page (`/`) redirects to `/onboarding` (placeholder; will be replaced when welcome moves to `/`)
 
 ## What Does NOT Exist Yet
-- Welcome screen at `/` (splash must be moved here and redesigned per approved sketch)
+- Home screen at `/` per Option A (merged welcome + slot browse; conditional onboarding banner for new users) — see approved sketch
 - Real onboarding form at `/onboarding` per D7 7-field schema
-- Home screen at `/` showing published slots per D7
 - Group Lobby page at `/group-lobby`
 - Mock data module at `src/lib/mockData.ts` per D7 schema
 - Reusable components (`CommitmentTracker`, `ChatBubble`, `Avatar`, etc.)
@@ -20,7 +19,7 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 p
 - `/onboarding` is currently a splash screen, not the onboarding form it claims to be. Will be resolved by splitting into `/` (welcome) and `/onboarding` (form) per D7.
 
 ## Current Focus
-Aesthetic direction conversation (words → sketch → approval → spec → Code) per the Sketches Before Code rule. Welcome screen is the first sketch deliverable.
+Home screen implementation spec (Option A approved 2026-04-17, D8 design system locked). Architect handoff in progress; Code picks up next.
 
 ## Decisions Made
 - Next.js App Router (already scaffolded; not Vite)
@@ -53,3 +52,10 @@ Aesthetic direction conversation (words → sketch → approval → spec → Cod
 - Approved via sketch iteration in architect session (3 rounds)
 - 50% fill threshold rule: slot cards show player count/avatars only when ≥50% capacity filled
 - CLAUDE.md design system section updated to match D8
+
+### 2026-04-18 — Memory Bank Reconciliation (Drift Cleanup #3)
+- systemPatterns.md Color System updated from old blue+black tokens to D8 tokens
+- activeContext.md "What Does NOT Exist Yet" consolidated: welcome + home merged into single Option A home screen
+- activeContext.md "Current Focus" updated from aesthetic conversation (done) to home screen implementation spec
+- progress.md "Up Next" updated to point at home screen implementation
+- PLAN.md M1 consolidated: welcome screen and home screen unified per Option A
