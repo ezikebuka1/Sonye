@@ -16,7 +16,7 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 p
 - Navigation between pages
 
 ## Known Issues
-- `/onboarding` is currently a splash screen, not the onboarding form it claims to be. Will be resolved by splitting into `/` (welcome) and `/onboarding` (form) per D7.
+- `/onboarding` is currently a splash screen, not the onboarding form it claims to be. Will be resolved when the D7 7-field form is built at `/onboarding` (next spec after home screen).
 
 ## Current Focus
 Home screen implementation spec (Option A approved 2026-04-17, D8 design system locked). Architect handoff in progress; Code picks up next.
