@@ -63,6 +63,10 @@ Real onboarding form at `/onboarding` per D7 7-field schema. Home screen shipped
 - progress.md "Up Next" updated to point at home screen implementation
 - PLAN.md M1 consolidated: welcome screen and home screen unified per Option A
 
+### 2026-04-20 — Post-ship fixes (smoke test)
+- SlotCard: `hover:bg-[#B85D3A]` replaced with `hover:bg-coral-dark`; added `--color-coral-dark` token to globals.css @theme
+- SlotCard: removed `import type ... from mockData`; SkillLevel now local type; zero mockData references in src/components/
+
 ### 2026-04-20 — Home Screen Shipped (Option A)
 - src/app/page.tsx replaced: redirect removed, home screen composition landed
 - src/lib/mockData.ts created with D7 shapes + v2 breadcrumb fields (creation_mode, sport, willing_to_drive)

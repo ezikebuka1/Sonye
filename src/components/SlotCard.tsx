@@ -1,15 +1,18 @@
 import { Activity, MapPin } from "lucide-react";
-import type { SkillLevel, Sport } from "@/lib/mockData";
 
 // NOTE: Activity is used as the sport icon placeholder for v1 (single-sport).
 // A sport-specific icon is deliberately deferred — this is the single sport
 // launch and a lucide placeholder is documented here per the spec.
 
+// SkillLevel is defined locally so this component stays self-contained.
+// Presentational components own their types; data resolution lives in the page.
+type SkillLevel = "beginner" | "advanced_beginner" | "intermediate" | "advanced";
+
 type OptedInUser = { id: string; avatar_color: string };
 
 type SlotCardProps = {
   slotId: string;
-  sport: Sport;
+  sport: string; // typed as string; callers pass the resolved value from the page
   skillLevel: SkillLevel;
   dayLabel: string;   // e.g. "Saturday"
   timeLabel: string;  // e.g. "8:00 AM"
@@ -106,7 +109,7 @@ export default function SlotCard({
           D7: waitlist opens when slot is full — button is never disabled. */}
       <button
         onClick={() => onJoin(slotId)}
-        className="w-full bg-coral text-white rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:bg-[#B85D3A] active:bg-[#B85D3A]"
+        className="w-full bg-coral text-white rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:bg-coral-dark active:bg-coral-dark"
         aria-label={isFull ? `Join waitlist for ${dayLabel} ${timeLabel}` : `Join game on ${dayLabel} ${timeLabel}`}
       >
         {isFull ? "Join waitlist" : "Join game"}
