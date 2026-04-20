@@ -1,25 +1,28 @@
 # Active Context
 
 ## Current State
-M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 product mechanics decided 2026-04-15; memory bank aligned to D7 same day.
+M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 product mechanics decided 2026-04-15; D8 design system approved 2026-04-17. Home screen shipped 2026-04-20.
 
 ## What Exists
-- Welcome/splash screen at `/onboarding` (misnamed — see "Known Issues" below)
-- Root page (`/`) redirects to `/onboarding` (placeholder; will be replaced when welcome moves to `/`)
+- Home screen at `/` per Option A (greeting, hero, social proof, conditional onboarding banner, slot cards with 50% fill rule, bottom tab bar) — mock data only
+- Mock data module at `src/lib/mockData.ts` with D7-aligned flat ID-referenced shapes and v2 breadcrumb fields
+- Presentational components: Greeting, HeroText, SocialProofStrip, OnboardingBanner, SlotCard, BottomTabBar
+- D8 tokens wired into Tailwind v4 @theme in globals.css
+- DM Sans + Instrument Serif wired via next/font in layout.tsx
+- Old splash screen at `/onboarding` (misnamed — see "Known Issues" below)
 
 ## What Does NOT Exist Yet
-- Home screen at `/` per Option A (merged welcome + slot browse; conditional onboarding banner for new users) — see approved sketch
 - Real onboarding form at `/onboarding` per D7 7-field schema
 - Group Lobby page at `/group-lobby`
-- Mock data module at `src/lib/mockData.ts` per D7 schema
-- Reusable components (`CommitmentTracker`, `ChatBubble`, `Avatar`, etc.)
-- Navigation between pages
+- Navigation wiring between pages (arrives in M2 with D1)
+- Client state store (arrives in M2 with D1)
+- `CommitmentTracker`, `ChatBubble` components (needed for group lobby)
 
 ## Known Issues
 - `/onboarding` is currently a splash screen, not the onboarding form it claims to be. Will be resolved when the D7 7-field form is built at `/onboarding` (next spec after home screen).
 
 ## Current Focus
-Home screen implementation spec (Option A approved 2026-04-17, D8 design system locked). Architect handoff in progress; Code picks up next.
+Real onboarding form at `/onboarding` per D7 7-field schema. Home screen shipped 2026-04-20; current onboarding route is still the old splash and must be rebuilt next.
 
 ## Decisions Made
 - Next.js App Router (already scaffolded; not Vite)
@@ -59,3 +62,14 @@ Home screen implementation spec (Option A approved 2026-04-17, D8 design system 
 - activeContext.md "Current Focus" updated from aesthetic conversation (done) to home screen implementation spec
 - progress.md "Up Next" updated to point at home screen implementation
 - PLAN.md M1 consolidated: welcome screen and home screen unified per Option A
+
+### 2026-04-20 — Home Screen Shipped (Option A)
+- src/app/page.tsx replaced: redirect removed, home screen composition landed
+- src/lib/mockData.ts created with D7 shapes + v2 breadcrumb fields (creation_mode, sport, willing_to_drive)
+- Six presentational components added under src/components/: Greeting, HeroText, SocialProofStrip, OnboardingBanner, SlotCard, BottomTabBar
+- D8 tokens wired as Tailwind v4 @theme inline in globals.css; dark mode block removed (D8 is light-only)
+- DM Sans + Instrument Serif wired via next/font/google in layout.tsx; Geist removed
+- 50% fill rule implemented in SlotCard (showSocialProof conditional)
+- Onboarding banner conditional on currentUser.onboarded; ?onboarded=1 URL override for demos
+- onJoin callbacks stubbed with console.log + TODO: D1 comment — wired in M2
+- lucide-react installed for icons
