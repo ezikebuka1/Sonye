@@ -18,17 +18,16 @@
 - Mock data module `src/lib/mockData.ts` with D7 shapes + v2 breadcrumb fields (2026-04-20)
 - Presentational components: Greeting, HeroText, SocialProofStrip, OnboardingBanner, SlotCard, BottomTabBar (2026-04-20)
 - D8 tokens wired into Tailwind v4 @theme; DM Sans + Instrument Serif via next/font (2026-04-20)
+- D7 onboarding form at `/onboarding` — 7 fields, local state, submit navigates to /?onboarded=1 (2026-04-22)
 
 ## Not Started ⏳
-- Real onboarding form at `/onboarding` (per D7 7-field schema)
 - Group Lobby page (`/group-lobby`) — per D7 slot-fill model
 - Navigation wiring between pages (M2, depends on D1)
 - Client state store (M2, depends on D1)
 - `CommitmentTracker`, `ChatBubble` components (needed for group lobby)
 
 ## Up Next
-- Real onboarding form at `/onboarding` per D7 7-field schema
-- Then Group Lobby at `/group-lobby`
+- Group Lobby at `/group-lobby` per D7 slot-fill model (locked-session lobby, commitment tracker, read-only chat)
 - Then M2: navigation wiring + client state (D1 decision first)
 
 ## Blockers

@@ -9,20 +9,16 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 p
 - Presentational components: Greeting, HeroText, SocialProofStrip, OnboardingBanner, SlotCard, BottomTabBar
 - D8 tokens wired into Tailwind v4 @theme in globals.css
 - DM Sans + Instrument Serif wired via next/font in layout.tsx
-- Old splash screen at `/onboarding` (misnamed — see "Known Issues" below)
+- D7 onboarding form at `/onboarding` capturing all 7 fields (name, phone, sport, skill_level, general_availability, preferred_venues, willing_to_drive); submit navigates to `/?onboarded=1` (M1 uses URL param demo toggle; real persistence in M3)
 
 ## What Does NOT Exist Yet
-- Real onboarding form at `/onboarding` per D7 7-field schema
 - Group Lobby page at `/group-lobby`
 - Navigation wiring between pages (arrives in M2 with D1)
 - Client state store (arrives in M2 with D1)
 - `CommitmentTracker`, `ChatBubble` components (needed for group lobby)
 
-## Known Issues
-- `/onboarding` is currently a splash screen, not the onboarding form it claims to be. Will be resolved when the D7 7-field form is built at `/onboarding` (next spec after home screen).
-
 ## Current Focus
-Real onboarding form at `/onboarding` per D7 7-field schema. Home screen shipped 2026-04-20; current onboarding route is still the old splash and must be rebuilt next.
+Group Lobby page at `/group-lobby` per D7 slot-fill model. Home screen and onboarding form both shipped; next build is the locked-session lobby with commitment tracker and read-only chat.
 
 ## Decisions Made
 - Next.js App Router (already scaffolded; not Vite)
@@ -30,6 +26,16 @@ Real onboarding form at `/onboarding` per D7 7-field schema. Home screen shipped
 - D8 design system: soft blue wash (#EEF4FA), warm coral accent (#D4724A), DM Sans + Instrument Serif italic (approved 2026-04-17)
 - D7: slot-based v1 mechanics (see `decisions/D7-product-mechanics-v1.md`)
 - Sketches Before Code rule effective 2026-04-15
+
+## Known Environment Quirks
+- User-global Claude Code plugin `claude-plugins-official/security-guidance`
+  fires a PreToolUse hook on any Write/Edit containing the substring
+  "pickle" — which false-positives on SquadUp's "pickleball" sport enum.
+  The hook fires once per file per session, then self-silences. Protocol
+  for Code: acknowledge the warning in chat, retry the Write (succeeds on
+  retry), fall back to Bash heredoc only if retry fails. Do not bypass
+  silently. Plugin is not a SquadUp concern — SquadUp repo is clean.
+  Upstream fix is a word-boundary regex; file-able when convenient.
 
 ## History
 
@@ -77,3 +83,11 @@ Real onboarding form at `/onboarding` per D7 7-field schema. Home screen shipped
 - Onboarding banner conditional on currentUser.onboarded; ?onboarded=1 URL override for demos
 - onJoin callbacks stubbed with console.log + TODO: D1 comment — wired in M2
 - lucide-react installed for icons
+
+### 2026-04-22 — Onboarding Form Shipped
+- src/app/onboarding/page.tsx replaced: ABCD splash deleted, D7 7-field form landed
+- Form state local (useState); submit routes to /?onboarded=1 (M1 demo toggle; M3 wires real persistence)
+- Validation: native + computed isValid; submit disabled until name/phone/skill/availability/≥1 venue set
+- willing_to_drive collected per D7 but not gated (optional at M1)
+- D8 amendment: coral-dark (#B85D3A) documented as hover/active token (already in globals.css from post-ship fix)
+- Pickle hook findings documented under new "Known Environment Quirks" section
