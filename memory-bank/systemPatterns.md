@@ -83,3 +83,19 @@ Pre-launch waitlist users (collected via Waitlist Intake Script) are pre-seeded 
 
 ### Sketches Before Code (effective 2026-04-15)
 All visual design proposals must be presented as rendered sketches (HTML/SVG artifact previewable in browser) before implementation. Architect session enforces this. No design changes get handed to Code without an approved visual sketch.
+
+## Push Discipline
+
+Pushes to GitHub are manual — never automated. Rationale: network side
+effects should be explicit. A local commit is reversible (`git reset`);
+a pushed commit is a coordination problem.
+
+- Push after each shipped feature commit, not in batches
+- Verify with `git log origin/main..HEAD --oneline` before declaring
+  work "done" — if the log isn't empty, GitHub doesn't have it
+- Shell prompt should show the ahead-of-origin count (most modern
+  prompts do this by default; verify your prompt does)
+- Post-commit hooks that auto-push are explicitly rejected: they couple
+  local file state to network side effects ("spooky action at a
+  distance"), and every implicit push is a potentially irreversible
+  operation made without deliberation
