@@ -30,6 +30,14 @@ export type Availability =
 
 export type CreationMode = "scheduled_slot" | "play_now"; // play_now = v2 only
 
+export type SessionMessage = {
+  id: string;
+  sessionId: string;
+  userId: string;        // references User; component resolves the name/color
+  text: string;
+  timestamp: string;     // ISO 8601
+};
+
 // ─── Shapes ───────────────────────────────────────────────────────────────────
 
 export type User = {
@@ -233,8 +241,42 @@ const slots: Slot[] = [
   },
 ];
 
-// M1 has no active sessions — empty array exported for shape correctness.
-const sessions: Session[] = [];
+// Seeded session: slot_c (Sun 9AM Fretz Park, beginner, 5/6 forming per PLAN.md).
+// member_user_ids MUST stay in sync with slot_c.opted_in_user_ids — enforced by assertSeedConsistency.
+const sessions: Session[] = [
+  {
+    id: "sess_001",
+    slotId: "slot_c",
+    sport: "pickleball",
+    creation_mode: "scheduled_slot",
+    status: "forming",
+    member_user_ids: ["u1", "u2", "u3", "u4", "u5"],
+  },
+];
+
+const sessionMessages: SessionMessage[] = [
+  {
+    id: "msg_001",
+    sessionId: "sess_001",
+    userId: "u1",
+    text: "Pumped for Sunday! Who's bringing extra balls?",
+    timestamp: "2026-04-17T14:22:00-05:00",
+  },
+  {
+    id: "msg_002",
+    sessionId: "sess_001",
+    userId: "u2",
+    text: "I've got a sleeve. See y'all at 9.",
+    timestamp: "2026-04-17T14:45:00-05:00",
+  },
+  {
+    id: "msg_003",
+    sessionId: "sess_001",
+    userId: "u3",
+    text: "Parking tip — the south lot fills up fast on Sundays. Come early.",
+    timestamp: "2026-04-17T18:10:00-05:00",
+  },
+];
 
 // ─── Pure helpers ─────────────────────────────────────────────────────────────
 
@@ -292,8 +334,47 @@ export function isSlotAtOrAbove50(slot: Slot): boolean {
   return getFillRatio(slot) >= 0.5;
 }
 
-// Exported for shape completeness; sessions are empty at M1.
-export { sessions };
+export { sessions, sessionMessages };
+
+// ─── Session / lobby helpers ───────────────────────────────────────────────────
+
+/** M1 convention: returns the first (and only) seeded session. */
+export function getLockedSessionForDemo(): Session | undefined {
+  return sessions[0];
+}
+
+export function getSessionMembers(sessionId: string): User[] {
+  const session = sessions.find((s) => s.id === sessionId);
+  if (!session) return [];
+  return session.member_user_ids
+    .map((id) => users.find((u) => u.id === id))
+    .filter((u): u is User => u !== undefined);
+}
+
+export function getMessagesForSession(sessionId: string): SessionMessage[] {
+  return sessionMessages
+    .filter((m) => m.sessionId === sessionId)
+    .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+}
+
+export function getSlotForSession(session: Session): Slot | undefined {
+  return slots.find((s) => s.id === session.slotId);
+}
+
+/** Dev-only tripwire: warns if session.member_user_ids drifts from the linked slot's opted_in_user_ids. */
+export function assertSeedConsistency(): void {
+  const session = sessions.find((s) => s.id === "sess_001");
+  const slot = slots.find((s) => s.id === session?.slotId);
+  if (!session || !slot) return;
+  const sessionSet = new Set(session.member_user_ids);
+  const slotSet = new Set(slot.opted_in_user_ids);
+  if (
+    sessionSet.size !== slotSet.size ||
+    [...sessionSet].some((id) => !slotSet.has(id))
+  ) {
+    console.warn("[mockData] Seed inconsistency: session members ≠ slot opt-ins");
+  }
+}
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 

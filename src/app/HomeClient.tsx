@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import Greeting from "@/components/Greeting";
@@ -10,6 +11,7 @@ import SlotCard from "@/components/SlotCard";
 import BottomTabBar from "@/components/BottomTabBar";
 
 import {
+  assertSeedConsistency,
   getCurrentUser,
   getSlotsForHome,
   getVenueById,
@@ -41,6 +43,10 @@ const STRIP_AVATAR_COLORS = ["#1A3650", "#3A7CB8", "#5A9FD4", "#7FA8C9"];
 
 export default function HomeClient({ onboardedOverride }: HomeClientProps) {
   const router = useRouter();
+
+  useEffect(() => {
+    assertSeedConsistency();
+  }, []);
 
   // Resolve data — all pure helpers, no mutations.
   const user = getCurrentUser(onboardedOverride ? { onboarded: "1" } : undefined);

@@ -19,16 +19,17 @@
 - Presentational components: Greeting, HeroText, SocialProofStrip, OnboardingBanner, SlotCard, BottomTabBar (2026-04-20)
 - D8 tokens wired into Tailwind v4 @theme; DM Sans + Instrument Serif via next/font (2026-04-20)
 - D7 onboarding form at `/onboarding` — 7 fields, local state, submit navigates to /?onboarded=1 (2026-04-22)
+- Group Lobby at `/group-lobby` — read-only lobby: header, commitment tracker (5/6), avatar stack, chat (3 messages), Leave stub (2026-04-23)
+- Components: CommitmentTracker, MemberAvatarStack, ChatMessageList, LobbyHeader (2026-04-23)
 
 ## Not Started ⏳
-- Group Lobby page (`/group-lobby`) — per D7 slot-fill model
 - Navigation wiring between pages (M2, depends on D1)
 - Client state store (M2, depends on D1)
-- `CommitmentTracker`, `ChatBubble` components (needed for group lobby)
 
 ## Up Next
-- Group Lobby at `/group-lobby` per D7 slot-fill model (locked-session lobby, commitment tracker, read-only chat)
-- Then M2: navigation wiring + client state (D1 decision first)
+- M1 Checkpoint (per PLAN.md): re-read projectbrief, verify three pages feel
+  like one product, confirm activeContext reconciled with filesystem
+- Then D1 (state management) decision doc → unblocks M2 navigation wiring
 
 ## Blockers
 - None currently

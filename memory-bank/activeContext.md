@@ -10,15 +10,15 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 p
 - D8 tokens wired into Tailwind v4 @theme in globals.css
 - DM Sans + Instrument Serif wired via next/font in layout.tsx
 - D7 onboarding form at `/onboarding` capturing all 7 fields (name, phone, sport, skill_level, general_availability, preferred_venues, willing_to_drive); submit navigates to `/?onboarded=1` (M1 uses URL param demo toggle; real persistence in M3)
+- Group Lobby at `/group-lobby` — read-only view of the seeded "forming" session: header with venue + neighborhood + day/time + skill badge, commitment tracker (5/6), member avatar stack, read-only chat with 3 seeded messages, non-functional Leave session button
+- Seeded session + chat messages in mockData with consistency assertion between session.member_user_ids and slot.opted_in_user_ids
 
 ## What Does NOT Exist Yet
-- Group Lobby page at `/group-lobby`
 - Navigation wiring between pages (arrives in M2 with D1)
 - Client state store (arrives in M2 with D1)
-- `CommitmentTracker`, `ChatBubble` components (needed for group lobby)
 
 ## Current Focus
-Group Lobby page at `/group-lobby` per D7 slot-fill model. Home screen and onboarding form both shipped; next build is the locked-session lobby with commitment tracker and read-only chat.
+M1 wrap-up and M2 prep. Three pages shipped (/, /onboarding, /group-lobby) at M1. Remaining M1 work: navigation wiring polish (if needed after review), screenshots for the PLAN.md manual-test acceptance. Next decision to make: D1 (state management) — blocks M2 navigation.
 
 ## Decisions Made
 - Next.js App Router (already scaffolded; not Vite)
@@ -36,6 +36,27 @@ Group Lobby page at `/group-lobby` per D7 slot-fill model. Home screen and onboa
   retry), fall back to Bash heredoc only if retry fails. Do not bypass
   silently. Plugin is not a SquadUp concern — SquadUp repo is clean.
   Upstream fix is a word-boundary regex; file-able when convenient.
+- Shell command substitution (`$(...)`) is blocked by a terminal guard with
+  message `Contains command_substitution`. Protocol: use pipes, xargs,
+  or two-step commands instead. E.g. instead of `kill $(lsof -ti :3000)`,
+  use `lsof -ti :3000 | xargs kill` or `npx kill-port 3000`. Source of the
+  guard not yet investigated; not a SquadUp concern.
+
+## Known M1 Shortcuts
+
+These are intentional deferrals, not bugs. Each has a documented owner milestone.
+
+- **"Hey Jordan" hardcode on the home screen.** The `?onboarded=1` demo
+  toggle returns a user with a hardcoded name. The onboarding form
+  captures a real name and logs it, but that name does not thread to
+  the home screen. Real name flow requires persistence — lands in M3
+  with Supabase. Do not demo to external eyes without flagging.
+- **`onJoin` is a console.log stub.** Tapping "Join game" on the home
+  screen does not navigate or mutate state. Wires in M2 with D1.
+- **"Leave session" button is a console.log stub.** Cancellation reason
+  prompt lands in M5 per D7.
+- **`/group-lobby` has no entry point from `/`.** Direct URL only at M1.
+  Real navigation (join slot → lock at capacity → lobby) wires in M5.
 
 ## History
 
@@ -83,6 +104,19 @@ Group Lobby page at `/group-lobby` per D7 slot-fill model. Home screen and onboa
 - Onboarding banner conditional on currentUser.onboarded; ?onboarded=1 URL override for demos
 - onJoin callbacks stubbed with console.log + TODO: D1 comment — wired in M2
 - lucide-react installed for icons
+
+### 2026-04-23 — Group Lobby Shipped (M1 complete)
+- src/app/group-lobby/page.tsx + GroupLobbyClient.tsx: read-only lobby view
+- src/lib/mockData.ts extended: SessionMessage type, one seeded session
+  (forming, 5/6 per PLAN.md), three seeded messages, four new pure helpers,
+  dev-only consistency assertion between session members and slot opt-ins
+- Four new components: CommitmentTracker, MemberAvatarStack, ChatMessageList, LobbyHeader
+- assertSeedConsistency called on mount in both HomeClient and GroupLobbyClient
+- Known Environment Quirks extended with shell substitution guard note
+- New "Known M1 Shortcuts" section documenting "Hey Jordan" hardcode,
+  onJoin stub, Leave session stub, and lobby-has-no-entry-point
+- All three M1 pages now exist. Remaining M1 work: review + screenshot
+  verification per PLAN.md. M1 Checkpoint next.
 
 ### 2026-04-22 — Onboarding Form Shipped
 - src/app/onboarding/page.tsx replaced: ABCD splash deleted, D7 7-field form landed
