@@ -90,6 +90,22 @@ proposals that would add filters, preferences, or segmentation
 are defaulted to the icebox unless they demonstrably improve
 density.
 
+### Raw-Output Reporting (effective 2026-04-18)
+
+When Code reports completion of any task back to the architect session,
+Code MUST paste the raw output of these two commands before any summary:
+
+1. `git log --oneline -5`
+2. `git log origin/main..HEAD --oneline`
+
+These outputs are non-negotiable. Summaries are optional additions, not
+substitutions. The rule exists because verbal summaries of "clean" or
+"complete" work have drifted from reality in this project, and raw git
+state cannot drift.
+
+Architect session will refuse to write the next spec until raw output
+is provided.
+
 ### Sketches Before Code (effective 2026-04-15)
 All visual design proposals must be presented as rendered sketches (HTML/SVG artifact previewable in browser) before implementation. Architect session enforces this. No design changes get handed to Code without an approved visual sketch.
 
