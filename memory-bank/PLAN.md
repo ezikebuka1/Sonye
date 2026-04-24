@@ -18,7 +18,7 @@ Architectural decisions that shape everything downstream. Make them deliberately
 
 | # | Decision | Blocks | Status |
 |---|----------|--------|--------|
-| D1 | 🏗️ State management (Zustand vs Context vs URL params vs server state) | M2 navigation | ⏳ pending |
+| D1 | 🏗️ State management — Zustand for client state | M2 navigation | ✅ decided 2026-04-18 |
 | D2 | 🏗️ Anonymous vs authenticated onboarding flow | M4 auth | ⏳ pending |
 | D3 | 🏗️ Database schema (relationships, foreign keys, queue state representation) | M3 backend | ⏳ pending |
 | D4 | 🏗️ Matching algorithm (FCFS vs optimal, client vs edge function, immediate vs round-based) | M5 matching | ⏳ pending |

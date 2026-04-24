@@ -25,7 +25,10 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 p
   deliberately decided. (2026-04-24)
 
 ## Current Focus
-M1 wrap-up and M2 prep. Three pages shipped (/, /onboarding, /group-lobby) at M1. Remaining M1 work: navigation wiring polish (if needed after review), screenshots for the PLAN.md manual-test acceptance. Next decision to make: D1 (state management) — blocks M2 navigation.
+M1 complete (all three pages shipped, polished per checkpoint). D1 decided:
+Zustand for client state. Next build: M2 navigation & client state wiring
+per D1. D5 (loading/error states) still pending; can be decided once the
+first async operation in M2 needs a loading state.
 
 ## Decisions Made
 - Next.js App Router (already scaffolded; not Vite)
@@ -124,6 +127,14 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
   onJoin stub, Leave session stub, and lobby-has-no-entry-point
 - All three M1 pages now exist. Remaining M1 work: review + screenshot
   verification per PLAN.md. M1 Checkpoint next.
+
+### 2026-04-18 — D1 Decided: Zustand
+- Four options evaluated (React Context, Zustand, URL params, server state)
+- Zustand chosen: scale-fit, mobile performance, cross-milestone durability,
+  low blast radius, boring-and-proven
+- Decision doc at memory-bank/decisions/D1-state-management.md
+- Not implemented yet — install and first store land in first M2 commit
+- PLAN.md decisions register updated to reflect ✅ decided
 
 ### 2026-04-18 — Play-reason icebox + density principle captured
 - Play-reason matching proposal (observed from real play) deferred to v2 on
