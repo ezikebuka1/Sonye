@@ -72,7 +72,7 @@ export default function GroupLobbyClient() {
   });
 
   return (
-    <main className="min-h-screen bg-wash pb-24">
+    <main className="min-h-screen bg-wash pb-8">
       <div className="max-w-[390px] mx-auto px-5 pt-6 space-y-5">
         <LobbyHeader
           venueName={venue.name}

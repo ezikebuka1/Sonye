@@ -18,18 +18,21 @@
 - Mock data module `src/lib/mockData.ts` with D7 shapes + v2 breadcrumb fields (2026-04-20)
 - Presentational components: Greeting, HeroText, SocialProofStrip, OnboardingBanner, SlotCard, BottomTabBar (2026-04-20)
 - D8 tokens wired into Tailwind v4 @theme; DM Sans + Instrument Serif via next/font (2026-04-20)
-- D7 onboarding form at `/onboarding` — 7 fields, local state, submit navigates to /?onboarded=1 (2026-04-22)
+- D7 onboarding form at `/onboarding` — 6 fields (willing_to_drive cut per D7.1), local state, submit navigates to /?onboarded=1 (2026-04-22)
 - Group Lobby at `/group-lobby` — read-only lobby: header, commitment tracker (5/6), avatar stack, chat (3 messages), Leave stub (2026-04-23)
 - Components: CommitmentTracker, MemberAvatarStack, ChatMessageList, LobbyHeader (2026-04-23)
+- M1 Polish: willing_to_drive removed from in-app form (D7.1 amendment), lobby pb-24→pb-8 (2026-04-24)
+- D1 decided: Zustand for client state (2026-04-24)
+- M1 complete ✅
 
 ## Not Started ⏳
 - Navigation wiring between pages (M2, depends on D1)
 - Client state store (M2, depends on D1)
 
 ## Up Next
-- M1 Checkpoint (per PLAN.md): re-read projectbrief, verify three pages feel
-  like one product, confirm activeContext reconciled with filesystem
-- Then D1 (state management) decision doc → unblocks M2 navigation wiring
+- M2: install Zustand, create src/lib/store.ts (user store), wire navigation
+  between pages (onboarding → home, home → lobby), replace ?onboarded=1 hack
+  with real store state. Depends on D1 ✅ and D5 (loading/error states, pending).
 
 ## Blockers
 - None currently

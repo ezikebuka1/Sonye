@@ -115,6 +115,14 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
 - onJoin callbacks stubbed with console.log + TODO: D1 comment — wired in M2
 - lucide-react installed for icons
 
+### 2026-04-24 — M1 Polish (Spec #4.7)
+- `willing_to_drive` removed from in-app onboarding form; D7.1 amendment
+  appended to D7 doc. Schema unchanged — field stays on User type in mockData,
+  collected via Waitlist Intake Script only in v1. Form is now 6 visible fields.
+- Group Lobby `pb-24` → `pb-8`; removes ~200px dead whitespace below
+  "Leave session" (lobby has no BottomTabBar, so tab-bar padding was wrong)
+- progress.md Up Next advanced to M2
+
 ### 2026-04-23 — Group Lobby Shipped (M1 complete)
 - src/app/group-lobby/page.tsx + GroupLobbyClient.tsx: read-only lobby view
 - src/lib/mockData.ts extended: SessionMessage type, one seeded session

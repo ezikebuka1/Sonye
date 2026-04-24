@@ -107,6 +107,27 @@ These features are explicitly out of scope for v1 but inform v1 architecture:
 - Magic claim link expiration (probably 7 days, TBD)
 - What happens when a user wants to opt out of a non-locked slot they joined (probably "leave anytime before lock," confirm during implementation)
 
+## D7.1 Amendment — Willing-to-Drive Removed from In-App Form (2026-04-24)
+
+**Status:** Applied during M1 Polish.
+
+The `willing_to_drive` field remains in the user schema and is collected via the
+Waitlist Intake Script (manual pre-launch process). It is **not** shown in the
+in-app onboarding form for v1.
+
+**Reason:** Density principle (see `projectbrief.md` → "V1 Decision Principle:
+Density Over Everything"). Adding an optional 4-option chip field increases form
+length and creates a perceived commitment barrier without improving v1 matching
+(v1 matching does not use drive distance). The field is preserved in the schema
+for v2 use. In-app collection deferred until v2 matching makes it actionable.
+
+**Impact on D7 Onboarding Schema table:** `willing_to_drive` row is valid in the
+schema; collection narrows to "Waitlist Intake Script only" for v1. The in-app
+form has 6 visible fields in v1 (not 7). `DrivingWillingness` type stays in
+`mockData.ts` on the `User` shape — only the form field is removed.
+
+---
+
 ## Decisions This Document Replaces
 
 - Original blueprint's "radius slider in miles" → replaced with venue multi-select

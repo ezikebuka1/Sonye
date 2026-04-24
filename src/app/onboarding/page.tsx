@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Check, Activity } from 'lucide-react';
-import type { SkillLevel, VenueId, DrivingWillingness, Availability } from '@/lib/mockData';
+import type { SkillLevel, VenueId, Availability } from '@/lib/mockData';
 
 type OnboardingFormState = {
   name: string;
@@ -11,7 +11,6 @@ type OnboardingFormState = {
   skill_level: SkillLevel | null;
   general_availability: Availability[];
   preferred_venues: VenueId[];
-  willing_to_drive: DrivingWillingness | null;
 };
 
 function formatPhone(digits: string): string {
@@ -42,13 +41,6 @@ const VENUE_OPTIONS: { value: VenueId; label: string }[] = [
   { value: 'fretz_park', label: 'Fretz Park' },
 ];
 
-const DRIVE_OPTIONS: { value: DrivingWillingness; label: string }[] = [
-  { value: 'under_10', label: 'Under 10 min' },
-  { value: 'under_20', label: 'Under 20 min' },
-  { value: 'under_30', label: 'Under 30 min' },
-  { value: 'over_30', label: '30+ min' },
-];
-
 const SKILL_SELECTED_CLASSES: Record<SkillLevel, string> = {
   beginner: 'bg-skill-beg-bg text-skill-beg-ink',
   advanced_beginner: 'bg-skill-advbeg-bg text-skill-advbeg-ink',
@@ -61,8 +53,6 @@ const CHIP_UNSELECTED = `${CHIP_BASE} bg-card border-card-border text-ink`;
 const CHIP_SELECTED_CORAL = `${CHIP_BASE} bg-coral/10 border-coral text-coral flex items-center gap-1.5`;
 const CHIP_SELECTED_SKILL = (level: SkillLevel) =>
   `${CHIP_BASE} ${SKILL_SELECTED_CLASSES[level]} border-card-border flex items-center gap-1.5`;
-const CHIP_SELECTED_DRIVE = `${CHIP_BASE} bg-skill-int-bg text-skill-int-ink border-card-border flex items-center gap-1.5`;
-
 function toggleMulti<T extends string>(arr: T[], value: T): T[] {
   return arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value];
 }
@@ -75,7 +65,6 @@ export default function OnboardingPage() {
     skill_level: null,
     general_availability: [],
     preferred_venues: [],
-    willing_to_drive: null,
   });
 
   const isValid =
@@ -241,36 +230,6 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          {/* Field 7 — Willing to drive (optional per D7 v2 breadcrumb pattern) */}
-          <div>
-            <label className="block font-sans text-sm font-medium text-ink mb-2">
-              How far will you drive for a game?
-            </label>
-            <p className="font-sans text-xs text-ink-soft mb-2">
-              Helps us match you nearby. Optional.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {DRIVE_OPTIONS.map(opt => {
-                const selected = form.willing_to_drive === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() =>
-                      setForm(f => ({
-                        ...f,
-                        willing_to_drive: selected ? null : opt.value,
-                      }))
-                    }
-                    className={selected ? CHIP_SELECTED_DRIVE : CHIP_UNSELECTED}
-                  >
-                    {selected && <Check size={12} aria-hidden="true" />}
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
         </div>
       </div>
 
