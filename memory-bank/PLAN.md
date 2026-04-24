@@ -211,3 +211,13 @@ Adding to this list is good — it means you noticed the temptation and resisted
 - Recurring sessions
 - Paid sessions
 - Activity browse mode (deliberately removed 2026-04-12 — does not match brief; revisit only if matching engine fails to find product-market fit)
+- **Play-reason matching** (observed 2026-04-18 from real play): players
+  have different reasons for playing — practice / competitive / learn /
+  social. Same skill level + different reason can produce a bad game.
+  Owner decision 2026-04-18: slot-attribute model (owners publish slots
+  with a play-reason tag, users filter). Deferred to v2 on
+  density/liquidity grounds: any additional filter fractures the v1
+  user base, and v1's dominant risk is empty slots, not mismatched
+  reasons. Re-evaluate after launch data shows whether mismatched-
+  reason pairings actually produce bad games at observable rates. If
+  yes, write D9 and fold into slot schema; if no, keep in v2 polish bucket.

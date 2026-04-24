@@ -17,6 +17,13 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 p
 - Navigation wiring between pages (arrives in M2 with D1)
 - Client state store (arrives in M2 with D1)
 
+## Icebox
+- **`src/app/queue/` empty directory** — leftover ghost from Drift Cleanup #1. Not
+  wired, not referenced, not in the memory bank. Proposal: leave it as a route
+  placeholder; `/queue` is a planned M-future page (CLAUDE.md). Observe for a week,
+  then decide: keep as placeholder, scaffold stub, or delete. Do not act until
+  deliberately decided. (2026-04-24)
+
 ## Current Focus
 M1 wrap-up and M2 prep. Three pages shipped (/, /onboarding, /group-lobby) at M1. Remaining M1 work: navigation wiring polish (if needed after review), screenshots for the PLAN.md manual-test acceptance. Next decision to make: D1 (state management) — blocks M2 navigation.
 
@@ -117,6 +124,15 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
   onJoin stub, Leave session stub, and lobby-has-no-entry-point
 - All three M1 pages now exist. Remaining M1 work: review + screenshot
   verification per PLAN.md. M1 Checkpoint next.
+
+### 2026-04-18 — Play-reason icebox + density principle captured
+- Play-reason matching proposal (observed from real play) deferred to v2 on
+  density/liquidity grounds; slot-attribute design direction recorded
+  alongside the deferral for post-launch reconsideration
+- V1 Decision Principle articulated in projectbrief.md: density and
+  liquidity trump all other v1 optimizations; filters/segmentation
+  default to icebox
+- systemPatterns.md: V1 Scope Discipline process pattern added
 
 ### 2026-04-22 — Onboarding Form Shipped
 - src/app/onboarding/page.tsx replaced: ABCD splash deleted, D7 7-field form landed

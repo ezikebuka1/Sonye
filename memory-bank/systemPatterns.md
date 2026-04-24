@@ -81,6 +81,15 @@ Pre-launch waitlist users (collected via Waitlist Intake Script) are pre-seeded 
 
 ## Process Patterns
 
+### V1 Scope Discipline (effective 2026-04-18)
+
+V1 feature additions must improve density and liquidity. See
+`projectbrief.md` → "V1 Decision Principle: Density Over Everything"
+for the governing rule. Architect session enforces this; scope
+proposals that would add filters, preferences, or segmentation
+are defaulted to the icebox unless they demonstrably improve
+density.
+
 ### Sketches Before Code (effective 2026-04-15)
 All visual design proposals must be presented as rendered sketches (HTML/SVG artifact previewable in browser) before implementation. Architect session enforces this. No design changes get handed to Code without an approved visual sketch.
 
