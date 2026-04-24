@@ -136,6 +136,21 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
 - All three M1 pages now exist. Remaining M1 work: review + screenshot
   verification per PLAN.md. M1 Checkpoint next.
 
+### 2026-04-18 — Partiful Pattern Captured as V1 Design Principle
+- Architect discussion with Gemini surfaced Partiful's frictionless
+  group-chat-to-on-the-list model as the right v1 sharing pattern
+- Captured in projectbrief.md as "V1 Design Pattern: The Partiful
+  Model" — companion to the density principle
+- PLAN.md milestones M3-M6 updated with Partiful-derived acceptance
+  criteria (anonymous reads, SMS OTP only, onboarding-at-Join,
+  OG metadata, player-as-voucher sharing, SMS notifications)
+- Risk Register updated with "Partiful pattern violated" entry
+- Implementation deferred to M3+ (requires real backend). No code
+  changes in this commit.
+- D2 (auth decision, M4-blocking) now has a sharper frame: Model A
+  (lightweight-join-with-later-profiling) vs Model B (onboarding-at-
+  Join). To be resolved when D2 is written.
+
 ### 2026-04-18 — D1 Decided: Zustand
 - Four options evaluated (React Context, Zustand, URL params, server state)
 - Zustand chosen: scale-fit, mobile performance, cross-milestone durability,

@@ -108,6 +108,9 @@ Each decision becomes a one-page doc in `memory-bank/decisions/` before becoming
 - [ ] 🔨 `npm run seed` script populates dev data matching `mockData.ts` shape
 - [ ] 🔨 Replace mock data with Supabase queries on all three pages
 - [ ] 🧪 Fresh-clone test: another machine can clone, set env, seed, and run
+- [ ] 🔨 RLS policies permit anonymous reads on published slots and
+      anonymized member avatar data (Partiful view-first pattern —
+      see projectbrief.md)
 
 **Checkpoint M3:**
 1. Schema worth showing another engineer? If not, refactor before adding auth.
@@ -127,6 +130,11 @@ Each decision becomes a one-page doc in `memory-bank/decisions/` before becoming
 - [ ] 🔨 Onboarding handles auth transition per D2 without losing selections
 - [ ] 🔨 RLS policies tightened — verified by attempting to read another user's data with a different account
 - [ ] 🧪 Auth edge cases: expired session, password reset, two-tab sync
+- [ ] 🔨 SMS OTP auth via Supabase phone provider; no password path,
+      no email path. D2 decision must codify Partiful-style SMS-only
+      auth with a decision between onboarding-at-Join (Model B) and
+      lightweight-join-with-later-profiling (Model A). See
+      projectbrief.md V1 Design Pattern.
 
 **Checkpoint M4:**
 1. Try to break your own auth. Guess URLs in a private window.
@@ -153,6 +161,11 @@ D7 dramatically simplified what "matching" means in v1. There is no real-time ma
 - [ ] 🔨 Cancellation flow with reason capture
 - [ ] 🧪 Two browser windows, two users, opt into same slot, both see updated count in realtime
 - [ ] 🧪 Concurrent opt-in stress: simulate 10 users opt into a 6-capacity slot — exactly 6 succeed, 2 land on waitlist, 2 see "slot full" message
+- [ ] 🔨 Join flow integrates onboarding-at-Join per D2 decision.
+      Target: under 60 seconds from Join-tap to on-the-list, including
+      phone OTP and first-time profile form.
+- [ ] 🔨 SMS notifications for commitment-critical events only (slot
+      locked, slot tomorrow). Chat messages do NOT trigger SMS.
 
 **Checkpoint M5:**
 1. Re-read D4. Is the algorithm doing what users want, or what was easy?
@@ -175,6 +188,14 @@ D7 dramatically simplified what "matching" means in v1. There is no real-time ma
 - [ ] 🔨 Audit: every list has a designed empty state
 - [ ] 🔨 Pre-launch: privacy policy, terms, plan for sudden traffic
 - [ ] 🔨 Onboard the manual waitlist (names + phone numbers already collected) via SMS
+- [ ] 🔨 Dynamic Open Graph metadata on slot detail routes via
+      Next.js generateMetadata. Preview content state-aware per fill
+      level per Partiful pattern. Tested by pasting a real slot URL
+      into iMessage and WhatsApp and visually verifying the unfurl.
+- [ ] 🔨 Share affordance on slot detail pages that emphasizes the
+      sharer when they are a slot member ("Jordan is playing..." vs
+      "Pickleball at..."). Player-as-voucher social proof per
+      projectbrief.md.
 
 **Checkpoint M6 — final retrospective:**
 1. Did you build what you set out to build? Pivots: deliberate or accidental?
@@ -195,6 +216,7 @@ D7 dramatically simplified what "matching" means in v1. There is no real-time ma
 | Multi-session drift between Code, Claude.ai, Gemini | Medium | Pre-commit hook handles worst case. Re-read `activeContext.md` at session start. |
 | Secrets committed to GitHub | High if it happens | `.env.local` in `.gitignore`, verified at end of M3. RLS as defense in depth. |
 | Build the app, nobody uses it | Real but mitigated | You already have a manual waitlist. Onboard them in M6. |
+| Partiful pattern violated by a future scope decision (e.g. adding a login wall before slot view, requiring email, adding push-notification install prompt) | High — breaks density multiplier | Every scope decision checked against the V1 Design Pattern in projectbrief.md. Architect session enforces. |
 
 ---
 

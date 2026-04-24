@@ -32,6 +32,41 @@ fracture — no matter how good the product intuition behind them — go
 to v2 until post-launch data shows density is high enough to afford
 the segmentation.
 
-This principle was articulated 2026-04-18 during M1 checkpoint, in
+This principle was articulated 2026-04-24 during M1 checkpoint, in
 response to the play-reason matching proposal (see `PLAN.md` icebox
 for that specific deferral).
+
+## V1 Design Pattern: The Partiful Model
+
+V1 optimizes for frictionless group-chat-to-on-the-list conversion.
+Inspiration: Partiful, which bypasses the native-app graveyard by
+being shareable via rich-link-preview into iMessage/WhatsApp/Signal
+and auth-less until commitment.
+
+Concrete v1 implications (acceptance criteria for relevant milestones):
+- Slot detail pages have dynamic, state-aware Open Graph metadata so
+  shared links unfurl as compelling previews in group chats. Preview
+  content shifts by fill state (0/6 leads with vibe; 3/6-5/6 leads
+  with social proof; 6/6 leads with waitlist FOMO).
+- View-first, auth-second: unauthenticated users can see a slot, its
+  fill count, and anonymized member avatars. Auth wall triggers only
+  at the Join button.
+- Auth is SMS OTP only. No passwords, no email. D2 will codify.
+- SMS is the notification layer for commitment-critical events only
+  (game locked, game tomorrow). Chat messages never trigger SMS —
+  avoiding the notification-fatigue failure mode.
+- Share surfaces emphasize the sharer when they are a slot member
+  (e.g. "Jordan is playing Pickleball Sunday at Fretz, join them")
+  — leveraging player-as-voucher social proof, which is stronger
+  than owner-as-promoter.
+
+This pattern serves the density principle: every friction cut between
+link-tap and on-the-list is a density multiplier; every friction step
+is a density tax. Captured 2026-04-18 from architect discussion of
+Gemini's Partiful analysis.
+
+Note on divergence from Partiful proper: Partiful's unit is a one-time
+event with a host-curated invite list. SquadUp's unit is a recurring
+slot with an owner-curated supply and a demand pool of skill-matched
+players. The sharing mechanics are borrowed; the matching and
+quality-control problems are ours to solve.
