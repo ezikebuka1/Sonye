@@ -136,6 +136,25 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
 - All three M1 pages now exist. Remaining M1 work: review + screenshot
   verification per PLAN.md. M1 Checkpoint next.
 
+### 2026-04-18 — Real-User Feedback: Lobby/Profile Split + Realness Strategy
+- Friend tested M1 on phone; raised "want to see who's in match" and
+  "what about profile pictures?"
+- Resolution: lobby/slot views show name + initial only (clean,
+  scannable, Partiful-aligned); user profiles (M3+) surface richer
+  detail (skill, games-played, preferred venues, member-since) on tap.
+  Progressive disclosure pattern.
+- Profile pictures iceboxed with full reasoning + reconsideration
+  trigger (~500 active users in metro).
+- New section in projectbrief.md: V1 Realness Strategy — captures the
+  cheap-or-free signals that establish real-person credibility without
+  density tax (first names, human chat, avatar variance, member-since,
+  games-played, last-played, SMS-verified badge). Density itself
+  named as the strongest structural realness move.
+- PLAN.md milestones M3-M5 updated with realness-strategy acceptance
+  criteria. Profile route at /profile/[userId] explicitly added to M5.
+- Second principled scope deferral via density principle (first was
+  play-reason matching). Pattern is holding.
+
 ### 2026-04-18 — Partiful Pattern Captured as V1 Design Principle
 - Architect discussion with Gemini surfaced Partiful's frictionless
   group-chat-to-on-the-list model as the right v1 sharing pattern

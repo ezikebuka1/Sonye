@@ -49,8 +49,17 @@ Concrete v1 implications (acceptance criteria for relevant milestones):
   content shifts by fill state (0/6 leads with vibe; 3/6-5/6 leads
   with social proof; 6/6 leads with waitlist FOMO).
 - View-first, auth-second: unauthenticated users can see a slot, its
-  fill count, and anonymized member avatars. Auth wall triggers only
-  at the Join button.
+  fill count, and the named members already in (first name + initial
+  avatar — that's it). Auth wall triggers only at the Join button.
+- Lobby/slot views show name + initial only. No skill, no badges, no
+  extra metadata. Clean, scannable, fast — the page stays calm even
+  with a full roster. Curious users tap a name to open that player's
+  profile, where richer detail (skill level, games played, preferred
+  venues, member-since) appears. Progressive disclosure: information
+  is there for those who want it, out of the way for those who don't.
+- Member identity in v1 = first name + initial avatar in roster
+  contexts; full profile available on tap. Profile pictures NOT in
+  v1 (see PLAN.md icebox).
 - Auth is SMS OTP only. No passwords, no email. D2 will codify.
 - SMS is the notification layer for commitment-critical events only
   (game locked, game tomorrow). Chat messages never trigger SMS —
@@ -70,3 +79,39 @@ event with a host-curated invite list. SquadUp's unit is a recurring
 slot with an owner-curated supply and a demand pool of skill-matched
 players. The sharing mechanics are borrowed; the matching and
 quality-control problems are ours to solve.
+
+## V1 Realness Strategy: Real People Without Density Tax
+
+Real-user feedback raised the question: "How do users know other users
+are real humans, not bots or stale profiles?" The default answer in
+most consumer apps is profile pictures — which fails the V1 Decision
+Principle on density grounds (see PLAN.md icebox).
+
+V1 instead leans on realness signals that fall out of the existing
+mechanics for free, with zero added onboarding friction:
+
+- **First names, not handles.** "Marcus" reads as a person; usernames
+  read as bots. Already enforced via D7 onboarding schema.
+- **Human-written chat.** Three seeded lobby messages model the
+  expected register: real, specific, useful. Sets the tone for real
+  user chat.
+- **Avatar color variance.** Blue palette of 4-5 shades distinguishes
+  members visually without needing photos.
+- **Member-since timestamp on profiles** (M3+). Account-creation date
+  signals real-person history; bot patterns (all created same day)
+  become visible.
+- **Games-played counter on profiles** (M5+). Track record is the
+  single strongest real-person signal. Bots don't show up to games.
+- **Last-played timestamp on profiles** (M5+). Distinguishes active
+  humans from drifted-away accounts.
+- **SMS-verified phone badge on profiles** (M4+). Cost-floor for
+  bot operators. Free byproduct of D2/SMS-OTP auth.
+
+The structural realness move, beyond any individual signal, is
+**density itself**. A populated SquadUp is automatically credible;
+an empty one is automatically suspect. The launch-day strategy of
+onboarding the entire pre-launch waitlist simultaneously via SMS
+magic links is the realness move. Pre-launch waitlist is not just
+users — it is manufactured social proof.
+
+Captured 2026-04-18 from real-user feedback during M1 pause.

@@ -111,6 +111,8 @@ Each decision becomes a one-page doc in `memory-bank/decisions/` before becoming
 - [ ] 🔨 RLS policies permit anonymous reads on published slots and
       anonymized member avatar data (Partiful view-first pattern —
       see projectbrief.md)
+- [ ] 🔨 User schema includes account-creation timestamp, surfaced on
+      profile pages per V1 Realness Strategy
 
 **Checkpoint M3:**
 1. Schema worth showing another engineer? If not, refactor before adding auth.
@@ -135,6 +137,8 @@ Each decision becomes a one-page doc in `memory-bank/decisions/` before becoming
       auth with a decision between onboarding-at-Join (Model B) and
       lightweight-join-with-later-profiling (Model A). See
       projectbrief.md V1 Design Pattern.
+- [ ] 🔨 SMS-verified status exposed as a small badge on user profiles
+      per V1 Realness Strategy (free byproduct of phone OTP auth)
 
 **Checkpoint M4:**
 1. Try to break your own auth. Guess URLs in a private window.
@@ -166,6 +170,12 @@ D7 dramatically simplified what "matching" means in v1. There is no real-time ma
       phone OTP and first-time profile form.
 - [ ] 🔨 SMS notifications for commitment-critical events only (slot
       locked, slot tomorrow). Chat messages do NOT trigger SMS.
+- [ ] 🔨 Games-played counter incremented on session completion;
+      surfaced on user profile pages per V1 Realness Strategy
+- [ ] 🔨 Last-played timestamp tracked on user records, surfaced on
+      profile pages per V1 Realness Strategy
+- [ ] 🔨 Profile route at `/profile/[userId]` accessible via tap on
+      any roster name (Partiful progressive disclosure pattern)
 
 **Checkpoint M5:**
 1. Re-read D4. Is the algorithm doing what users want, or what was easy?
@@ -233,6 +243,27 @@ Adding to this list is good — it means you noticed the temptation and resisted
 - Recurring sessions
 - Paid sessions
 - Activity browse mode (deliberately removed 2026-04-12 — does not match brief; revisit only if matching engine fails to find product-market fit)
+- **Profile pictures** (raised by user feedback 2026-04-18). Deferred
+  to v2 on density grounds:
+  - Photo upload is the highest-attrition step in consumer onboarding
+    (camera roll → crop → upload → confirm — a 2-3 minute decision
+    point with multiple drop-off opportunities). V1 cannot afford it.
+  - Optional photos create variance: a roster mixing photos and
+    initials reads as inconsistent and the no-photo entries look less
+    trustworthy. All-or-nothing is the only stable policy, and "all"
+    is too expensive at v1.
+  - Photos open a swamp of side-effects: moderation, inappropriate
+    images, AI-generated profiles, GDPR, storage and CDN costs,
+    broken-image fallbacks. Each small alone; together a tax.
+  - The underlying user need — "are these real people?" — is better
+    served by the V1 Realness Strategy in projectbrief.md (names +
+    timestamps + games-played + SMS-verified badge), all of which
+    fall out of v1 mechanics for free.
+  - **Reconsider when:** active user count crosses ~500 in a single
+    metro. At that density the social-proof return on photos
+    outweighs the onboarding friction tax. Below that, names +
+    track record carry more weight, and density itself is the
+    strongest realness signal.
 - **Play-reason matching** (observed 2026-04-18 from real play): players
   have different reasons for playing — practice / competitive / learn /
   social. Same skill level + different reason can produce a bad game.
