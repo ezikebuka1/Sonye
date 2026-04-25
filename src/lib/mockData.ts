@@ -293,6 +293,21 @@ export function getCurrentUser(searchParams?: { onboarded?: string }): User {
   return base;
 }
 
+// Dev-only demo identity — matches the M1 hardcoded values exactly.
+// Used by the ?onboarded=1 dev toggle in HomeClient.
+export const seedUser: User = {
+  id: "u_current",
+  name: "Jordan",
+  phone: "",
+  sport: "pickleball",
+  skill_level: "intermediate",
+  general_availability: ["saturday_morning", "sunday_morning"],
+  preferred_venues: ["cole_park", "fretz_park"],
+  willing_to_drive: "under_20",
+  avatar_color: "#3A7CB8",
+  onboarded: true,
+};
+
 export function getVenueById(id: VenueId): Venue {
   const venue = venues.find((v) => v.id === id);
   if (!venue) throw new Error(`Venue not found: ${id}`);

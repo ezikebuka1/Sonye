@@ -5,7 +5,8 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 p
 
 ## What Exists
 - Home screen at `/` per Option A (greeting, hero, social proof, conditional onboarding banner, slot cards with 50% fill rule, bottom tab bar) — mock data only
-- Mock data module at `src/lib/mockData.ts` with D7-aligned flat ID-referenced shapes and v2 breadcrumb fields
+- Mock data module at `src/lib/mockData.ts` with D7-aligned flat ID-referenced shapes and v2 breadcrumb fields; includes `seedUser` named export (demo identity for ?onboarded=1 toggle)
+- Zustand store at `src/lib/store.ts` — `useAppStore` with `currentUser`, `setUser`, `clearUser`; in-memory only (intentional at M2.1; persistence in M3)
 - Presentational components: Greeting, HeroText, SocialProofStrip, OnboardingBanner, SlotCard, BottomTabBar
 - D8 tokens wired into Tailwind v4 @theme in globals.css
 - DM Sans + Instrument Serif wired via next/font in layout.tsx
@@ -14,8 +15,8 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 p
 - Seeded session + chat messages in mockData with consistency assertion between session.member_user_ids and slot.opted_in_user_ids
 
 ## What Does NOT Exist Yet
-- Navigation wiring between pages (arrives in M2 with D1)
-- Client state store (arrives in M2 with D1)
+- Navigation wiring between pages (onJoin → slot → lobby — arrives in M2.2)
+- Persistence (store is in-memory only; localStorage/Supabase in M3)
 
 ## Icebox
 - **`src/app/queue/` empty directory** — leftover ghost from Drift Cleanup #1. Not
@@ -52,23 +53,30 @@ first async operation in M2 needs a loading state.
   use `lsof -ti :3000 | xargs kill` or `npx kill-port 3000`. Source of the
   guard not yet investigated; not a SquadUp concern.
 
-## Known M1 Shortcuts
+## Known Shortcuts / Deferrals
 
 These are intentional deferrals, not bugs. Each has a documented owner milestone.
 
-- **"Hey Jordan" hardcode on the home screen.** The `?onboarded=1` demo
-  toggle returns a user with a hardcoded name. The onboarding form
-  captures a real name and logs it, but that name does not thread to
-  the home screen. Real name flow requires persistence — lands in M3
-  with Supabase. Do not demo to external eyes without flagging.
 - **`onJoin` is a console.log stub.** Tapping "Join game" on the home
-  screen does not navigate or mutate state. Wires in M2 with D1.
+  screen does not navigate or mutate state. Wires in M2.2 with D1.
 - **"Leave session" button is a console.log stub.** Cancellation reason
   prompt lands in M5 per D7.
 - **`/group-lobby` has no entry point from `/`.** Direct URL only at M1.
   Real navigation (join slot → lock at capacity → lobby) wires in M5.
+- **Store is in-memory only.** Hard refresh wipes currentUser. Intentional
+  at M2.1 — real persistence (Supabase) lands in M3.
 
 ## History
+
+### 2026-04-25 — M2.1 Shipped: Zustand Store + Name Threading
+- zustand installed; `src/lib/store.ts` created with `useAppStore` (currentUser, setUser, clearUser)
+- `seedUser` named export added to `mockData.ts` — single source of truth for the demo identity
+- Onboarding submit now calls `useAppStore.getState().setUser(user)` and navigates to `/` (no ?onboarded=1)
+- HomeClient rewritten to read `currentUser` from store; greeting and banner keyed on store state
+- `?onboarded=1` preserved as dev-only demo toggle (useEffect seeds store from seedUser if store is empty)
+- "Hey Jordan" hardcode retired — submitted name threads to the home greeting
+- `src/app/page.tsx` simplified (no longer reads searchParams server-side)
+- M2.1 closes. Next: M2.2 (onJoin slot interaction wiring)
 
 ### 2026-04-12 — Drift Cleanup #1
 - Memory bank claimed queue page was done; `/queue` route never existed

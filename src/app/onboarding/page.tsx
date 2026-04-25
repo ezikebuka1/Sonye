@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Check, Activity } from 'lucide-react';
 import type { SkillLevel, VenueId, Availability } from '@/lib/mockData';
+import { useAppStore } from '@/lib/store';
 
 type OnboardingFormState = {
   name: string;
@@ -80,9 +81,20 @@ export default function OnboardingPage() {
   }
 
   function handleSubmit() {
-    if (!isValid) return;
-    console.log('[onboarding submit]', form);
-    router.push('/?onboarded=1');
+    if (!isValid || form.skill_level === null) return;
+    useAppStore.getState().setUser({
+      id: 'user-self',
+      name: form.name.trim(),
+      phone: form.phone,
+      sport: 'pickleball',
+      skill_level: form.skill_level,
+      general_availability: form.general_availability,
+      preferred_venues: form.preferred_venues,
+      willing_to_drive: 'under_20',
+      avatar_color: '#3A7CB8',
+      onboarded: true,
+    });
+    router.push('/');
   }
 
   return (

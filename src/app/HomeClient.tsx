@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import Greeting from "@/components/Greeting";
 import HeroText from "@/components/HeroText";
@@ -12,17 +13,14 @@ import BottomTabBar from "@/components/BottomTabBar";
 
 import {
   assertSeedConsistency,
-  getCurrentUser,
+  seedUser,
   getSlotsForHome,
   getVenueById,
   getUsersForSlot,
   getFillRatio,
   type Slot,
 } from "@/lib/mockData";
-
-type HomeClientProps = {
-  onboardedOverride: boolean; // true when ?onboarded=1 is in the URL
-};
+import { useAppStore } from "@/lib/store";
 
 // Maps the 3-letter day_of_week abbreviation to a display string.
 function dayLabelFor(dow: Slot["day_of_week"]): string {
@@ -41,21 +39,29 @@ function dayLabelFor(dow: Slot["day_of_week"]): string {
 // Blue-palette avatar colors for the social proof strip.
 const STRIP_AVATAR_COLORS = ["#1A3650", "#3A7CB8", "#5A9FD4", "#7FA8C9"];
 
-export default function HomeClient({ onboardedOverride }: HomeClientProps) {
+export default function HomeClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentUser = useAppStore((s) => s.currentUser);
 
   useEffect(() => {
     assertSeedConsistency();
   }, []);
 
-  // Resolve data — all pure helpers, no mutations.
-  const user = getCurrentUser(onboardedOverride ? { onboarded: "1" } : undefined);
+  // Dev-only demo toggle: ?onboarded=1 seeds the store with the canned demo
+  // identity, but only when the store is empty (never clobbers a real submitted user).
+  useEffect(() => {
+    if (searchParams.get("onboarded") === "1" && useAppStore.getState().currentUser === null) {
+      useAppStore.getState().setUser(seedUser);
+    }
+  }, [searchParams]);
+
   const slots = getSlotsForHome();
 
   return (
     <main className="min-h-screen bg-wash pb-24">
       <div className="max-w-[390px] mx-auto px-5 pt-6 space-y-5">
-        <Greeting name={user.onboarded ? user.name : null} />
+        <Greeting name={currentUser?.onboarded ? currentUser.name : null} />
 
         <HeroText />
 
@@ -65,7 +71,7 @@ export default function HomeClient({ onboardedOverride }: HomeClientProps) {
         />
 
         {/* Onboarding banner — visible only until the user completes D7 7-field form */}
-        {!user.onboarded && (
+        {!currentUser?.onboarded && (
           <OnboardingBanner onClick={() => router.push("/onboarding")} />
         )}
 

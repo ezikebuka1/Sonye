@@ -24,15 +24,20 @@
 - M1 Polish: willing_to_drive removed from in-app form (D7.1 amendment), lobby pb-24→pb-8 (2026-04-24)
 - D1 decided: Zustand for client state (2026-04-24)
 - M1 complete ✅
+- M2.1: Zustand store + submitted name threads to home greeting (2026-04-25)
+  - zustand installed; `src/lib/store.ts` with useAppStore (currentUser, setUser, clearUser)
+  - Onboarding submit writes to store before navigating to `/`
+  - HomeClient reads from store; "Hey Jordan" hardcode retired
+  - ?onboarded=1 preserved as dev-only demo toggle seeding from mockData.seedUser
 
 ## Not Started ⏳
-- Navigation wiring between pages (M2, depends on D1)
-- Client state store (M2, depends on D1)
+- M2.2: onJoin slot interaction wiring (home → slot opt-in state)
+- Navigation: home → lobby full flow (M5)
+- Persistence: store is in-memory only; localStorage/Supabase in M3
 
 ## Up Next
-- M2: install Zustand, create src/lib/store.ts (user store), wire navigation
-  between pages (onboarding → home, home → lobby), replace ?onboarded=1 hack
-  with real store state. Depends on D1 ✅ and D5 (loading/error states, pending).
+- M2.2: wire onJoin slot cards to store; clicking "Join game" should update
+  slot opt-in state. Closes M2 (Navigation & Client State).
 
 ## Blockers
 - None currently
