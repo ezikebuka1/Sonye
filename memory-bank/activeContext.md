@@ -68,6 +68,13 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
 
 ## History
 
+### 2026-04-27 — M2.1 E2E Suite Landed
+- Playwright installed (`@playwright/test`); `playwright.config.ts` at project root (Chromium-only, webServer auto-start)
+- `e2e/m2.1-store.spec.ts`: five tests encoding AC1–AC5; AC5 uses pushState+popstate (not page.goto) to preserve Zustand store across URL change
+- `data-testid="onboarding-banner"` added to OnboardingBanner root button for stable test selection
+- `npm run test:e2e` added; suite runs in ~6 s
+- Deliberate-regression confirmed via committed suite: AC5 fails when `currentUser === null` guard commented out (Alex → Jordan), passes when restored
+
 ### 2026-04-25 — M2.1 Shipped: Zustand Store + Name Threading
 - zustand installed; `src/lib/store.ts` created with `useAppStore` (currentUser, setUser, clearUser)
 - `seedUser` named export added to `mockData.ts` — single source of truth for the demo identity

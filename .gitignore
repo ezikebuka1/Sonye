@@ -141,3 +141,8 @@ vite.config.ts.timestamp-*
 # Claude Code local config (machine-specific)
 .claude/settings.local.json
 .claude/launch.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/

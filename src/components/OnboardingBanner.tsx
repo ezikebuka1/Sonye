@@ -17,6 +17,7 @@ export default function OnboardingBanner({ onClick }: OnboardingBannerProps) {
       className="w-full flex items-center gap-3 bg-card rounded-2xl border border-coral px-4 py-3 cursor-pointer text-left"
       role="button"
       aria-label="Set up your profile to get matched to games"
+      data-testid="onboarding-banner"
     >
       {/* Left: coral icon */}
       <div className="shrink-0 text-coral">
