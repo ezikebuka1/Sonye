@@ -29,15 +29,20 @@
   - Onboarding submit writes to store before navigating to `/`
   - HomeClient reads from store; "Hey Jordan" hardcode retired
   - ?onboarded=1 preserved as dev-only demo toggle seeding from mockData.seedUser
+- M2.2: onJoin wiring, optimistic state, minimal Toast/D5 (2026-04-28)
+  - slots slice, `joinSlot` with optimistic update + rollback (600ms simulated async, ?simulateFailure=1 toggle)
+  - JoinedButton, SocialProofBlock (200ms fade-in), Toast component
+  - D5 decided (minimal): toast only, two copy strings, skeleton/spinner deferred to M3
+- M2 Navigation and Client State complete ✅
 
 ## Not Started ⏳
-- M2.2: onJoin slot interaction wiring (home → slot opt-in state)
 - Navigation: home → lobby full flow (M5)
 - Persistence: store is in-memory only; localStorage/Supabase in M3
+- Auth flow: M4, D2 decision pending
 
 ## Up Next
-- M2.2: wire onJoin slot cards to store; clicking "Join game" should update
-  slot opt-in state. Closes M2 (Navigation & Client State).
+- M3: Supabase backend. D3 (database schema) decision must be made first,
+  then D2 (auth flow) before M4. Real persistence replaces in-memory store.
 
 ## Blockers
 - None currently

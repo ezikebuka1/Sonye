@@ -2,7 +2,7 @@
 
 **One-line definition:** SquadUp is a frictionless group formation and coordination engine for casual sports — users input availability, skill, and location, and the system autonomously forms reliable critical-mass groups. Mobile-first PWA. Single location, few time frames at launch, by design, for liquidity density.
 
-**Status:** M1 in progress. D7 v1 mechanics decided 2026-04-15. D8 design system approved 2026-04-17. Memory bank reconciled 2026-04-18. Next step: home screen implementation at `/` per Option A.
+**Status:** M2 complete 2026-04-28. D1 (Zustand) and D5 (minimal toast) decided and implemented. Next: M3 — Supabase backend, D3 decision first.
 
 **How to read this plan:**
 - Milestones, not weeks. Order matters; duration doesn't. Don't estimate dates.
@@ -22,7 +22,7 @@ Architectural decisions that shape everything downstream. Make them deliberately
 | D2 | 🏗️ Anonymous vs authenticated onboarding flow | M4 auth | ⏳ pending |
 | D3 | 🏗️ Database schema (relationships, foreign keys, queue state representation) | M3 backend | ⏳ pending |
 | D4 | 🏗️ Matching algorithm (FCFS vs optimal, client vs edge function, immediate vs round-based) | M5 matching | ⏳ pending |
-| D5 | 🏗️ Loading and error state design system | M2 onward | ⏳ pending |
+| D5 | 🏗️ Loading and error state design system | M2 onward | ✅ decided 2026-04-28 |
 | D6 | 🏗️ Realtime architecture (Supabase channels vs polling vs hybrid) | M5 realtime | ⏳ pending |
 | D7 | 🏗️ V1 product mechanics (slot model, group size, waitlist, onboarding schema) | M1 onward | ✅ decided 2026-04-15 |
 
@@ -43,7 +43,7 @@ Each decision becomes a one-page doc in `memory-bank/decisions/` before becoming
 
 ---
 
-## M1 — Frontend Skeleton (in progress)
+## M1 — Frontend Skeleton ✅
 
 **Goal:** three mobile-first pages exist as routes, render with mock data, look like the real app. No backend, no auth, no realtime.
 
@@ -71,7 +71,7 @@ Each decision becomes a one-page doc in `memory-bank/decisions/` before becoming
 
 ---
 
-## M2 — Navigation & Client State
+## M2 — Navigation & Client State ✅
 
 **Depends on:** M1 complete, D1 made, D5 made.
 

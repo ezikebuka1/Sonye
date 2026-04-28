@@ -1,13 +1,16 @@
 # Active Context
 
 ## Current State
-M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 product mechanics decided 2026-04-15; D8 design system approved 2026-04-17. Home screen shipped 2026-04-20.
+M2 complete — onJoin wired with optimistic Zustand state, Toast/D5 landed 2026-04-28. No backend, no auth, no API calls. D7 v1 product mechanics decided 2026-04-15; D8 design system approved 2026-04-17.
 
 ## What Exists
 - Home screen at `/` per Option A (greeting, hero, social proof, conditional onboarding banner, slot cards with 50% fill rule, bottom tab bar) — mock data only
 - Mock data module at `src/lib/mockData.ts` with D7-aligned flat ID-referenced shapes and v2 breadcrumb fields; includes `seedUser` named export (demo identity for ?onboarded=1 toggle)
 - Zustand store at `src/lib/store.ts` — `useAppStore` with `currentUser`, `setUser`, `clearUser`; in-memory only (intentional at M2.1; persistence in M3)
-- Presentational components: Greeting, HeroText, SocialProofStrip, OnboardingBanner, SlotCard, BottomTabBar
+- Zustand store extended (M2.2): slots slice (`Record<string, Slot>`, initialized from `mockData.initialSlots`), `joinSlot` action (optimistic update + 600ms simulated async + rollback), toast slice (single visible toast, replace-not-queue)
+- Toast component at `src/components/Toast.tsx` — top-of-viewport, slide-down, auto-dismiss 5s, error/success variants
+- D5 minimal pattern: toast only at M2.2; skeleton/spinner deferred to M3
+- Presentational components: Greeting, HeroText, SocialProofStrip, OnboardingBanner, SlotCard (M2.2: isJoined/isFull/fillCount + JoinedButton + SocialProofBlock 200ms fade-in), BottomTabBar, Toast
 - D8 tokens wired into Tailwind v4 @theme in globals.css
 - DM Sans + Instrument Serif wired via next/font in layout.tsx
 - D7 onboarding form at `/onboarding` capturing all 7 fields (name, phone, sport, skill_level, general_availability, preferred_venues, willing_to_drive); submit navigates to `/?onboarded=1` (M1 uses URL param demo toggle; real persistence in M3)
@@ -15,8 +18,9 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 p
 - Seeded session + chat messages in mockData with consistency assertion between session.member_user_ids and slot.opted_in_user_ids
 
 ## What Does NOT Exist Yet
-- Navigation wiring between pages (onJoin → slot → lobby — arrives in M2.2)
 - Persistence (store is in-memory only; localStorage/Supabase in M3)
+- Real backend/Supabase (M3)
+- Auth flow (M4, D2 decision pending)
 
 ## Icebox
 - **`src/app/queue/` empty directory** — leftover ghost from Drift Cleanup #1. Not
@@ -26,10 +30,9 @@ M1 in progress — frontend skeleton. No backend, no auth, no API calls. D7 v1 p
   deliberately decided. (2026-04-24)
 
 ## Current Focus
-M1 complete (all three pages shipped, polished per checkpoint). D1 decided:
-Zustand for client state. Next build: M2 navigation & client state wiring
-per D1. D5 (loading/error states) still pending; can be decided once the
-first async operation in M2 needs a loading state.
+M2 complete. D1 (Zustand) and D5 (minimal toast) both decided and implemented.
+Next: M3 — Supabase backend. D3 (database schema) decision must be made first,
+then D2 (auth flow) before M4. Real persistence replaces in-memory store.
 
 ## Decisions Made
 - Next.js App Router (already scaffolded; not Vite)
@@ -37,6 +40,7 @@ first async operation in M2 needs a loading state.
 - D8 design system: soft blue wash (#EEF4FA), warm coral accent (#D4724A), DM Sans + Instrument Serif italic (approved 2026-04-17)
 - D7: slot-based v1 mechanics (see `decisions/D7-product-mechanics-v1.md`)
 - Sketches Before Code rule effective 2026-04-15
+- D5 (loading/error states): minimal toast pattern only; decided 2026-04-28 (see `decisions/D5-loading-error-states.md`)
 
 ## Known Environment Quirks
 - User-global Claude Code plugin `claude-plugins-official/security-guidance`
@@ -57,8 +61,6 @@ first async operation in M2 needs a loading state.
 
 These are intentional deferrals, not bugs. Each has a documented owner milestone.
 
-- **`onJoin` is a console.log stub.** Tapping "Join game" on the home
-  screen does not navigate or mutate state. Wires in M2.2 with D1.
 - **"Leave session" button is a console.log stub.** Cancellation reason
   prompt lands in M5 per D7.
 - **`/group-lobby` has no entry point from `/`.** Direct URL only at M1.
@@ -67,6 +69,15 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
   at M2.1 — real persistence (Supabase) lands in M3.
 
 ## History
+
+### 2026-04-28 — M2.2 Shipped: onJoin Wiring + Optimistic State + Minimal D5
+- `useAppStore` extended: slots slice, `joinSlot` (optimistic + rollback), toast slice
+- SlotCard: `isJoined`/`isFull`/`fillCount` props; `JoinedButton`; `SocialProofBlock` (200ms fade-in)
+- Toast: slide-down, 5s auto-dismiss, backdrop-tap, error/success variants
+- HomeClient rewired: reads store slots, resolves per-slot state, dispatches `joinSlot`, renders Toast
+- Unauthenticated Join tap routes to `/onboarding` (M4 D2 revisits with SMS OTP)
+- D5 decided: minimal toast scope; D5 doc at `memory-bank/decisions/D5-loading-error-states.md`
+- M2 complete. Up Next: M3 (Supabase backend, D3 decision first)
 
 ### 2026-04-27 — M2.1 E2E Suite Landed
 - Playwright installed (`@playwright/test`); `playwright.config.ts` at project root (Chromium-only, webServer auto-start)

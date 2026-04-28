@@ -308,6 +308,26 @@ export const seedUser: User = {
   onboarded: true,
 };
 
+// Record form of slots for Zustand store initialization (M2.2+).
+// The store owns mutable slot state at runtime; this is the initial seed only.
+export const initialSlots: Record<string, Slot> = Object.fromEntries(
+  slots.map((s) => [s.id, s])
+);
+
+// Pure sort helper — accepts any Slot array (store-resolved or module-scope).
+// Mirrors the sort order of getSlotsForHome but takes a param so HomeClient
+// can pass store data without re-importing the module-scope array.
+export function sortSlotsForHome(slotsToSort: Slot[]): Slot[] {
+  const dayOrder: Record<Slot["day_of_week"], number> = {
+    mon: 0, tue: 1, wed: 2, thu: 3, fri: 4, sat: 5, sun: 6,
+  };
+  return [...slotsToSort].sort((a, b) => {
+    const dayDiff = dayOrder[a.day_of_week] - dayOrder[b.day_of_week];
+    if (dayDiff !== 0) return dayDiff;
+    return parseTimeLabel(a.time_label) - parseTimeLabel(b.time_label);
+  });
+}
+
 export function getVenueById(id: VenueId): Venue {
   const venue = venues.find((v) => v.id === id);
   if (!venue) throw new Error(`Venue not found: ${id}`);
