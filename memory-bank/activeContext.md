@@ -67,6 +67,7 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
   Real navigation (join slot → lock at capacity → lobby) wires in M5.
 - **Store is in-memory only.** Hard refresh wipes currentUser. Intentional
   at M2.1 — real persistence (Supabase) lands in M3.
+- **BottomTabBar tab clicks are no-ops.** Squad and Profile routes don't exist yet; navigation wires when they do.
 
 ## History
 

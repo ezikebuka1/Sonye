@@ -34,7 +34,7 @@ export default function BottomTabBar({ activeTab }: BottomTabBarProps) {
           return (
             <div
               key={key}
-              // TODO: D1 — wire onClick with router.push once state management is decided
+              // TODO: wire tab navigation when routes exist for Squad and Profile
               className={`flex-1 flex flex-col items-center justify-center py-3 gap-0.5 ${
                 isActive ? "text-coral" : "text-ink-soft"
               }`}
