@@ -77,6 +77,7 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
 - HomeClient rewired: reads store slots, resolves per-slot state, dispatches `joinSlot`, renders Toast
 - Unauthenticated Join tap routes to `/onboarding` (M4 D2 revisits with SMS OTP)
 - D5 decided: minimal toast scope; D5 doc at `memory-bank/decisions/D5-loading-error-states.md`
+- M2.2 E2E: 7 tests in `e2e/m2.2-join.spec.ts`; AC5 uses pushState+popstate (proven pattern from M2.1); toast selector uses `:not(#__next-route-announcer__)` to exclude Next.js internal element
 - M2 complete. Up Next: M3 (Supabase backend, D3 decision first)
 
 ### 2026-04-27 — M2.1 E2E Suite Landed
