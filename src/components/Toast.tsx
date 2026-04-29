@@ -71,6 +71,7 @@ export function Toast({ message, action, variant, onDismiss }: ToastProps) {
         {/* Action */}
         {action && (
           <button
+            type="button"
             onClick={handleAction}
             className="font-sans text-sm font-semibold underline shrink-0"
             style={{ color: ACCENT[variant] }}
@@ -81,6 +82,7 @@ export function Toast({ message, action, variant, onDismiss }: ToastProps) {
 
         {/* Dismiss X */}
         <button
+          type="button"
           onClick={onDismiss}
           className="shrink-0 text-white/70 hover:text-white"
           aria-label="Dismiss notification"

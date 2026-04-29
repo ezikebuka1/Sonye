@@ -34,6 +34,7 @@ const MAX_VISIBLE_AVATARS = 5;
 function JoinedButton() {
   return (
     <button
+      type="button"
       disabled
       className="w-full bg-inset text-ink border border-card-border rounded-xl py-2.5 font-sans font-medium text-[15px] flex items-center justify-center gap-1.5 cursor-default"
       aria-label="Already joined"
@@ -147,6 +148,7 @@ export default function SlotCard({
         <JoinedButton />
       ) : isFull ? (
         <button
+          type="button"
           onClick={() => onJoinWaitlist(slotId)}
           className="w-full bg-coral text-white rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:bg-coral-dark active:bg-coral-dark"
           aria-label={`Join waitlist for ${dayLabel} ${timeLabel}`}
@@ -155,6 +157,7 @@ export default function SlotCard({
         </button>
       ) : (
         <button
+          type="button"
           onClick={() => onJoin(slotId)}
           className="w-full bg-coral text-white rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:bg-coral-dark active:bg-coral-dark"
           aria-label={`Join game on ${dayLabel} ${timeLabel}`}

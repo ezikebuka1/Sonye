@@ -100,6 +100,7 @@ export default function GroupLobbyClient() {
         </div>
 
         <button
+          type="button"
           onClick={() => {
             console.log("[lobby] leave session — M5 wires reason prompt");
           }}

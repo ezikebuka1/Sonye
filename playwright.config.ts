@@ -16,6 +16,15 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      // WebKit / iPhone 14 — catches iOS Safari-specific event-handling
+      // bugs that Chromium/Blink silently hides (e.g. type="submit" outside
+      // a form, touch event pipeline differences). Added after M2.2 device
+      // bug where all 12 Chromium tests passed but Join button was silent
+      // on a real iPhone. Run: npx playwright test --project=webkit-iphone
+      name: 'webkit-iphone',
+      use: { ...devices['iPhone 14'] },
+    },
   ],
   webServer: {
     command: 'npm run dev',

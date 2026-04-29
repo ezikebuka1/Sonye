@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current State
-M2 complete — onJoin wired with optimistic Zustand state, Toast/D5 landed 2026-04-28. No backend, no auth, no API calls. D7 v1 product mechanics decided 2026-04-15; D8 design system approved 2026-04-17.
+M2 complete — onJoin wired with optimistic Zustand state, Toast/D5 landed 2026-04-28. Post-ship iOS fix: `type="button"` audit across all `<button>` elements + WebKit Playwright project added (2026-04-28). No backend, no auth, no API calls. D7 v1 product mechanics decided 2026-04-15; D8 design system approved 2026-04-17.
 
 ## What Exists
 - Home screen at `/` per Option A (greeting, hero, social proof, conditional onboarding banner, slot cards with 50% fill rule, bottom tab bar) — mock data only
@@ -11,6 +11,8 @@ M2 complete — onJoin wired with optimistic Zustand state, Toast/D5 landed 2026
 - Toast component at `src/components/Toast.tsx` — top-of-viewport, slide-down, auto-dismiss 5s, error/success variants
 - D5 minimal pattern: toast only at M2.2; skeleton/spinner deferred to M3
 - Presentational components: Greeting, HeroText, SocialProofStrip, OnboardingBanner, SlotCard (M2.2: isJoined/isFull/fillCount + JoinedButton + SocialProofBlock 200ms fade-in), BottomTabBar, Toast
+- All `<button>` elements across src/ carry explicit `type="button"` (10 instances across 6 files); HTML default `type="submit"` eliminated as an iOS Safari hazard
+- Playwright: both `chromium` (Desktop Chrome) and `webkit-iphone` (iPhone 14) projects; 24 tests total (12 per engine)
 - D8 tokens wired into Tailwind v4 @theme in globals.css
 - DM Sans + Instrument Serif wired via next/font in layout.tsx
 - D7 onboarding form at `/onboarding` capturing all 7 fields (name, phone, sport, skill_level, general_availability, preferred_venues, willing_to_drive); submit navigates to `/?onboarded=1` (M1 uses URL param demo toggle; real persistence in M3)
@@ -42,6 +44,28 @@ then D2 (auth flow) before M4. Real persistence replaces in-memory store.
 - Sketches Before Code rule effective 2026-04-15
 - D5 (loading/error states): minimal toast pattern only; decided 2026-04-28 (see `decisions/D5-loading-error-states.md`)
 
+## Known Shortcuts / Deferrals
+
+These are intentional deferrals, not bugs. Each has a documented owner milestone.
+
+- **"Leave session" button is a console.log stub.** Cancellation reason
+  prompt lands in M5 per D7.
+- **`/group-lobby` has no entry point from `/`.** Direct URL only at M1.
+  Real navigation (join slot → lock at capacity → lobby) wires in M5.
+- **Store is in-memory only.** Hard refresh wipes currentUser. Intentional
+  at M2.1 — real persistence (Supabase) lands in M3.
+- **BottomTabBar tab clicks are no-ops.** Squad and Profile routes don't exist yet; navigation wires when they do.
+- **iOS device bug: root cause unconfirmed.** `type="button"` audit shipped
+  as defensive hardening after "Join button does nothing on real iPhone"
+  report. Playwright WebKit does not reproduce the failure (WebKit passes
+  with and without `type="button"`). Diagnostic step (a) — `console.log`
+  in onJoin handler, observed via Safari Web Inspector on device — still
+  needed to confirm whether the handler fires at all. If it fires and
+  nothing updates, the Zustand re-render path on iOS is the next suspect.
+  If it does not fire, the root cause is at the DOM/compositor level and
+  requires deeper device debugging. Re-test on device after shipping this
+  commit.
+
 ## Known Environment Quirks
 - User-global Claude Code plugin `claude-plugins-official/security-guidance`
   fires a PreToolUse hook on any Write/Edit containing the substring
@@ -57,19 +81,22 @@ then D2 (auth flow) before M4. Real persistence replaces in-memory store.
   use `lsof -ti :3000 | xargs kill` or `npx kill-port 3000`. Source of the
   guard not yet investigated; not a SquadUp concern.
 
-## Known Shortcuts / Deferrals
-
-These are intentional deferrals, not bugs. Each has a documented owner milestone.
-
-- **"Leave session" button is a console.log stub.** Cancellation reason
-  prompt lands in M5 per D7.
-- **`/group-lobby` has no entry point from `/`.** Direct URL only at M1.
-  Real navigation (join slot → lock at capacity → lobby) wires in M5.
-- **Store is in-memory only.** Hard refresh wipes currentUser. Intentional
-  at M2.1 — real persistence (Supabase) lands in M3.
-- **BottomTabBar tab clicks are no-ops.** Squad and Profile routes don't exist yet; navigation wires when they do.
-
 ## History
+
+### 2026-04-28 — Post-M2.2 iOS Bug Fix + WebKit Coverage
+- `type="button"` audit: all 10 `<button>` elements across 6 files now carry explicit
+  `type` attribute; HTML default `type="submit"` eliminated as an iOS Safari hazard
+- Files touched: SlotCard, Toast, OnboardingBanner, LobbyHeader, GroupLobbyClient,
+  onboarding/page.tsx
+- `playwright.config.ts`: added `webkit-iphone` project (`devices['iPhone 14']`);
+  existing m2.1 + m2.2 specs now run against both engines (24 tests total)
+- WebKit binary installed: Playwright WebKit 26.4
+- **Deliberate-regression proof INCONCLUSIVE**: Playwright WebKit does not simulate
+  the specific iOS Safari touch pipeline that caused the real-device failure.
+  With `type="button"` removed from Join button, WebKit still passes 7/7. The
+  `type="button"` change ships as defensive hardening, not confirmed root cause.
+  Root cause still requires diagnostic step (a) on real device (console.log in
+  onJoin handler via Safari Web Inspector).
 
 ### 2026-04-28 — M2.2 Shipped: onJoin Wiring + Optimistic State + Minimal D5
 - `useAppStore` extended: slots slice, `joinSlot` (optimistic + rollback), toast slice

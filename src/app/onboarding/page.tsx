@@ -102,6 +102,7 @@ export default function OnboardingPage() {
       <div className="max-w-[390px] mx-auto px-5 pt-6">
         {/* Back nav */}
         <button
+          type="button"
           onClick={() => router.push('/')}
           className="mb-6 p-1 -ml-1 text-ink"
           aria-label="Go back"
@@ -248,6 +249,7 @@ export default function OnboardingPage() {
       {/* Sticky submit — always visible at bottom */}
       <div className="fixed bottom-0 inset-x-0 bg-wash pt-4 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <button
+          type="button"
           onClick={handleSubmit}
           disabled={!isValid}
           className="w-full max-w-[350px] mx-auto block bg-coral hover:bg-coral-dark active:bg-coral-dark text-white font-medium py-3.5 rounded-xl font-sans disabled:bg-ink-soft disabled:cursor-not-allowed transition-colors"

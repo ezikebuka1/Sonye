@@ -31,6 +31,7 @@ export default function LobbyHeader({
   return (
     <div className="space-y-1">
       <button
+        type="button"
         onClick={onBack}
         className="p-1 -ml-1 text-ink mb-2"
         aria-label="Go back"

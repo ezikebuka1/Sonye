@@ -13,6 +13,7 @@ type OnboardingBannerProps = {
 export default function OnboardingBanner({ onClick }: OnboardingBannerProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className="w-full flex items-center gap-3 bg-card rounded-2xl border border-coral px-4 py-3 cursor-pointer text-left"
       role="button"
