@@ -67,6 +67,17 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
   commit.
 
 ## Known Environment Quirks
+- **Next.js dev server HMR WebSocket — device testing.** `npm run dev`
+  binds its HMR WebSocket to `localhost` only. An iPhone on the same
+  wifi receives the static HTML but React never hydrates — every button
+  appears completely dead, native `<input>` fields still work. Root
+  cause: `ws://192.168.1.247:3000/_next/webpack-hmr` connection refused.
+  **Device verification must use the production build:**
+  ```
+  npm run build && npm run start
+  ```
+  This is a Next.js dev-server quirk, not a SquadUp issue. Discovered
+  2026-05-01 during M2.2 bug investigation Round 2.
 - User-global Claude Code plugin `claude-plugins-official/security-guidance`
   fires a PreToolUse hook on any Write/Edit containing the substring
   "pickle" — which false-positives on SquadUp's "pickleball" sport enum.
