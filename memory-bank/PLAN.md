@@ -25,6 +25,9 @@ Architectural decisions that shape everything downstream. Make them deliberately
 | D5 | 🏗️ Loading and error state design system | M2 onward | ✅ decided 2026-04-28 |
 | D6 | 🏗️ Realtime architecture (Supabase channels vs polling vs hybrid) | M5 realtime | ⏳ pending |
 | D7 | 🏗️ V1 product mechanics (slot model, group size, waitlist, onboarding schema) | M1 onward | ✅ decided 2026-04-15 |
+| D9 | 🏗️ Concurrent join policy — max one Joined slot per calendar day; leave or complete to unlock | D3 (schema), M4 (enforcement), M5 (leave flow) | ✅ decided 2026-05-01 |
+
+Note: D9 blocks D3. Schema must support `attended`, `left_at`, `leave_reason` on membership records and an indexed same-day-active query before enforcement can be implemented.
 
 Each decision becomes a one-page doc in `memory-bank/decisions/` before becoming implementable.
 

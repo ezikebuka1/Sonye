@@ -94,6 +94,18 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
 
 ## History
 
+### 2026-05-01 — D9 Decided: Concurrent Join Policy
+- One Joined slot per calendar day; unlock via M5 leave (with reason capture) or
+  match completion (attended/no-show). Cross-day multi-join unrestricted.
+- Same-day collision surfaces error-variant toast per D5 pattern:
+  "You're already in a game today. Leave that one or complete it to join another."
+- Blocks D3 schema design (needs `attended`, `left_at`, `leave_reason` on membership
+  records; composite index on user_id + slot_date + left_at + attended).
+- Provisional for v1; revisit after 30 days of real M5+ data.
+- Inline-switch affordance (option C) deferred; amendment trigger: "Switching to
+  another game" dominant in leave-reason data.
+- Decision doc at `memory-bank/decisions/D9-concurrent-join-policy.md`
+
 ### 2026-04-28 — Post-M2.2 iOS Bug Fix + WebKit Coverage
 - `type="button"` audit: all 10 `<button>` elements across 6 files now carry explicit
   `type` attribute; HTML default `type="submit"` eliminated as an iOS Safari hazard
