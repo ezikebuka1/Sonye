@@ -94,6 +94,24 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
 
 ## History
 
+### 2026-05-01 — projectbrief.md Restructured Around Evolution-First Vision
+- Vision section added at top: the long-horizon destination (frictionless adult group-activity formation)
+- Operating philosophy articulated: evolution-first vs scalable-first. Every v1 decision filtered against
+  a second question — does it preserve or foreclose future evolution paths? D7's v2 breadcrumbs
+  (creation_mode, sport, willing_to_drive) named as first concrete instance of this discipline.
+- V1 repositioned as "the first form": manually curated, recurring pickleball slots in Dallas.
+  Narrowness is the strategy, not a limitation.
+- What v1 deliberately does NOT do: no Play Now, no multi-activity, no multi-city, no segmentation
+  filters, no profile pictures — each held as evolution surface area.
+- V1→Vn evolution map added: activity-broad-next vs geography-broad-next as two live options gated on
+  v1 density data; ordering deliberately TBD. Real-time autonomous matching deferred beyond either.
+- V1 Decision Principle (Density Over Everything) moved from PLAN.md icebox context into projectbrief.md
+  as a first-class principle: empty-slot risk > bad-match risk; every feature must improve density or
+  gets held for Vn.
+- V1 Design Pattern (Partiful model) and V1 Realness Strategy both retained; repositioned in brief.
+- The Goal section added as concrete anchor: pre-seeded waitlist → SMS magic-claim launch → density
+  and follow-through as metrics gating v1→Vn transition.
+
 ### 2026-05-01 — D9 Decided: Concurrent Join Policy
 - One Joined slot per calendar day; unlock via M5 leave (with reason capture) or
   match completion (attended/no-show). Cross-day multi-join unrestricted.
