@@ -1,6 +1,6 @@
-# SquadUp — Project Plan
+# Sonye — Project Plan
 
-**One-line definition:** SquadUp is a frictionless group formation and coordination engine for casual sports — users input availability, skill, and location, and the system autonomously forms reliable critical-mass groups. Mobile-first PWA. Single location, few time frames at launch, by design, for liquidity density.
+**One-line definition:** Sonye is a frictionless group formation and coordination engine for casual sports — users input availability, skill, and location, and the system autonomously forms reliable critical-mass groups. Mobile-first PWA. Single location, few time frames at launch, by design, for liquidity density.
 
 **Status:** M2 complete 2026-04-28. D1 (Zustand) and D5 (minimal toast) decided and implemented. Next: M3 — Supabase backend, D3 decision first.
 
@@ -192,7 +192,7 @@ D7 dramatically simplified what "matching" means in v1. There is no real-time ma
 **Depends on:** M5 complete.
 
 - [ ] 🔨 Deploy to Vercel, env vars set in dashboard, deploys on push to main
-- [ ] 🔨 README rewritten (what SquadUp is, how to run locally, links to architecture)
+- [ ] 🔨 README rewritten (what Sonye is, how to run locally, links to architecture)
 - [ ] 🔨 Error tracking (Sentry or Supabase errors table)
 - [ ] 🔨 Basic analytics ("how many users joined a queue in last 24h")
 - [ ] 🔨 Playwright tests for the three critical flows

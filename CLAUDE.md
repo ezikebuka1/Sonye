@@ -1,8 +1,8 @@
 A top level file defining rules  (e.g., "use TDD", "only use approved libraries", etc.)
-# SquadUp — Claude Context File
+# Sonye — Claude Context File
 
 ## Project Overview
-SquadUp is a squad-based social app for finding and joining local activities.
+Sonye is a squad-based social app for finding and joining local activities.
 Users can browse activities near them, join a queue, and get matched into a group lobby with other people.
 
 ## Developer Profile

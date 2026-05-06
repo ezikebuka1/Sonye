@@ -7,13 +7,13 @@
 
 ## The Decision
 
-SquadUp uses **Zustand** for client-side state management.
+Sonye uses **Zustand** for client-side state management.
 
 The first Zustand store lives at `src/lib/store.ts` and holds the currently-active user. Additional stores (or additional slices of the same store) are added when concrete need arises, not speculatively.
 
 ## The Problem
 
-React components cannot share state across page navigations without a mechanism. At M1, SquadUp used a URL parameter (`?onboarded=1`) as the only persistent channel between `/onboarding` and `/`. This was sufficient to prove Option A but does not scale to M2's requirements: a submitted profile must drive the home greeting, the Join button must know which user is joining, and the lobby must know which session the user belongs to.
+React components cannot share state across page navigations without a mechanism. At M1, Sonye used a URL parameter (`?onboarded=1`) as the only persistent channel between `/onboarding` and `/`. This was sufficient to prove Option A but does not scale to M2's requirements: a submitted profile must drive the home greeting, the Join button must know which user is joining, and the lobby must know which session the user belongs to.
 
 We need a single, typed, in-memory location where shared data lives between routes.
 
@@ -53,7 +53,7 @@ No client-side state store at all. Every page reads directly from the server; th
 
 4. **Low blast radius.** 1.2 KB and ~50 lines of store code. If a future milestone proves Zustand wrong, swapping it out is a contained refactor, not a project-wide rework.
 
-5. **Boring and proven.** Zustand is the default React state library for apps of this size in 2026. SquadUp has no reason to pick an exotic alternative.
+5. **Boring and proven.** Zustand is the default React state library for apps of this size in 2026. Sonye has no reason to pick an exotic alternative.
 
 ## What This Decision Does NOT Mean
 

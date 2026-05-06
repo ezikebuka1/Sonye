@@ -16,7 +16,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "SquadUp",
+  title: "Sonye",
   description: "Find your squad for casual sports in Dallas",
 };
 

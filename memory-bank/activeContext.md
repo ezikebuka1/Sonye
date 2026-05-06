@@ -1,6 +1,7 @@
 # Active Context
 
 ## Current State
+Working name finalized as Sonye (was SquadUp / InTotality).
 M2 complete — onJoin wired with optimistic Zustand state, Toast/D5 landed 2026-04-28. Post-ship iOS fix: `type="button"` audit across all `<button>` elements + WebKit Playwright project added (2026-04-28). No backend, no auth, no API calls. D7 v1 product mechanics decided 2026-04-15; D8 design system approved 2026-04-17.
 
 ## What Exists
@@ -76,21 +77,21 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
   ```
   npm run build && npm run start
   ```
-  This is a Next.js dev-server quirk, not a SquadUp issue. Discovered
+  This is a Next.js dev-server quirk, not a Sonye issue. Discovered
   2026-05-01 during M2.2 bug investigation Round 2.
 - User-global Claude Code plugin `claude-plugins-official/security-guidance`
   fires a PreToolUse hook on any Write/Edit containing the substring
-  "pickle" — which false-positives on SquadUp's "pickleball" sport enum.
+  "pickle" — which false-positives on Sonye's "pickleball" sport enum.
   The hook fires once per file per session, then self-silences. Protocol
   for Code: acknowledge the warning in chat, retry the Write (succeeds on
   retry), fall back to Bash heredoc only if retry fails. Do not bypass
-  silently. Plugin is not a SquadUp concern — SquadUp repo is clean.
+  silently. Plugin is not a Sonye concern — Sonye repo is clean.
   Upstream fix is a word-boundary regex; file-able when convenient.
 - Shell command substitution (`$(...)`) is blocked by a terminal guard with
   message `Contains command_substitution`. Protocol: use pipes, xargs,
   or two-step commands instead. E.g. instead of `kill $(lsof -ti :3000)`,
   use `lsof -ti :3000 | xargs kill` or `npx kill-port 3000`. Source of the
-  guard not yet investigated; not a SquadUp concern.
+  guard not yet investigated; not a Sonye concern.
 
 ## History
 
