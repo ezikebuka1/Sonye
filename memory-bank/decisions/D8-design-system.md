@@ -6,7 +6,7 @@
 
 ## Summary
 
-SquadUp's visual identity sits between Playtomic (too corporate) and Timeleft (too events-focused). The direction is: casual but polished, active but not gamer, personal but not pastel. It should feel like getting invited to play by a friend who has good taste.
+Sonye's visual identity sits between Playtomic (too corporate) and Timeleft (too events-focused). The direction is: casual but polished, active but not gamer, personal but not pastel. It should feel like getting invited to play by a friend who has good taste.
 
 ## Color Tokens
 

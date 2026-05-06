@@ -6,7 +6,7 @@
 
 ## Summary
 
-V1 of SquadUp implements brief-aligned matching via **manually curated, recurring time slots** that users opt into. The system autonomously forms groups by filling published slots — not by searching across users in real time. Real-time autonomous matching ("Play Now") is deferred to v2 once liquidity supports it.
+V1 of Sonye implements brief-aligned matching via **manually curated, recurring time slots** that users opt into. The system autonomously forms groups by filling published slots — not by searching across users in real time. Real-time autonomous matching ("Play Now") is deferred to v2 once liquidity supports it.
 
 ## Product Mechanics
 
