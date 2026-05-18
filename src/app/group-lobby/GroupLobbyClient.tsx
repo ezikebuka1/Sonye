@@ -16,6 +16,7 @@ import {
   getSlotForSession,
   getVenueById,
   getUserById,
+  getAvatarColor,
 } from "@/lib/mockData";
 
 type SkillStyle = "beg" | "advbeg" | "int" | "adv";
@@ -64,7 +65,7 @@ export default function GroupLobbyClient() {
       author: {
         id: msg.userId,
         name: author?.name ?? "Unknown",
-        avatar_color: author?.avatar_color ?? "#1A3650",
+        avatar_color: getAvatarColor(author?.gender ?? null),
       },
       text: msg.text,
       timestamp: msg.timestamp,
@@ -90,7 +91,7 @@ export default function GroupLobbyClient() {
           members={members.map((u) => ({
             id: u.id,
             name: u.name,
-            avatar_color: u.avatar_color,
+            avatar_color: getAvatarColor(u.gender),
           }))}
         />
 

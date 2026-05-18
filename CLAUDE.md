@@ -11,11 +11,11 @@ Users can browse activities near them, join a queue, and get matched into a grou
 - Needs clear explanations alongside code suggestions
 
 ## Tech Stack
-- **Framework:** Next.js 15 (App Router)
+- **Framework:** Next.js 16 (App Router)
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
 - **Package Manager:** npm
-- **Version Control:** GitHub (https://github.com/ezikebuka1/SquadUp)
+- **Version Control:** GitHub (https://github.com/ezikebuka1/SquadUp) — repo still named SquadUp; product is now Sonye
 
 ## Cursor Plugins Installed
 - **Superpowers / Frontend Design** — Use this for generating polished, mobile-first UI components. Always produce clean, modern designs with smooth interactions.
@@ -45,9 +45,10 @@ Users can browse activities near them, join a queue, and get matched into a grou
 ## Pages Built So Far
 | Page | Route | Status |
 |------|--------|--------|
+| Home | `/` | ✅ Done |
 | Onboarding | `/onboarding` | ✅ Done |
+| Group Lobby | `/group-lobby` | ✅ Done (mock data, M5 wires leave) |
 | Queue | `/queue` | ⏳ Not started |
-| Group Lobby | `/group-lobby` | ⏳ Not started |
 
 ## Memory Bank Protocol (REQUIRED)
 

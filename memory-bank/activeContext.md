@@ -26,11 +26,7 @@ M2 complete — onJoin wired with optimistic Zustand state, Toast/D5 landed 2026
 - Auth flow (M4, D2 decision pending)
 
 ## Icebox
-- **`src/app/queue/` empty directory** — leftover ghost from Drift Cleanup #1. Not
-  wired, not referenced, not in the memory bank. Proposal: leave it as a route
-  placeholder; `/queue` is a planned M-future page (CLAUDE.md). Observe for a week,
-  then decide: keep as placeholder, scaffold stub, or delete. Do not act until
-  deliberately decided. (2026-04-24)
+(no current items)
 
 ## Current Focus
 M2 complete. D1 (Zustand) and D5 (minimal toast) both decided and implemented.
@@ -56,16 +52,7 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
 - **Store is in-memory only.** Hard refresh wipes currentUser. Intentional
   at M2.1 — real persistence (Supabase) lands in M3.
 - **BottomTabBar tab clicks are no-ops.** Squad and Profile routes don't exist yet; navigation wires when they do.
-- **iOS device bug: root cause unconfirmed.** `type="button"` audit shipped
-  as defensive hardening after "Join button does nothing on real iPhone"
-  report. Playwright WebKit does not reproduce the failure (WebKit passes
-  with and without `type="button"`). Diagnostic step (a) — `console.log`
-  in onJoin handler, observed via Safari Web Inspector on device — still
-  needed to confirm whether the handler fires at all. If it fires and
-  nothing updates, the Zustand re-render path on iOS is the next suspect.
-  If it does not fire, the root cause is at the DOM/compositor level and
-  requires deeper device debugging. Re-test on device after shipping this
-  commit.
+- **iOS device bug: resolved.** `type="button"` audit shipped as defensive hardening; HMR WebSocket was the actual root cause (dev server hydration failure on device). Production build (`npm run build && npm run start`) confirmed fix. See Known Environment Quirks for full detail.
 
 ## Known Environment Quirks
 - **Next.js dev server HMR WebSocket — device testing.** `npm run dev`
@@ -94,6 +81,20 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
   guard not yet investigated; not a Sonye concern.
 
 ## History
+
+### 2026-05-17 — Pre-M3 Baseline Commit 2: Schema + UX Decisions Applied
+- D7.2 onboarding bifurcation: form detects `?slotId` param via `useEffect`; slot-context path collects name+phone+skill only (general_availability/preferred_venues set null); generic path collects all six fields. Single `onboarding/page.tsx` — no new file.
+- D7 name split: `first_name` + `last_name` fields replace single `name` field in form state; stored as concatenated `name` string on User. Placeholders: Jordan / Smith.
+- D7.3 optional gender field: Woman/Man/Non-binary/Prefer not to say; toggleable back to null; both onboarding paths; `gender: User['gender']` on form state.
+- D8.1 avatar color derivation: `getAvatarColor(gender)` exported from mockData.ts; woman→#C56B8C, man→#3A7CB8, non_binary/null→#27500A. All avatar render call sites (HomeClient, GroupLobbyClient) use derived color. `avatar_color` field retained on User type for seed integrity only.
+- D3 amendment: `gender_category: 'open' | 'women' | 'men'` added to Slot type. All seed slots set to "open". Gender tag renders on SlotCard when !== "open". `genderCategory` prop threaded HomeClient → SlotCard.
+- Hero subtitle added to HeroText: "Curated games in Dallas. Tap to join."
+- mockData seed users: u1=man, u2=woman, u3=non_binary, u4=woman, u5=man, u6=woman, u7=null; seedUser gender=null.
+- E2E helpers updated: both `submitOnboarding` helpers now fill last_name placeholder 'Smith'.
+- CLAUDE.md: Next.js 15→16, Pages table updated, repo URL note added.
+- projectbrief.md: InTotality → Sonye.
+- Docs cleanup: `docs/superpowers/plans/` → `memory-bank/implementation-plans/`; `docs/` removed.
+- .gitignore: `/.playwright-mcp/` added. AGENTS.md created at repo root.
 
 ### 2026-05-17 — Amendment projectbrief-A1 Applied: Fretz Park → Lake Highlands North Park
 - Fretz Park removed from v1 launch scope (two disqualifiers: operational incompatibility with Partiful

@@ -18,6 +18,7 @@ import {
   sortSlotsForHome,
   getVenueById,
   getUserById,
+  getAvatarColor,
   type Slot,
 } from "@/lib/mockData";
 import { useAppStore } from "@/lib/store";
@@ -97,11 +98,11 @@ export default function HomeClient() {
                 if (currentUser && id === currentUser.id) {
                   return {
                     id: currentUser.id,
-                    avatar_color: currentUser.avatar_color ?? CURRENT_USER_AVATAR_FALLBACK,
+                    avatar_color: getAvatarColor(currentUser.gender),
                   };
                 }
                 const u = getUserById(id);
-                return u ? { id: u.id, avatar_color: u.avatar_color } : null;
+                return u ? { id: u.id, avatar_color: getAvatarColor(u.gender) } : null;
               })
               .filter((u): u is { id: string; avatar_color: string } => u !== null);
 
@@ -119,6 +120,7 @@ export default function HomeClient() {
                 isJoined={isJoined}
                 isFull={isFull}
                 optedInUsers={optedInUsers}
+                genderCategory={slot.gender_category}
                 onJoin={() => {
                   if (!currentUser) {
                     // Unauthenticated tap: route to onboarding.
