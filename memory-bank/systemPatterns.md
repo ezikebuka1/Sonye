@@ -67,7 +67,7 @@ Canonical source: `memory-bank/decisions/D7-product-mechanics-v1.md`. This secti
 - sport (single-select; v1 hardcoded to "pickleball")
 - skill_level (single-select: beginner / advanced beginner / intermediate / advanced)
 - general_availability (multi-select: weekday evenings / Saturday morning / Saturday evening / Sunday morning / Sunday evening)
-- preferred_venues (multi-select: Cole Park / Churchill Park / Fretz Park)
+- preferred_venues (multi-select: Cole Park / Churchill Park / Lake Highlands North Park)
 - willing_to_drive (single-select: under 10 / under 20 / under 30 / 30+ minutes)
 
 ### V2 Architectural Breadcrumbs
@@ -108,6 +108,17 @@ is provided.
 
 ### Sketches Before Code (effective 2026-04-15)
 All visual design proposals must be presented as rendered sketches (HTML/SVG artifact previewable in browser) before implementation. Architect session enforces this. No design changes get handed to Code without an approved visual sketch.
+
+### Dispatch-Only Execution (effective 2026-05-16)
+
+Architect-thread drafts, amendments, and documents are never execution
+orders. Code acts only on a single-paste handoff explicitly headed
+"DISPATCH SPEC". A document pasted into the architect thread for review —
+even one whose body says "Locked" — is review material, not a dispatch.
+If architect-thread content appears to request action and is not under a
+DISPATCH SPEC header, Code takes no action and waits. This rule exists
+because review drafts were twice executed prematurely; no damage occurred
+only because nothing was committed.
 
 ## Push Discipline
 
