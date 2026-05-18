@@ -17,8 +17,7 @@ This is the long-horizon product. It is not what v1 ships.
 
 ## Operating philosophy: evolution-first, not scalable-first
 
-InTotality (working name; see naming notes in activeContext.md) is
-deliberately built to evolve, not to scale.
+Sonye is deliberately built to evolve, not to scale.
 
 A scalable product is one whose v1 architecture handles v100 with
 more capacity. An evolutionary product is one whose v1 architecture

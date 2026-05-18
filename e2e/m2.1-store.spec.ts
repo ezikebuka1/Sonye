@@ -8,6 +8,7 @@ import { test, expect, Page } from '@playwright/test';
 async function submitOnboarding(page: Page, name: string) {
   await page.goto('/onboarding');
   await page.getByPlaceholder('Jordan').fill(name);
+  await page.getByPlaceholder('Smith').fill('Smith');
   await page.getByPlaceholder('(214) 555-0123').fill('5125550123');
   await page.getByRole('button', { name: /^beginner$/i }).click();
   await page.getByRole('button', { name: /weekday evenings/i }).click();

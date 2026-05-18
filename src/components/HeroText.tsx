@@ -8,10 +8,15 @@
  */
 export default function HeroText() {
   return (
-    <div className="leading-[1.05]">
-      <p className="font-sans text-ink text-4xl font-medium">Find your</p>
-      <p className="font-serif italic text-coral text-4xl font-normal">
-        squad.
+    <div>
+      <div className="leading-[1.05]">
+        <p className="font-sans text-ink text-4xl font-medium">Find your</p>
+        <p className="font-serif italic text-coral text-4xl font-normal">
+          squad.
+        </p>
+      </div>
+      <p className="font-sans text-ink-soft text-sm mt-2">
+        Curated pickleball games in Dallas. Tap to join.
       </p>
     </div>
   );

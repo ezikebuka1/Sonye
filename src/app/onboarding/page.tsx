@@ -1,17 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Check, Activity } from 'lucide-react';
-import type { SkillLevel, VenueId, Availability } from '@/lib/mockData';
+import type { SkillLevel, VenueId, Availability, User } from '@/lib/mockData';
 import { useAppStore } from '@/lib/store';
 
+type Gender = User['gender'];
+
 type OnboardingFormState = {
-  name: string;
+  first_name: string;
+  last_name: string;
   phone: string;
   skill_level: SkillLevel | null;
   general_availability: Availability[];
   preferred_venues: VenueId[];
+  gender: Gender;
 };
 
 function formatPhone(digits: string): string {
@@ -39,7 +43,14 @@ const AVAILABILITY_OPTIONS: { value: Availability; label: string }[] = [
 const VENUE_OPTIONS: { value: VenueId; label: string }[] = [
   { value: 'cole_park', label: 'Cole Park' },
   { value: 'churchill_park', label: 'Churchill Park' },
-  { value: 'fretz_park', label: 'Fretz Park' },
+  { value: 'lake_highlands_north', label: 'Lake Highlands North Park' },
+];
+
+const GENDER_OPTIONS: { value: NonNullable<Gender>; label: string }[] = [
+  { value: 'woman', label: 'Woman' },
+  { value: 'man', label: 'Man' },
+  { value: 'non_binary', label: 'Non-binary' },
+  { value: 'prefer_not_to_say', label: 'Prefer not to say' },
 ];
 
 const SKILL_SELECTED_CLASSES: Record<SkillLevel, string> = {
@@ -54,26 +65,44 @@ const CHIP_UNSELECTED = `${CHIP_BASE} bg-card border-card-border text-ink`;
 const CHIP_SELECTED_CORAL = `${CHIP_BASE} bg-coral/10 border-coral text-coral flex items-center gap-1.5`;
 const CHIP_SELECTED_SKILL = (level: SkillLevel) =>
   `${CHIP_BASE} ${SKILL_SELECTED_CLASSES[level]} border-card-border flex items-center gap-1.5`;
+
 function toggleMulti<T extends string>(arr: T[], value: T): T[] {
   return arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value];
 }
 
 export default function OnboardingPage() {
   const router = useRouter();
+
+  // Slot-context detection: if a slotId param is present, use minimal form (D7.2).
+  // Defaults to full-form path on initial render. M3+ wires the actual slot-link entry.
+  const [isSlotContext, setIsSlotContext] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setIsSlotContext(params.has('slotId'));
+  }, []);
+
   const [form, setForm] = useState<OnboardingFormState>({
-    name: '',
+    first_name: '',
+    last_name: '',
     phone: '',
     skill_level: null,
     general_availability: [],
     preferred_venues: [],
+    gender: null,
   });
 
-  const isValid =
-    form.name.trim().length >= 2 &&
-    /^\d{10}$/.test(form.phone) &&
-    form.skill_level !== null &&
-    form.general_availability.length >= 1 &&
-    form.preferred_venues.length >= 1;
+  const nameValid = form.first_name.trim().length >= 2 && form.last_name.trim().length >= 1;
+  const phoneValid = /^\d{10}$/.test(form.phone);
+  const skillValid = form.skill_level !== null;
+  const availabilityValid = form.general_availability.length >= 1;
+  const venueValid = form.preferred_venues.length >= 1;
+
+  // Minimal form (slot context): name + phone + skill required; availability/venues omitted.
+  // Full form: all six fields required.
+  const isValid = isSlotContext
+    ? nameValid && phoneValid && skillValid
+    : nameValid && phoneValid && skillValid && availabilityValid && venueValid;
 
   function handlePhoneChange(raw: string) {
     const digits = raw.replace(/\D/g, '').slice(0, 10);
@@ -84,13 +113,14 @@ export default function OnboardingPage() {
     if (!isValid || form.skill_level === null) return;
     useAppStore.getState().setUser({
       id: 'user-self',
-      name: form.name.trim(),
+      name: `${form.first_name.trim()} ${form.last_name.trim()}`.trim(),
       phone: form.phone,
       sport: 'pickleball',
       skill_level: form.skill_level,
-      general_availability: form.general_availability,
-      preferred_venues: form.preferred_venues,
-      willing_to_drive: 'under_20',
+      general_availability: isSlotContext ? null : form.general_availability,
+      preferred_venues: isSlotContext ? null : form.preferred_venues,
+      willing_to_drive: null,
+      gender: form.gender,
       avatar_color: '#3A7CB8',
       onboarded: true,
     });
@@ -116,17 +146,32 @@ export default function OnboardingPage() {
         <p className="font-sans text-sm text-ink-soft mt-1 mb-6">Takes about a minute.</p>
 
         <div className="space-y-6">
-          {/* Field 1 — Name */}
+          {/* Field 1a — First name */}
           <div>
             <label className="block font-sans text-sm font-medium text-ink mb-2">
-              What&apos;s your name?
+              First name
             </label>
             <input
               type="text"
               placeholder="Jordan"
               maxLength={50}
-              value={form.name}
-              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+              value={form.first_name}
+              onChange={e => setForm(f => ({ ...f, first_name: e.target.value }))}
+              className="bg-card rounded-xl border border-card-border px-4 py-3 w-full text-ink font-sans focus:outline-none focus:border-coral focus:ring-1 focus:ring-coral"
+            />
+          </div>
+
+          {/* Field 1b — Last name */}
+          <div>
+            <label className="block font-sans text-sm font-medium text-ink mb-2">
+              Last name
+            </label>
+            <input
+              type="text"
+              placeholder="Smith"
+              maxLength={50}
+              value={form.last_name}
+              onChange={e => setForm(f => ({ ...f, last_name: e.target.value }))}
               className="bg-card rounded-xl border border-card-border px-4 py-3 w-full text-ink font-sans focus:outline-none focus:border-coral focus:ring-1 focus:ring-coral"
             />
           </div>
@@ -186,52 +231,85 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          {/* Field 5 — General availability */}
-          <div>
-            <label className="block font-sans text-sm font-medium text-ink mb-2">
-              When are you usually free?
-            </label>
-            <p className="font-sans text-xs text-ink-soft mb-2">Pick all that work.</p>
-            <div className="flex flex-wrap gap-2">
-              {AVAILABILITY_OPTIONS.map(opt => {
-                const selected = form.general_availability.includes(opt.value);
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() =>
-                      setForm(f => ({
-                        ...f,
-                        general_availability: toggleMulti(f.general_availability, opt.value),
-                      }))
-                    }
-                    className={selected ? CHIP_SELECTED_CORAL : CHIP_UNSELECTED}
-                  >
-                    {selected && <Check size={12} aria-hidden="true" />}
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          {/* Fields 5 & 6 — Availability + Venues (full form only; omitted in slot context per D7.2) */}
+          {!isSlotContext && (
+            <>
+              {/* Field 5 — General availability */}
+              <div>
+                <label className="block font-sans text-sm font-medium text-ink mb-2">
+                  When are you usually free?
+                </label>
+                <p className="font-sans text-xs text-ink-soft mb-2">Pick all that work.</p>
+                <div className="flex flex-wrap gap-2">
+                  {AVAILABILITY_OPTIONS.map(opt => {
+                    const selected = form.general_availability.includes(opt.value);
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() =>
+                          setForm(f => ({
+                            ...f,
+                            general_availability: toggleMulti(f.general_availability, opt.value),
+                          }))
+                        }
+                        className={selected ? CHIP_SELECTED_CORAL : CHIP_UNSELECTED}
+                      >
+                        {selected && <Check size={12} aria-hidden="true" />}
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-          {/* Field 6 — Preferred venues */}
+              {/* Field 6 — Preferred venues */}
+              <div>
+                <label className="block font-sans text-sm font-medium text-ink mb-2">
+                  Which parks work for you?
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {VENUE_OPTIONS.map(opt => {
+                    const selected = form.preferred_venues.includes(opt.value);
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() =>
+                          setForm(f => ({
+                            ...f,
+                            preferred_venues: toggleMulti(f.preferred_venues, opt.value),
+                          }))
+                        }
+                        className={selected ? CHIP_SELECTED_CORAL : CHIP_UNSELECTED}
+                      >
+                        {selected && <Check size={12} aria-hidden="true" />}
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Field 7 — Gender (optional, both paths per D7.3) */}
           <div>
-            <label className="block font-sans text-sm font-medium text-ink mb-2">
-              Which parks work for you?
+            <label className="block font-sans text-sm font-medium text-ink mb-1">
+              Gender <span className="font-normal text-ink-soft">(optional)</span>
             </label>
+            <p className="font-sans text-xs text-ink-soft mb-2">
+              Used to show game gender composition in the lobby.
+            </p>
             <div className="flex flex-wrap gap-2">
-              {VENUE_OPTIONS.map(opt => {
-                const selected = form.preferred_venues.includes(opt.value);
+              {GENDER_OPTIONS.map(opt => {
+                const selected = form.gender === opt.value;
                 return (
                   <button
                     key={opt.value}
                     type="button"
                     onClick={() =>
-                      setForm(f => ({
-                        ...f,
-                        preferred_venues: toggleMulti(f.preferred_venues, opt.value),
-                      }))
+                      setForm(f => ({ ...f, gender: selected ? null : opt.value }))
                     }
                     className={selected ? CHIP_SELECTED_CORAL : CHIP_UNSELECTED}
                   >

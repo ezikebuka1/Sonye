@@ -1,7 +1,6 @@
 // Pure mock data module — no React imports, no side effects, no mutation.
 // All shapes are flat and ID-referenced per D7 product mechanics.
-// V2 breadcrumb fields (creation_mode, sport, willing_to_drive) are collected
-// in v1 even though not yet used, to prevent future migrations.
+// V2 breadcrumb fields (creation_mode, sport) are collected in v1 to prevent future migrations.
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
@@ -13,7 +12,7 @@ export type SkillLevel =
 
 export type Sport = "pickleball"; // v1 hardcoded; v2 expands to multi-sport
 
-export type VenueId = "cole_park" | "churchill_park" | "fretz_park";
+export type VenueId = "cole_park" | "churchill_park" | "lake_highlands_north";
 
 export type DrivingWillingness =
   | "under_10"
@@ -46,10 +45,11 @@ export type User = {
   phone: string;
   sport: Sport;
   skill_level: SkillLevel;
-  general_availability: Availability[];
-  preferred_venues: VenueId[];
-  willing_to_drive: DrivingWillingness; // v2 breadcrumb: used by v2 matching algo
-  avatar_color: string; // hex from blue palette only — never coral
+  general_availability: Availability[] | null; // null when joining via slot link (D7.2)
+  preferred_venues: VenueId[] | null;          // null when joining via slot link (D7.2)
+  willing_to_drive: DrivingWillingness | null; // D7.1: not asked in-form; set via waitlist CSV only
+  gender: 'woman' | 'man' | 'non_binary' | 'prefer_not_to_say' | null; // D7.3: optional
+  avatar_color: string;  // seed value retained; render sites use getAvatarColor(gender) per D8.1
   onboarded: boolean;
 };
 
@@ -69,6 +69,7 @@ export type Slot = {
   capacity: number; // v1 always 6
   opted_in_user_ids: string[];
   creation_mode: CreationMode; // v2 breadcrumb: always 'scheduled_slot' in v1
+  gender_category: 'open' | 'women' | 'men'; // D3 amendment; 'open' is default (~90% of games)
 };
 
 export type Session = {
@@ -85,7 +86,7 @@ export type Session = {
 const venues: Venue[] = [
   { id: "cole_park", name: "Cole Park", neighborhood: "Lakewood" },
   { id: "churchill_park", name: "Churchill Park", neighborhood: "Preston Hollow" },
-  { id: "fretz_park", name: "Fretz Park", neighborhood: "North Dallas" },
+  { id: "lake_highlands_north", name: "Lake Highlands North Park", neighborhood: "Lake Highlands" },
 ];
 
 const users: User[] = [
@@ -97,8 +98,9 @@ const users: User[] = [
     sport: "pickleball",
     skill_level: "intermediate",
     general_availability: ["saturday_morning", "sunday_morning"],
-    preferred_venues: ["cole_park", "fretz_park"],
-    willing_to_drive: "under_20",
+    preferred_venues: ["cole_park", "lake_highlands_north"],
+    willing_to_drive: null,
+    gender: null,
     avatar_color: "#3A7CB8",
     onboarded: false,
   },
@@ -111,6 +113,7 @@ const users: User[] = [
     general_availability: ["weekday_evenings", "saturday_morning"],
     preferred_venues: ["cole_park"],
     willing_to_drive: "under_10",
+    gender: "man",
     avatar_color: "#1A3650",
     onboarded: true,
   },
@@ -121,8 +124,9 @@ const users: User[] = [
     sport: "pickleball",
     skill_level: "advanced_beginner",
     general_availability: ["saturday_evening", "sunday_morning"],
-    preferred_venues: ["churchill_park", "fretz_park"],
+    preferred_venues: ["churchill_park", "lake_highlands_north"],
     willing_to_drive: "under_20",
+    gender: "woman",
     avatar_color: "#5A9FD4",
     onboarded: true,
   },
@@ -135,6 +139,7 @@ const users: User[] = [
     general_availability: ["saturday_morning", "saturday_evening"],
     preferred_venues: ["cole_park", "churchill_park"],
     willing_to_drive: "under_30",
+    gender: "non_binary",
     avatar_color: "#4A6E8E",
     onboarded: true,
   },
@@ -145,8 +150,9 @@ const users: User[] = [
     sport: "pickleball",
     skill_level: "beginner",
     general_availability: ["sunday_morning", "sunday_evening"],
-    preferred_venues: ["fretz_park"],
+    preferred_venues: ["lake_highlands_north"],
     willing_to_drive: "under_10",
+    gender: "woman",
     avatar_color: "#7FA8C9",
     onboarded: true,
   },
@@ -159,6 +165,7 @@ const users: User[] = [
     general_availability: ["weekday_evenings", "sunday_evening"],
     preferred_venues: ["cole_park"],
     willing_to_drive: "over_30",
+    gender: "man",
     avatar_color: "#2D6B9E",
     onboarded: true,
   },
@@ -169,8 +176,9 @@ const users: User[] = [
     sport: "pickleball",
     skill_level: "intermediate",
     general_availability: ["saturday_morning", "sunday_morning"],
-    preferred_venues: ["churchill_park", "fretz_park"],
+    preferred_venues: ["churchill_park", "lake_highlands_north"],
     willing_to_drive: "under_20",
+    gender: "woman",
     avatar_color: "#A9C3DB",
     onboarded: true,
   },
@@ -181,8 +189,9 @@ const users: User[] = [
     sport: "pickleball",
     skill_level: "advanced_beginner",
     general_availability: ["weekday_evenings", "saturday_evening"],
-    preferred_venues: ["cole_park", "fretz_park"],
+    preferred_venues: ["cole_park", "lake_highlands_north"],
     willing_to_drive: "under_30",
+    gender: null,
     avatar_color: "#6B9AC4",
     onboarded: true,
   },
@@ -205,6 +214,7 @@ const slots: Slot[] = [
     capacity: 6,
     opted_in_user_ids: ["u1"],
     creation_mode: "scheduled_slot",
+    gender_category: "open",
   },
   {
     id: "slot_b",
@@ -216,10 +226,11 @@ const slots: Slot[] = [
     capacity: 6,
     opted_in_user_ids: ["u1", "u2", "u3"],
     creation_mode: "scheduled_slot",
+    gender_category: "open",
   },
   {
     id: "slot_c",
-    venueId: "fretz_park",
+    venueId: "lake_highlands_north",
     sport: "pickleball",
     skill_level: "beginner",
     day_of_week: "sun",
@@ -227,6 +238,7 @@ const slots: Slot[] = [
     capacity: 6,
     opted_in_user_ids: ["u1", "u2", "u3", "u4", "u5"],
     creation_mode: "scheduled_slot",
+    gender_category: "open",
   },
   {
     id: "slot_d",
@@ -238,10 +250,11 @@ const slots: Slot[] = [
     capacity: 6,
     opted_in_user_ids: ["u1", "u2", "u3", "u4", "u5", "u6"],
     creation_mode: "scheduled_slot",
+    gender_category: "open",
   },
 ];
 
-// Seeded session: slot_c (Sun 9AM Fretz Park, beginner, 5/6 forming per PLAN.md).
+// Seeded session: slot_c (Sun 9AM Lake Highlands North Park, beginner, 5/6 forming per PLAN.md).
 // member_user_ids MUST stay in sync with slot_c.opted_in_user_ids — enforced by assertSeedConsistency.
 const sessions: Session[] = [
   {
@@ -302,11 +315,19 @@ export const seedUser: User = {
   sport: "pickleball",
   skill_level: "intermediate",
   general_availability: ["saturday_morning", "sunday_morning"],
-  preferred_venues: ["cole_park", "fretz_park"],
-  willing_to_drive: "under_20",
+  preferred_venues: ["cole_park", "lake_highlands_north"],
+  willing_to_drive: null,
+  gender: null,
   avatar_color: "#3A7CB8",
   onboarded: true,
 };
+
+/** Maps gender → avatar color per D8.1. Use at all avatar render sites. */
+export function getAvatarColor(gender: User['gender']): string {
+  if (gender === 'woman') return '#C56B8C'; // TBD: finalize pink palette M5 per D8.1
+  if (gender === 'man') return '#3A7CB8';   // D8 blue family
+  return '#27500A'; // non_binary / prefer_not_to_say / null → D8 skill-int green
+}
 
 // Record form of slots for Zustand store initialization (M2.2+).
 // The store owns mutable slot state at runtime; this is the initial seed only.

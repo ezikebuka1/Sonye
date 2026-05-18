@@ -8,6 +8,7 @@ import { test, expect, Page } from '@playwright/test';
 async function submitOnboarding(page: Page, name: string) {
   await page.goto('/onboarding');
   await page.getByPlaceholder('Jordan').fill(name);
+  await page.getByPlaceholder('Smith').fill('Smith');
   await page.getByPlaceholder('(214) 555-0123').fill('5125550123');
   await page.getByRole('button', { name: /^beginner$/i }).click();
   await page.getByRole('button', { name: /weekday evenings/i }).click();
@@ -20,7 +21,7 @@ async function submitOnboarding(page: Page, name: string) {
  * Slot reference (from mockData seed):
  *   slot_a = Saturday  8:00 AM  1/6   Cole Park        intermediate
  *   slot_b = Saturday  5:00 PM  3/6   Churchill Park   advanced_beginner
- *   slot_c = Sunday    9:00 AM  5/6   Fretz Park       beginner
+ *   slot_c = Sunday    9:00 AM  5/6   Lake Highlands North Park  beginner
  *   slot_d = Sunday    4:00 PM  6/6   Cole Park        advanced   ← full
  */
 

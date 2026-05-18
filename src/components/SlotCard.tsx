@@ -18,6 +18,7 @@ type SlotCardProps = {
   isJoined: boolean;
   isFull: boolean;
   optedInUsers: OptedInUser[];
+  genderCategory: 'open' | 'women' | 'men';
   onJoin: (slotId: string) => void;
   onJoinWaitlist: (slotId: string) => void;
 };
@@ -105,6 +106,7 @@ export default function SlotCard({
   isJoined,
   isFull,
   optedInUsers,
+  genderCategory,
   onJoin,
   onJoinWaitlist,
 }: SlotCardProps) {
@@ -113,14 +115,21 @@ export default function SlotCard({
 
   return (
     <article className="bg-card rounded-2xl border border-[0.5px] border-card-border p-4 space-y-3">
-      {/* Row 1: sport icon chip + skill badge */}
+      {/* Row 1: sport icon chip + badges (skill + gender tag when non-open) */}
       <div className="flex items-center justify-between">
         <div className="bg-gradient-to-br from-coral/80 to-coral rounded-xl p-2.5 text-white">
           <Activity size={18} aria-hidden="true" />
         </div>
-        <span className={`${badge.bg} ${badge.text} rounded-full px-2.5 py-1 text-xs font-medium`}>
-          {badge.label}
-        </span>
+        <div className="flex items-center gap-1.5">
+          {genderCategory !== 'open' && (
+            <span className="bg-inset border border-card-border rounded-full px-2.5 py-1 text-xs font-medium text-ink-soft">
+              {genderCategory === 'women' ? "Women's" : "Men's"}
+            </span>
+          )}
+          <span className={`${badge.bg} ${badge.text} rounded-full px-2.5 py-1 text-xs font-medium`}>
+            {badge.label}
+          </span>
+        </div>
       </div>
 
       {/* Row 2: day · time */}
