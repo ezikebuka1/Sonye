@@ -57,10 +57,10 @@ The in-app onboarding form captures these seven fields. The Waitlist Intake Scri
 | Sport | single-select | Hardcoded to "pickleball" in v1; field exists for v2 multi-sport readiness |
 | Skill level | single-select | beginner / advanced beginner / intermediate / advanced |
 | General availability | multi-select | weekday evenings / Saturday morning / Saturday evening / Sunday morning / Sunday evening |
-| Preferred venues | multi-select | Cole Park (Dallas) / Churchill Park (Dallas) / Fretz Park (Dallas) |
+| Preferred venues | multi-select | Cole Park (Dallas) / Churchill Park (Dallas) / Lake Highlands North Park (Dallas) |
 | Willing to drive | single-select | Under 10 min / Under 20 min / Under 30 min / 30+ min or as far as needed |
 
-**Why venue multi-select and not radius slider:** v1 venues are a small finite set of three specific vetted Dallas courts, not a search space. "Pick which of these works for you" is more honest UX than "draw a circle on a map." Radius search becomes relevant in v2 when venue count expands.
+**Why venue multi-select and not radius slider:** v1 venues are a small finite set of three specific vetted Dallas courts, not a search space. "Pick which of these works for you" is more honest UX than "draw a circle on a map." Radius search becomes relevant in v2 when venue count expands. *(Amendment projectbrief-A1, 2026-05-16: Fretz Park replaced by Lake Highlands North Park — field-verified Public Commons.)*
 
 **Why "willing to drive" is collected in v1 even though v1 doesn't use it for matching:** schema consistency with manual collection (no migration at launch), and v2 matching algorithm will use this field to filter slot visibility. Capturing v2-relevant fields in v1 prevents needing to ask existing users to fill them in later.
 

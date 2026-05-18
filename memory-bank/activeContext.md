@@ -95,6 +95,20 @@ These are intentional deferrals, not bugs. Each has a documented owner milestone
 
 ## History
 
+### 2026-05-17 — Amendment projectbrief-A1 Applied: Fretz Park → Lake Highlands North Park
+- Fretz Park removed from v1 launch scope (two disqualifiers: operational incompatibility with Partiful
+  Model; behavioral incompatibility with target user — pre-formed paid groups, not solo walk-ons).
+- Lake Highlands North Park added as verified replacement (field observation 2026-05-16; strongest
+  infrastructure verification of the three v1 venues: 4 clustered courts, universal paddle queue,
+  direct line-of-sight from parking lot).
+- V1 Venue Inclusion Criteria (Public Commons Test) elevated to first-class principle in projectbrief.md:
+  zero financial barrier, low psychological friction, egalitarian offline infrastructure — all three required.
+- Files updated: projectbrief.md (venue swap + Public Commons Test section + amendment pointer),
+  D7-product-mechanics-v1.md (preferred_venues option set), systemPatterns.md (onboarding schema summary),
+  src/lib/mockData.ts (VenueId type, venues array, all user preferred_venues, slot_c venueId, seedUser,
+  seeded session comment), src/app/onboarding/page.tsx (VENUE_OPTIONS), e2e/m2.2-join.spec.ts (slot_c comment).
+- No structural changes — pure swap. Schema seams (venue as data entity per D3) held without migration.
+
 ### 2026-05-01 — projectbrief.md Restructured Around Evolution-First Vision
 - Vision section added at top: the long-horizon destination (frictionless adult group-activity formation)
 - Operating philosophy articulated: evolution-first vs scalable-first. Every v1 decision filtered against

@@ -55,7 +55,10 @@ This is narrower than the vision on every dimension:
   group.
 - **Activity:** pickleball only. Not multi-activity.
 - **Geography:** Dallas only. Three vetted courts (Cole Park,
-  Churchill Park, Fretz Park).
+  Churchill Park, Lake Highlands North Park). *(Amendment projectbrief-A1,
+  2026-05-16: Fretz Park removed — operational + behavioral incompatibility;
+  Lake Highlands North Park added — field-verified Public Commons. See
+  decisions/ for full rationale.)*
 - **Curation:** manual by the owner. Not autonomous.
 - **Promise:** reliability and quality, not zero-friction
   spontaneity.
@@ -131,6 +134,38 @@ at all.
 
 (Articulated 2026-04-24 during M1 checkpoint, in response to the
 play-reason matching proposal. See PLAN.md icebox.)
+
+## V1 Venue Inclusion Criteria: The Public Commons Test
+
+Any venue — v1 or future — must pass all three criteria to be eligible.
+These are independent: failing any one disqualifies the venue.
+
+1. **Zero financial barrier.** No pay-to-play, no reservation fee, no
+   third-party booking cost.
+2. **Low psychological friction.** Clear public sightlines; the venue
+   must not feel "owned" by a neighborhood or private entity. Visible,
+   approachable, no psychological "moat."
+3. **Egalitarian offline infrastructure.** A single universal paddle
+   queue that forces natural stranger-merging. Not fragmented across
+   courts, not reservation-gated, not socially siloed.
+
+Venue-model verification via field research is a required pre-inclusion
+step, not an assumption. V1 venues and their verification status:
+
+- **Cole Park** — open-play verified (field observation, May 2026).
+- **Lake Highlands North Park** — Public Commons verified (field
+  observation, May 16 2026); strongest infrastructure verification of
+  the three.
+- **Churchill Park** — grouped with Cole in May 2026 observation;
+  accepted in-scope; a pre-launch re-verification pass is recommended
+  if capacity allows.
+
+Rejected venues retained as evidence: Fretz Park (fails criterion 1 —
+paid/reservation-gated); Friendship Park (fails criterion 2 — hidden,
+subdivision-interior, psychological moat despite being free).
+
+(Elevated to first-class criterion by Amendment projectbrief-A1,
+2026-05-16, following Fretz Park field research.)
 
 ## V1 Design Pattern: The Partiful Model
 

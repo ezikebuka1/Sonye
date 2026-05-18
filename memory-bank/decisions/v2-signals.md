@@ -1,0 +1,84 @@
+# V2 Signal Log
+
+Status: Locked 2026-05-16
+
+> Ideas deferred out of v1, with the trigger that would make each
+> reconsiderable. Deferral is not rejection. Each entry: what it is,
+> why it's not in v1, what data would earn it a second look.
+
+## The v2 evolution axes
+
+v1 can grow in four possible directions. Which one comes first is
+decided by real v1 data, not now:
+
+1. Activity-broad — add tennis, basketball, etc. (from the brief)
+2. Geography-broad — add Austin, Houston, etc. (from the brief)
+3. Mechanic-broad — scheduled games → spontaneous "Play Now"
+   (from field research)
+4. Coordination-broad — organizer-run → player-run via park
+   communities (from the QR-code idea)
+
+## Deferred features
+
+Play Now / Hyper-Spontaneous home screen. Field research showed
+players act on impulse, day-of, weather-driven. v1 stays scheduled
+because we don't have enough players yet for "find me a game right
+now" to actually produce a game. Revisit when v1 density data shows
+enough liquidity. The spontaneous-player archetype is the target
+user for this when it ships.
+
+Duo Pairing. Letting two solo players team up before joining a game.
+Cut from v1 — it's a real feature build that doesn't actually add
+players (two solos joining = same fill as a pair joining). Revisit
+if v1 data shows pairs joining the same game within minutes of each
+other is a frequent pattern.
+
+Vetted Network / friend list. Players want a digital address book of
+people they've played with and trust. Cut from v1 — it's a full
+social-graph feature, not a free byproduct. Revisit if v1 share-link
+traffic clusters heavily around past teammates. The park-community
+idea below may be the better-shaped version of this.
+
+Sub-In (transfer your spot to a friend). A player bails because a
+real-life friend became available; they hand their game spot to that
+friend. Cut from v1 — needs the friend in the system, and grows the
+friend-network not Sonye's network. The v1 path is "leave with
+reason," and "a friend became available" is one of the leave reasons.
+Revisit if that becomes the dominant leave reason in the first month.
+
+QR codes at parks → park communities. Physical QR code at each court;
+scan to join that park's community; schedule games with whoever's in
+it. Genuinely new idea (owner's own, not from research). Deferred
+because naive version fragments players the way the competitor
+TeamReach does. If built in v2, must be designed so communities add
+visibility, not wall players off. Cleanest candidate to also solve
+the Vetted Network need.
+
+Gender enforcement. v1 uses honor-system for women's/men's games
+(organizer watches roster manually). Automated enforcement (app
+blocks wrong-gender joins) deferred — needs required gender data,
+messy with non-binary / skipped users. Revisit if manual oversight
+stops scaling.
+
+Pre-join avatar color visibility. Showing game gender-composition on
+the home screen before joining. Deferred — a changeable snapshot is
+weak grounds for a safety decision; the women's/men's tag is the
+strong tool instead. Revisit if women's-tagged games consistently
+underfill while mixed games have many women.
+
+Fretz Park (and pay-to-play venues). Removed from v1 — paid, gated,
+app-booking required, kills the frictionless model. Reconsiderable
+only if a future version builds payment + third-party-booking
+integration. Operational facts for that future: gatekeeper was lax
+but present (the desk's mere existence repels spontaneous players);
+zero solo players observed there at all.
+
+Profile pictures. Already in the brief's icebox. Highest-attrition
+onboarding step; the realness strategy is built around not needing
+them. Revisit at ~500 active users in one metro.
+
+Play-reason matching. Already in the brief's icebox. Tagging games by
+intent (competitive vs casual) and letting players filter. Fragments
+density. Field research confirmed players compromise on vibe for
+court time anyway. Revisit post-launch if mismatched-intent games
+visibly produce bad experiences.
