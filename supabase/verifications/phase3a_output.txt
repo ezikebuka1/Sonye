@@ -1,0 +1,184 @@
+=== SETUP: Seeding test users and slots ===
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+Seeded IDs captured via gset:
+               alice_id               |            alice_auth_id             |                bob_id                |             bob_auth_id              |               owner_id               |                s1_id                 |                s2_id                 |                stz_id                
+--------------------------------------+--------------------------------------+--------------------------------------+--------------------------------------+--------------------------------------+--------------------------------------+--------------------------------------+--------------------------------------
+ 95b67f87-2278-4fe4-a70b-3be013ec90d2 | 110e7ef0-a16e-41de-91ce-823d804dd2bc | 6506baf4-6e97-4d40-b3e2-7d3fdf22754a | d918d4a5-e95e-4f0c-9cc9-d6a55441bb82 | 0860987a-de0f-45c9-ae3e-030ba134b8b4 | a85c8086-d724-4296-8be5-23f3fb5fae2b | 230c4de2-cb10-4263-9951-2c31da314d01 | 99a4dfa0-8db2-4f9f-a824-36cbc7918cdd
+(1 row)
+
+
+=== PROOF 1: Anon vault ===
+BEGIN
+SET
+P1-A: Direct table reads as anon (EXPECTED: all counts = 0):
+ users_anon_count 
+------------------
+                0
+(1 row)
+
+ slots_anon_count 
+------------------
+                0
+(1 row)
+
+ sm_anon_count 
+---------------
+             0
+(1 row)
+
+ chat_anon_count 
+-----------------
+               0
+(1 row)
+
+P1-B: claim_lookups random UUID (EXPECTED: 1 row, is_valid = false):
+ is_valid 
+----------
+ f
+(1 row)
+
+P1-C: slot_share_preview S1 empty slot (EXPECTED: venue_name=Cole Park, fill_count=NULL, fill_ratio_shown=false):
+ venue_name | fill_count | fill_ratio_shown 
+------------+------------+------------------
+ Cole Park  |            | f
+(1 row)
+
+COMMIT
+PROOF 1 COMPLETE. Expected: 4x count=0, is_valid=f, fill_count=<null>, fill_ratio_shown=f
+
+=== PROOF 2: Cross-user deny ===
+BEGIN
+SET
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "110e7ef0-a16e-41de-91ce-823d804dd2bc", "role" : "authenticated"}
+(1 row)
+
+P2-A: Count all users as Alice (EXPECTED: 1 -- only own row visible):
+ user_count 
+------------
+          1
+(1 row)
+
+P2-B: Alice own id visible (EXPECTED: 1 row = Alice id):
+                  id                  
+--------------------------------------
+ 95b67f87-2278-4fe4-a70b-3be013ec90d2
+(1 row)
+
+P2-C: Bob row filtered by RLS (EXPECTED: 0):
+ bob_visible 
+-------------
+           0
+(1 row)
+
+COMMIT
+PROOF 2 COMPLETE. Expected: count=1, id=Alice id, bob_visible=0
+
+=== PROOF 3: Escalation guard ===
+BEGIN
+SET
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "110e7ef0-a16e-41de-91ce-823d804dd2bc", "role" : "authenticated"}
+(1 row)
+
+P3-A: Attempt role escalation to owner (EXPECTED: RLS WITH CHECK error):
+ERROR:  new row violates row-level security policy for table "users"
+P3-B: Verify role still player after failed escalation (EXPECTED: player):
+  role  
+--------
+ player
+(1 row)
+
+P3-C: Legit self-update of first_name (EXPECTED: UPDATE 1):
+UPDATE 1
+P3-D: Verify name changed (EXPECTED: Anne):
+ first_name 
+------------
+ Anne
+(1 row)
+
+COMMIT
+PROOF 3 COMPLETE. Expected: escalation error, role=player, UPDATE 1, first_name=Anne
+
+=== PROOF 4: D9 two-layer (function pre-check + index backstop) ===
+P4-A: Alice joins S1 (EXPECTED: resulting_status = joined):
+BEGIN
+SET
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "110e7ef0-a16e-41de-91ce-823d804dd2bc", "role" : "authenticated"}
+(1 row)
+
+            membership_id             | resulting_status 
+--------------------------------------+------------------
+ 6206e88f-a4ed-4a78-815f-b00673cfb380 | joined
+(1 row)
+
+COMMIT
+P4-B: Alice attempts S2 same Dallas day 2026-06-13 (EXPECTED: D9 violation error SQLSTATE 23505):
+BEGIN
+SET
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "110e7ef0-a16e-41de-91ce-823d804dd2bc", "role" : "authenticated"}
+(1 row)
+
+ERROR:  join_slot: D9 violation — already joined a game on 2026-06-13
+CONTEXT:  PL/pgSQL function public.join_slot(uuid) line 45 at RAISE
+ROLLBACK
+P4-C: Index backstop -- direct INSERT as service role (EXPECTED: unique constraint sm_d9_one_joined_per_day):
+P4-D: Verify Alice has exactly 1 joined row on 2026-06-13 (EXPECTED: 1):
+ joined_count 
+--------------
+            1
+(1 row)
+
+PROOF 4 COMPLETE. Expected: S1=joined, S2=D9 error, index violation, joined_count=1
+
+=== PROOF 5: Timezone red-flag (R2 -- Dallas civil date, not UTC) ===
+P5-A: Bob joins late-night slot S_tz (EXPECTED: resulting_status = joined):
+BEGIN
+ERROR:  duplicate key value violates unique constraint "sm_d9_one_joined_per_day"
+DETAIL:  Key (user_id, slot_date)=(95b67f87-2278-4fe4-a70b-3be013ec90d2, 2026-06-13) already exists.
+SET
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "d918d4a5-e95e-4f0c-9cc9-d6a55441bb82", "role" : "authenticated"}
+(1 row)
+
+            membership_id             | resulting_status 
+--------------------------------------+------------------
+ 2a10c4ac-48bb-4bc4-bc5a-cf74225c46cb | joined
+(1 row)
+
+COMMIT
+P5-B: slot_date stored for Bob on S_tz (EXPECTED: 2026-06-13 NOT 2026-06-14):
+ slot_date  
+------------
+ 2026-06-13
+(1 row)
+
+P5-C: Side-by-side Dallas vs UTC proof for S_tz slot:
+ dallas_date |  utc_date  |  dallas_wallclock   |      utc_instant       
+-------------+------------+---------------------+------------------------
+ 2026-06-13  | 2026-06-14 | 2026-06-13 23:30:00 | 2026-06-14 04:30:00+00
+(1 row)
+
+EXPECTED: dallas_date=2026-06-13, utc_date=2026-06-14 (must differ)
+P5-D: December CST sanity check (no INSERT -- literal only):
+ dec_dallas |  dec_utc   
+------------+------------
+ 2026-12-12 | 2026-12-13
+(1 row)
+
+EXPECTED: dec_dallas=2026-12-12 (Saturday CST), dec_utc=2026-12-13 (Sunday UTC)
+
+PROOF 5 COMPLETE.
+
+=== ALL PHASE 3A PROOFS COMPLETE ===
