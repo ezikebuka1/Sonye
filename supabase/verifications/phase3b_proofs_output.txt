@@ -1,0 +1,157 @@
+
+=== PROOF 6 VERIFICATION: Last-seat race post-race state ===
+P6-A: Slot counts (EXPECTED: member_count=6, waitlist_count=1):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              1
+(1 row)
+
+P6-B: Status breakdown (EXPECTED: joined=6, waitlisted=1):
+   status   | cnt 
+------------+-----
+ joined     |   6
+ waitlisted |   1
+(2 rows)
+
+P6-C: Member roster in join order (EXPECTED: Alice-Eve joined, then Grace or Henry joined and the other waitlisted):
+ first_name |   status   |          created_at           
+------------+------------+-------------------------------
+ Alice      | joined     | 2026-05-21 13:05:44.171874+00
+ Bob        | joined     | 2026-05-21 13:05:44.175419+00
+ Charlie    | joined     | 2026-05-21 13:05:44.176147+00
+ Dana       | joined     | 2026-05-21 13:05:44.176757+00
+ Eve        | joined     | 2026-05-21 13:05:44.177305+00
+ Grace      | joined     | 2026-05-21 13:06:12.391327+00
+ Henry      | waitlisted | 2026-05-21 13:06:13.356492+00
+(7 rows)
+
+PROOF 6 VERIFICATION COMPLETE.
+Key invariant: count(joined)=6, count(waitlisted)=1, never 7 joined.
+
+=== PROOF 7: Promotion D9-skip ===
+P7-0: S_promote initial state (EXPECTED: member_count=6, waitlist_count=2):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              2
+(1 row)
+
+
+P7 Variant 1: Frank leaves S_promote (EXPECTED: leave=true, Tom promoted, Maria skipped):
+BEGIN
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "287019ef-7029-4f27-83ad-dcea73a70b61", "role" : "authenticated"}
+(1 row)
+
+SET
+Frank calls leave_slot (EXPECTED: true):
+ leave_slot 
+------------
+ t
+(1 row)
+
+COMMIT
+P7-A: S_promote roster after Frank leaves (EXPECTED: Frank=left, Tom=joined, Maria=waitlisted):
+ first_name |   status   
+------------+------------
+ Alice      | joined
+ Bob        | joined
+ Charlie    | joined
+ Dana       | joined
+ Eve        | joined
+ Frank      | left
+ Maria      | waitlisted
+ Tom        | joined
+(8 rows)
+
+P7-B: S_promote slot counts after Variant 1 (EXPECTED: member_count=6, waitlist_count=1):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              1
+(1 row)
+
+
+P7 Variant 2 setup: insert Uma as waitlisted on S_promote (service role):
+INSERT 0 1
+Variant 2 setup: D9-block Uma (joined on S_conflict, slot_date 2026-07-18):
+INSERT 0 1
+Verify waitlist now has Maria and Uma (EXPECTED: waitlist_count=2):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              2
+(1 row)
+
+P7 Variant 2: Eve leaves S_promote (EXPECTED: leave=true, nobody promoted -- Maria & Uma both D9-blocked):
+BEGIN
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "954f3fca-6a16-411a-af34-ac2b4f2fc1d5", "role" : "authenticated"}
+(1 row)
+
+SET
+Eve calls leave_slot (EXPECTED: true):
+ leave_slot 
+------------
+ t
+(1 row)
+
+COMMIT
+P7-C: S_promote roster after Eve leaves (EXPECTED: member_count=5, Eve=left, Maria+Uma still waitlisted):
+ first_name |   status   
+------------+------------
+ Alice      | joined
+ Bob        | joined
+ Charlie    | joined
+ Dana       | joined
+ Eve        | left
+ Frank      | left
+ Maria      | waitlisted
+ Tom        | joined
+ Uma        | waitlisted
+(9 rows)
+
+P7-D: S_promote slot counts after Variant 2 (EXPECTED: member_count=5, waitlist_count=2):
+ member_count | waitlist_count 
+--------------+----------------
+            5 |              2
+(1 row)
+
+PROOF 7 COMPLETE.
+Var 1: Frank left, Maria skipped (D9), Tom promoted. Var 2: Eve left, Maria+Uma both D9-blocked, nobody promoted.
+
+=== PROOF 8: Count self-heal ===
+P8-A: S_drift initial state (EXPECTED: member_count=1, waitlist_count=0):
+ member_count | waitlist_count 
+--------------+----------------
+            1 |              0
+(1 row)
+
+P8-B: Corrupt member_count to 99 (deliberate drift):
+ERROR:  new row for relation "slots" violates check constraint "slots_member_count_within_capacity"
+DETAIL:  Failing row contains (6b8f0ae9-1a27-4f34-ac14-0c86b4f4bb00, cole-park, pickleball, 84f10352-833d-4103-a02b-b0e888996010, 2026-07-25 23:00:00+00, 2026-07-26 01:00:00+00, null, null, 6, open, 99, 0, 2026-05-21 13:05:44.171366+00).
+P8-C: Confirm corruption (EXPECTED: 99):
+ member_count 
+--------------
+            1
+(1 row)
+
+P8-D: Trigger self-heal via Charlie joining S_drift (service role INSERT):
+INSERT 0 1
+P8-E: Verify trigger recomputed (EXPECTED: member_count=2 NOT 100, waitlist_count=0):
+ member_count | waitlist_count 
+--------------+----------------
+            2 |              0
+(1 row)
+
+P8-F: Cross-check against actual memberships:
+ true_joined | true_waitlisted 
+-------------+-----------------
+           2 |               0
+(1 row)
+
+PROOF 8 COMPLETE.
+Expected: true_joined=2 (Frank + Charlie), true_waitlisted=0. member_count=2 (recomputed not incremented from 99).
+DROP TABLE
+State table dropped.
+
+=== ALL PHASE 3B PROOFS COMPLETE ===

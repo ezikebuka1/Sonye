@@ -1,0 +1,47 @@
+Timing is on.
+SESSION 1 (Grace, blocker): start
+Timestamp:
+              now              
+-------------------------------
+ 2026-05-21 13:06:12.389001+00
+(1 row)
+
+Time: 0.844 ms
+Time: 1.135 ms
+Time: 0.222 ms
+Grace joining S_race -- will hold lock 5s via pg_sleep
+BEGIN
+Time: 0.141 ms
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "4cd053d9-9965-4326-b525-9adbd2acf5fe", "role" : "authenticated"}
+(1 row)
+
+Time: 1.032 ms
+SET
+Time: 0.477 ms
+Grace calls join_slot (EXPECTED: joined, then lock held 5s):
+            membership_id             | resulting_status 
+--------------------------------------+------------------
+ 56d0d946-d1f5-4fb8-8c59-d09e3eb8e039 | joined
+(1 row)
+
+Time: 7.122 ms
+Holding slot lock for 5s via pg_sleep...
+ pg_sleep 
+----------
+ 
+(1 row)
+
+Time: 5008.124 ms (00:05.008)
+pg_sleep done, committing:
+COMMIT
+Time: 6.011 ms
+Timestamp after commit:
+              now              
+-------------------------------
+ 2026-05-21 13:06:17.417258+00
+(1 row)
+
+Time: 1.199 ms
+SESSION 1 COMPLETE

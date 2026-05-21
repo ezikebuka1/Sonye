@@ -1,0 +1,92 @@
+=== PHASE 3B SETUP: creating state table ===
+NOTICE:  table "phase3b_test_state" does not exist, skipping
+DROP TABLE
+CREATE TABLE
+Seeding 11 test users...
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+Seeding 4 slots...
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+Pre-filling S_race (5/6 joined: Alice, Bob, Charlie, Dana, Eve)...
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+Verifying S_race member_count (EXPECTED: 5):
+ member_count | waitlist_count 
+--------------+----------------
+            5 |              0
+(1 row)
+
+Pre-filling S_promote (6 joined + 2 waitlisted + Maria D9-blocked)...
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+Verifying S_promote (EXPECTED: member_count=6, waitlist_count=2):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              2
+(1 row)
+
+Pre-filling S_drift (1 joined: Frank)...
+INSERT 0 1
+Verifying S_drift (EXPECTED: member_count=1, waitlist_count=0):
+ member_count | waitlist_count 
+--------------+----------------
+            1 |              0
+(1 row)
+
+Persisting IDs to phase3b_test_state...
+INSERT 0 21
+State table populated. Verifying row count (EXPECTED: 21):
+ state_rows 
+------------
+         21
+(1 row)
+
+Seeded IDs summary:
+      key      |                value                 
+---------------+--------------------------------------
+ alice_id      | 44b0fce4-f940-4d5a-9d3a-ab3d6d6b26fd
+ bob_id        | c1a354dc-68bd-4189-9379-b114516f8d85
+ charlie_id    | 257147a6-314b-440a-b9af-f7eef4e95541
+ dana_id       | 51a223d5-ab52-491d-b90f-c946c2567140
+ eve_auth_id   | 954f3fca-6a16-411a-af34-ac2b4f2fc1d5
+ eve_id        | c2b8c028-99bf-4f93-b856-0fc20c451aee
+ frank_auth_id | 287019ef-7029-4f27-83ad-dcea73a70b61
+ frank_id      | 6f8a61ba-343e-42aa-a8a3-5136a3e96622
+ grace_auth_id | 4cd053d9-9965-4326-b525-9adbd2acf5fe
+ grace_id      | 3434b8b3-4e52-4197-9eea-d190b12fd69c
+ henry_auth_id | 8cb5781f-7448-479a-9565-5d9b8d689680
+ henry_id      | 60479aac-8089-4cbf-a955-1be7196f60f3
+ maria_id      | 5b8243d3-f31b-4550-8c19-794b0eb6fe27
+ owner_id      | 84f10352-833d-4103-a02b-b0e888996010
+ s_conflict_id | 20547193-7593-4fbd-8da4-523d81bc3aea
+ s_drift_id    | 6b8f0ae9-1a27-4f34-ac14-0c86b4f4bb00
+ s_promote_id  | 45aeb09d-67b7-44e2-aeeb-7d584b8e8c3e
+ s_race_id     | 0029fb2c-478b-4f84-ae3a-01027e7bb503
+ tom_id        | 505461a8-18bc-4b7c-85c7-03e04418f072
+ uma_auth_id   | ebd9f1bb-70a9-4f5a-b858-2700f5acc688
+ uma_id        | db87ecec-d3a6-47be-a9ec-eb844ed6302a
+(21 rows)
+
+=== PHASE 3B SETUP COMPLETE ===

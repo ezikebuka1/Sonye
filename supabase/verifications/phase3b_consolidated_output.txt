@@ -1,0 +1,360 @@
+
+======================================================================
+=== PHASE 3B SETUP OUTPUT ===
+======================================================================
+=== PHASE 3B SETUP: creating state table ===
+NOTICE:  table "phase3b_test_state" does not exist, skipping
+DROP TABLE
+CREATE TABLE
+Seeding 11 test users...
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+Seeding 4 slots...
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+Pre-filling S_race (5/6 joined: Alice, Bob, Charlie, Dana, Eve)...
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+Verifying S_race member_count (EXPECTED: 5):
+ member_count | waitlist_count 
+--------------+----------------
+            5 |              0
+(1 row)
+
+Pre-filling S_promote (6 joined + 2 waitlisted + Maria D9-blocked)...
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+Verifying S_promote (EXPECTED: member_count=6, waitlist_count=2):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              2
+(1 row)
+
+Pre-filling S_drift (1 joined: Frank)...
+INSERT 0 1
+Verifying S_drift (EXPECTED: member_count=1, waitlist_count=0):
+ member_count | waitlist_count 
+--------------+----------------
+            1 |              0
+(1 row)
+
+Persisting IDs to phase3b_test_state...
+INSERT 0 21
+State table populated. Verifying row count (EXPECTED: 21):
+ state_rows 
+------------
+         21
+(1 row)
+
+Seeded IDs summary:
+      key      |                value                 
+---------------+--------------------------------------
+ alice_id      | 44b0fce4-f940-4d5a-9d3a-ab3d6d6b26fd
+ bob_id        | c1a354dc-68bd-4189-9379-b114516f8d85
+ charlie_id    | 257147a6-314b-440a-b9af-f7eef4e95541
+ dana_id       | 51a223d5-ab52-491d-b90f-c946c2567140
+ eve_auth_id   | 954f3fca-6a16-411a-af34-ac2b4f2fc1d5
+ eve_id        | c2b8c028-99bf-4f93-b856-0fc20c451aee
+ frank_auth_id | 287019ef-7029-4f27-83ad-dcea73a70b61
+ frank_id      | 6f8a61ba-343e-42aa-a8a3-5136a3e96622
+ grace_auth_id | 4cd053d9-9965-4326-b525-9adbd2acf5fe
+ grace_id      | 3434b8b3-4e52-4197-9eea-d190b12fd69c
+ henry_auth_id | 8cb5781f-7448-479a-9565-5d9b8d689680
+ henry_id      | 60479aac-8089-4cbf-a955-1be7196f60f3
+ maria_id      | 5b8243d3-f31b-4550-8c19-794b0eb6fe27
+ owner_id      | 84f10352-833d-4103-a02b-b0e888996010
+ s_conflict_id | 20547193-7593-4fbd-8da4-523d81bc3aea
+ s_drift_id    | 6b8f0ae9-1a27-4f34-ac14-0c86b4f4bb00
+ s_promote_id  | 45aeb09d-67b7-44e2-aeeb-7d584b8e8c3e
+ s_race_id     | 0029fb2c-478b-4f84-ae3a-01027e7bb503
+ tom_id        | 505461a8-18bc-4b7c-85c7-03e04418f072
+ uma_auth_id   | ebd9f1bb-70a9-4f5a-b858-2700f5acc688
+ uma_id        | db87ecec-d3a6-47be-a9ec-eb844ed6302a
+(21 rows)
+
+=== PHASE 3B SETUP COMPLETE ===
+
+======================================================================
+=== PROOF 6 TIMING LOG ===
+======================================================================
+Race start and end captured in bash orchestration:
+  TS_START: 1779368772.242378
+  TS_END:   1779368777.575... (approx)
+  Total wall-clock: 5.33s (expected ~6s: 1s delay + 5s pg_sleep)
+  Session 2 join_slot duration: 4091.339ms (KEY DATUM — confirmed lock serialized)
+
+======================================================================
+=== PROOF 6 SESSION 1 OUTPUT (Grace, blocker) ===
+======================================================================
+Timing is on.
+SESSION 1 (Grace, blocker): start
+Timestamp:
+              now              
+-------------------------------
+ 2026-05-21 13:06:12.389001+00
+(1 row)
+
+Time: 0.844 ms
+Time: 1.135 ms
+Time: 0.222 ms
+Grace joining S_race -- will hold lock 5s via pg_sleep
+BEGIN
+Time: 0.141 ms
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "4cd053d9-9965-4326-b525-9adbd2acf5fe", "role" : "authenticated"}
+(1 row)
+
+Time: 1.032 ms
+SET
+Time: 0.477 ms
+Grace calls join_slot (EXPECTED: joined, then lock held 5s):
+            membership_id             | resulting_status 
+--------------------------------------+------------------
+ 56d0d946-d1f5-4fb8-8c59-d09e3eb8e039 | joined
+(1 row)
+
+Time: 7.122 ms
+Holding slot lock for 5s via pg_sleep...
+ pg_sleep 
+----------
+ 
+(1 row)
+
+Time: 5008.124 ms (00:05.008)
+pg_sleep done, committing:
+COMMIT
+Time: 6.011 ms
+Timestamp after commit:
+              now              
+-------------------------------
+ 2026-05-21 13:06:17.417258+00
+(1 row)
+
+Time: 1.199 ms
+SESSION 1 COMPLETE
+
+======================================================================
+=== PROOF 6 SESSION 2 OUTPUT (Henry, racer) ===
+======================================================================
+Timing is on.
+SESSION 2 (Henry, racer): start
+Timestamp:
+              now              
+-------------------------------
+ 2026-05-21 13:06:13.353718+00
+(1 row)
+
+Time: 0.657 ms
+Time: 1.443 ms
+Time: 0.430 ms
+Henry racing for last seat -- should BLOCK on Grace lock, then get waitlisted
+BEGIN
+Time: 0.135 ms
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "8cb5781f-7448-479a-9565-5d9b8d689680", "role" : "authenticated"}
+(1 row)
+
+Time: 0.304 ms
+SET
+Time: 0.304 ms
+Henry calls join_slot (EXPECTED: blocks ~4-5s, returns waitlisted):
+            membership_id             | resulting_status 
+--------------------------------------+------------------
+ ae5edd24-5781-41d2-bf2a-0a66c655f97a | waitlisted
+(1 row)
+
+Time: 4091.339 ms (00:04.091)
+COMMIT
+Time: 1.649 ms
+Timestamp after commit:
+              now              
+-------------------------------
+ 2026-05-21 13:06:17.451872+00
+(1 row)
+
+Time: 0.120 ms
+SESSION 2 COMPLETE
+
+======================================================================
+=== PROOF 6 VERIFICATION + PROOFS 7 & 8 OUTPUT ===
+======================================================================
+
+=== PROOF 6 VERIFICATION: Last-seat race post-race state ===
+P6-A: Slot counts (EXPECTED: member_count=6, waitlist_count=1):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              1
+(1 row)
+
+P6-B: Status breakdown (EXPECTED: joined=6, waitlisted=1):
+   status   | cnt 
+------------+-----
+ joined     |   6
+ waitlisted |   1
+(2 rows)
+
+P6-C: Member roster in join order (EXPECTED: Alice-Eve joined, then Grace or Henry joined and the other waitlisted):
+ first_name |   status   |          created_at           
+------------+------------+-------------------------------
+ Alice      | joined     | 2026-05-21 13:05:44.171874+00
+ Bob        | joined     | 2026-05-21 13:05:44.175419+00
+ Charlie    | joined     | 2026-05-21 13:05:44.176147+00
+ Dana       | joined     | 2026-05-21 13:05:44.176757+00
+ Eve        | joined     | 2026-05-21 13:05:44.177305+00
+ Grace      | joined     | 2026-05-21 13:06:12.391327+00
+ Henry      | waitlisted | 2026-05-21 13:06:13.356492+00
+(7 rows)
+
+PROOF 6 VERIFICATION COMPLETE.
+Key invariant: count(joined)=6, count(waitlisted)=1, never 7 joined.
+
+=== PROOF 7: Promotion D9-skip ===
+P7-0: S_promote initial state (EXPECTED: member_count=6, waitlist_count=2):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              2
+(1 row)
+
+
+P7 Variant 1: Frank leaves S_promote (EXPECTED: leave=true, Tom promoted, Maria skipped):
+BEGIN
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "287019ef-7029-4f27-83ad-dcea73a70b61", "role" : "authenticated"}
+(1 row)
+
+SET
+Frank calls leave_slot (EXPECTED: true):
+ leave_slot 
+------------
+ t
+(1 row)
+
+COMMIT
+P7-A: S_promote roster after Frank leaves (EXPECTED: Frank=left, Tom=joined, Maria=waitlisted):
+ first_name |   status   
+------------+------------
+ Alice      | joined
+ Bob        | joined
+ Charlie    | joined
+ Dana       | joined
+ Eve        | joined
+ Frank      | left
+ Maria      | waitlisted
+ Tom        | joined
+(8 rows)
+
+P7-B: S_promote slot counts after Variant 1 (EXPECTED: member_count=6, waitlist_count=1):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              1
+(1 row)
+
+
+P7 Variant 2 setup: insert Uma as waitlisted on S_promote (service role):
+INSERT 0 1
+Variant 2 setup: D9-block Uma (joined on S_conflict, slot_date 2026-07-18):
+INSERT 0 1
+Verify waitlist now has Maria and Uma (EXPECTED: waitlist_count=2):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              2
+(1 row)
+
+P7 Variant 2: Eve leaves S_promote (EXPECTED: leave=true, nobody promoted -- Maria & Uma both D9-blocked):
+BEGIN
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "954f3fca-6a16-411a-af34-ac2b4f2fc1d5", "role" : "authenticated"}
+(1 row)
+
+SET
+Eve calls leave_slot (EXPECTED: true):
+ leave_slot 
+------------
+ t
+(1 row)
+
+COMMIT
+P7-C: S_promote roster after Eve leaves (EXPECTED: member_count=5, Eve=left, Maria+Uma still waitlisted):
+ first_name |   status   
+------------+------------
+ Alice      | joined
+ Bob        | joined
+ Charlie    | joined
+ Dana       | joined
+ Eve        | left
+ Frank      | left
+ Maria      | waitlisted
+ Tom        | joined
+ Uma        | waitlisted
+(9 rows)
+
+P7-D: S_promote slot counts after Variant 2 (EXPECTED: member_count=5, waitlist_count=2):
+ member_count | waitlist_count 
+--------------+----------------
+            5 |              2
+(1 row)
+
+PROOF 7 COMPLETE.
+Var 1: Frank left, Maria skipped (D9), Tom promoted. Var 2: Eve left, Maria+Uma both D9-blocked, nobody promoted.
+
+=== PROOF 8: Count self-heal ===
+P8-A: S_drift initial state (EXPECTED: member_count=1, waitlist_count=0):
+ member_count | waitlist_count 
+--------------+----------------
+            1 |              0
+(1 row)
+
+P8-B: Corrupt member_count to 99 (deliberate drift):
+ERROR:  new row for relation "slots" violates check constraint "slots_member_count_within_capacity"
+DETAIL:  Failing row contains (6b8f0ae9-1a27-4f34-ac14-0c86b4f4bb00, cole-park, pickleball, 84f10352-833d-4103-a02b-b0e888996010, 2026-07-25 23:00:00+00, 2026-07-26 01:00:00+00, null, null, 6, open, 99, 0, 2026-05-21 13:05:44.171366+00).
+P8-C: Confirm corruption (EXPECTED: 99):
+ member_count 
+--------------
+            1
+(1 row)
+
+P8-D: Trigger self-heal via Charlie joining S_drift (service role INSERT):
+INSERT 0 1
+P8-E: Verify trigger recomputed (EXPECTED: member_count=2 NOT 100, waitlist_count=0):
+ member_count | waitlist_count 
+--------------+----------------
+            2 |              0
+(1 row)
+
+P8-F: Cross-check against actual memberships:
+ true_joined | true_waitlisted 
+-------------+-----------------
+           2 |               0
+(1 row)
+
+PROOF 8 COMPLETE.
+Expected: true_joined=2 (Frank + Charlie), true_waitlisted=0. member_count=2 (recomputed not incremented from 99).
+DROP TABLE
+State table dropped.
+
+=== ALL PHASE 3B PROOFS COMPLETE ===
