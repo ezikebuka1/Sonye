@@ -982,23 +982,25 @@ PART 10 — MIGRATION ORDER (load-bearing — do not reorder)
 ================================================================
 
 1. create extension if not exists pgcrypto;
-2. Helper fns (Part 5): current_user_id, is_owner,
+2. Tables FK order + indexes (Part 4): metros, sports, venues,
+   users, slots, session_memberships, chat_messages
+   (indexes created inline with their parent table)
+3. Helper fns (Part 5): current_user_id, is_owner,
    is_active_member, slot_fill_meets_social_threshold
-3. Tables FK order (Part 4): metros, sports, venues, users,
-   slots, session_memberships, chat_messages
-4. All indexes incl. partial uniques (in Part 4 blocks)
-5. Read fns/views (Part 6): claim_lookups, slot_roster,
+4. Read fns/views (Part 6): claim_lookups, slot_roster,
    slot_share_preview, slot_social_proof
-6. Transaction fns + trigger (Part 7): sync_slot_counts (+
+5. Transaction fns + trigger (Part 7): sync_slot_counts (+
    trg_sync_slot_counts), signup_claim, promote_from_waitlist,
    join_slot, leave_slot, kick_member
-7. ENABLE RLS + policies (Part 8), table by table
-8. Grants matrix (Part 9)
-9. Seed (Part 11)
+6. ENABLE RLS + policies (Part 8), table by table
+7. Grants matrix (Part 9)
+8. Seed (Part 11)
 
-Rationale: helpers before policies that call them; tables
-before indexes/fns referencing them; RLS after objects; seed
-last (service-role, bypasses RLS).
+Rationale: LANGUAGE sql fn bodies are validated at CREATE time
+(not call time) — tables must exist before any fn that names
+them; helpers before the policies and transaction fns that
+invoke them; RLS after all objects; seed last (service-role,
+bypasses RLS).
 
 ================================================================
 PART 11 — SEED DATA (v1)
