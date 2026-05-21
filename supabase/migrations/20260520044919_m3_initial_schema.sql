@@ -3,8 +3,8 @@
 -- Source: memory-bank/decisions/D3-database-schema.md (d64fc59)
 -- Order per PART 10 (load-bearing — do not reorder):
 --   1. pgcrypto
---   2. Helper fns (Part 5)
---   3. Tables in FK order + indexes (Part 4)
+--   2. Tables in FK order + indexes (Part 4)
+--   3. Helper fns (Part 5)
 --   4. Read fns (Part 6)
 --   5. Transaction fns + trigger (Part 7)
 --   6. RLS ENABLE + policies (Part 8)
@@ -17,46 +17,7 @@
 
 create extension if not exists pgcrypto;
 
--- 2. Helper functions (Part 5) — created before tables/policies --
-
-CREATE OR REPLACE FUNCTION public.current_user_id()
-RETURNS uuid LANGUAGE sql STABLE SECURITY DEFINER
-SET search_path = ''
-AS $$
-    SELECT id FROM public.users WHERE auth_user_id = auth.uid()
-$$;
-
-CREATE OR REPLACE FUNCTION public.is_owner()
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
-SET search_path = ''
-AS $$
-    SELECT EXISTS (
-        SELECT 1 FROM public.users
-        WHERE id = public.current_user_id() AND role = 'owner'
-    )
-$$;
-
-CREATE OR REPLACE FUNCTION public.is_active_member(p_slot uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
-SET search_path = ''
-AS $$
-    SELECT EXISTS (
-        SELECT 1 FROM public.session_memberships
-        WHERE slot_id = p_slot
-          AND user_id = public.current_user_id()
-          AND status IN ('joined','waitlisted')
-    )
-$$;
-
-CREATE OR REPLACE FUNCTION public.slot_fill_meets_social_threshold(p_slot uuid)
-RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
-SET search_path = ''
-AS $$
-    SELECT (s.member_count::numeric / NULLIF(s.capacity, 0)) >= 0.5
-    FROM public.slots s WHERE s.id = p_slot
-$$;
-
--- 3. Tables in FK order + indexes (Part 4) -----------------------
+-- 2. Tables in FK order + indexes (Part 4) -----------------------
 
 -- 4.1 metros, sports
 
@@ -219,6 +180,45 @@ CREATE TABLE chat_messages (
 );
 CREATE INDEX chat_messages_slot_id_created_at_idx
     ON chat_messages (slot_id, created_at);
+
+-- 3. Helper functions (Part 5) ----------------------------------------
+
+CREATE OR REPLACE FUNCTION public.current_user_id()
+RETURNS uuid LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = ''
+AS $$
+    SELECT id FROM public.users WHERE auth_user_id = auth.uid()
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_owner()
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = ''
+AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.users
+        WHERE id = public.current_user_id() AND role = 'owner'
+    )
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_active_member(p_slot uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = ''
+AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.session_memberships
+        WHERE slot_id = p_slot
+          AND user_id = public.current_user_id()
+          AND status IN ('joined','waitlisted')
+    )
+$$;
+
+CREATE OR REPLACE FUNCTION public.slot_fill_meets_social_threshold(p_slot uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = ''
+AS $$
+    SELECT (s.member_count::numeric / NULLIF(s.capacity, 0)) >= 0.5
+    FROM public.slots s WHERE s.id = p_slot
+$$;
 
 -- 4. Read functions (Part 6) ------------------------------------
 
