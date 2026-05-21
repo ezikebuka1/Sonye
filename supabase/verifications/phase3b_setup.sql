@@ -10,6 +10,13 @@
 DROP TABLE IF EXISTS public.phase3b_test_state;
 CREATE TABLE public.phase3b_test_state (key text PRIMARY KEY, value text);
 
+\echo 'Cleaning up any prior test data (phase3a remnants)...'
+DELETE FROM public.chat_messages;
+DELETE FROM public.session_memberships;
+DELETE FROM public.slots;
+DELETE FROM public.users WHERE role != 'owner';
+
+
 \echo 'Seeding 11 test users...'
 
 INSERT INTO public.users (phone, first_name, skill_level, role, auth_user_id)
