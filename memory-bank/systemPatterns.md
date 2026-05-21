@@ -120,6 +120,30 @@ DISPATCH SPEC header, Code takes no action and waits. This rule exists
 because review drafts were twice executed prematurely; no damage occurred
 only because nothing was committed.
 
+### Migration-Order Verification (effective 2026-05-21)
+
+Before marking any SQL migration "ready to apply," verify that every
+`CREATE FUNCTION … LANGUAGE sql` statement is positioned AFTER all
+tables it references in its body.
+
+**Root cause (M3, Phase 3A):** PostgreSQL validates `LANGUAGE sql`
+function bodies at `CREATE` time, not at call time. A `LANGUAGE sql`
+helper that names `public.users` in its body will fail with
+`relation "public.users" does not exist` if the `users` table has not
+yet been created in the same migration run. `LANGUAGE plpgsql` bodies
+are validated lazily and do not have this constraint.
+
+**Checklist before any migration commit:**
+1. List every `CREATE … LANGUAGE sql` function in the file.
+2. For each, grep its body for table/view names.
+3. Confirm each referenced table/view is created EARLIER in the file.
+4. If any forward reference exists, move the function block below the
+   referenced object — or convert to `LANGUAGE plpgsql` if ordering is
+   structurally impossible.
+
+**Apply the same check to `CREATE VIEW`:** views are also validated at
+creation time and will fail on forward references.
+
 ## Push Discipline
 
 Pushes to GitHub are manual — never automated. Rationale: network side
