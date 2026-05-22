@@ -212,6 +212,18 @@ AS $$
     )
 $$;
 
+CREATE OR REPLACE FUNCTION public.is_joined_member(p_slot uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = ''
+AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.session_memberships
+        WHERE slot_id = p_slot
+          AND user_id = public.current_user_id()
+          AND status = 'joined'
+    )
+$$;
+
 CREATE OR REPLACE FUNCTION public.slot_fill_meets_social_threshold(p_slot uuid)
 RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER
 SET search_path = ''
@@ -239,15 +251,33 @@ AS $$
 $$;
 
 CREATE OR REPLACE FUNCTION public.slot_roster(target_slot uuid)
-RETURNS TABLE (membership_id uuid, first_name text, gender text, status text)
+RETURNS TABLE (
+    membership_id uuid,
+    first_name text,
+    gender text,
+    phone text,
+    status text
+)
 LANGUAGE sql SECURITY DEFINER SET search_path = ''
 AS $$
-    SELECT sm.id, u.first_name, u.gender, sm.status
+    SELECT
+        sm.id,
+        u.first_name,
+        u.gender,
+        CASE
+            WHEN sm.status = 'joined'
+                 AND (public.is_joined_member(target_slot)
+                      OR public.is_owner())
+            THEN u.phone
+            ELSE NULL
+        END AS phone,
+        sm.status
     FROM public.session_memberships sm
     JOIN public.users u ON u.id = sm.user_id
     WHERE sm.slot_id = target_slot
       AND sm.status IN ('joined','waitlisted')
-      AND (public.is_active_member(target_slot) OR public.is_owner())
+      AND (public.is_active_member(target_slot)
+           OR public.is_owner())
 $$;
 
 CREATE OR REPLACE FUNCTION public.slot_share_preview(target_slot uuid)
@@ -854,6 +884,7 @@ CREATE POLICY chat_insert_member_self ON chat_messages
 REVOKE ALL ON FUNCTION public.current_user_id()                       FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.is_owner()                              FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.is_active_member(uuid)                  FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.is_joined_member(uuid)                  FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.slot_fill_meets_social_threshold(uuid)  FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.claim_lookups(uuid)                     FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.slot_roster(uuid)                       FROM PUBLIC;
@@ -873,6 +904,7 @@ GRANT EXECUTE ON FUNCTION public.slot_share_preview(uuid)              TO anon, 
 GRANT EXECUTE ON FUNCTION public.current_user_id()                    TO authenticated;
 GRANT EXECUTE ON FUNCTION public.is_owner()                           TO authenticated;
 GRANT EXECUTE ON FUNCTION public.is_active_member(uuid)               TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_joined_member(uuid)               TO authenticated;
 GRANT EXECUTE ON FUNCTION public.slot_roster(uuid)                    TO authenticated;
 GRANT EXECUTE ON FUNCTION public.slot_social_proof(uuid)              TO authenticated;
 GRANT EXECUTE ON FUNCTION public.join_slot(uuid)                      TO authenticated;
