@@ -175,3 +175,56 @@ the signup/claim flow, the join/leave UX, the share-link surface).
 The schema's invariants — RLS calibration, transaction functions as
 the sole write path for memberships, the partial unique indexes as
 ultimate backstops — are the contract M4 builds against.
+
+## M3.1 patch — slot_roster phone projection (per D10)
+
+Applied after M3 local verification closed, before cloud apply. Per
+D10 (Lobby Communication): v1 coordination is off-platform via
+SMS/iMessage; joined members see each other's phone numbers in the
+lobby; waitlisted users and anonymous viewers see none. The migration
+file (20260520044919_m3_initial_schema.sql) was edited in place and
+the full 11-proof local battery re-run and passed before this patch
+was committed.
+
+New helper `is_joined_member(p_slot uuid) RETURNS boolean`: LANGUAGE
+sql STABLE SECURITY DEFINER, SET search_path = ''. EXISTS query over
+session_memberships filtered to current_user_id() AND status =
+'joined'. Mirrors the is_active_member pattern exactly. Stays PURE
+per R5 — owner-ness is added at the CASE call site via OR is_owner(),
+never folded into the helper. REVOKE FROM PUBLIC; GRANT EXECUTE TO
+authenticated.
+
+slot_roster return shape gains `phone text` between gender and status
+(five columns total: membership_id, first_name, gender, phone,
+status). The phone column uses a CASE expression: visible iff caller
+is is_joined_member OR is_owner AND the projected row itself has
+status = 'joined'. WHERE clause is unchanged — roster visibility gate
+remains is_active_member OR is_owner, so waitlisted callers still
+receive roster rows; only the phone projection is denied. Owner
+visibility is constrained by the same row-level status filter as any
+joined caller — the owner branch is not a privilege escalation around
+the row filter.
+
+Three new verification proofs in
+supabase/verifications/phase3b_proofs_d10.sql:
+- Proof 9 (joined caller): Grace calls slot_roster on S_race —
+  joined_with_phone=6, waitlisted_null=1. Zero joined rows without
+  phone; zero waitlisted rows with phone exposed.
+- Proof 10 (waitlisted caller): Henry calls slot_roster on S_race —
+  total_rows=7, rows_with_phone=0. Roster access preserved; phone
+  denied on every row including joined-status rows.
+- Proof 11 (owner via is_owner() branch): TestOwner (dedicated
+  test fixture, auth_user_id=00000000-0000-0000-0000-d10000000001,
+  phone=+19990000000) calls slot_roster — caller_is_owner=t,
+  phone counts identical to Proof 9. P11-A calls is_owner()
+  explicitly to verify the JWT-sub → current_user_id() → role
+  chain before the roster assertion. The seeded placeholder owner
+  (auth_user_id=NULL, the cloud-apply tripwire) is not touched by
+  the proof script.
+
+E.164 load-bearing note: the existing users_phone_e164_format CHECK
+constraint (phone ~ '^\+[1-9][0-9]{7,14}$') is now load-bearing on
+M4's sms: URI construction. The lobby will tap a phone value from
+slot_roster and open the device's native messaging app with it
+prefilled. A non-E.164 phone silently breaks that link. Preserve
+E.164 strictness in any future schema work that touches users.phone.
