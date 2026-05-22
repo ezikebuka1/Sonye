@@ -137,7 +137,9 @@ CREATE TABLE session_memberships (
     left_at            timestamptz,
     leave_reason_code  text,
     leave_reason_note  text,
-    created_at         timestamptz NOT NULL DEFAULT now(),
+    created_at                   timestamptz NOT NULL DEFAULT now(),
+    attendance_token             uuid          NULL,
+    attendance_token_expires_at  timestamptz   NULL,
     CONSTRAINT sm_status_valid
         CHECK (status IN ('joined','waitlisted','left')),
     CONSTRAINT sm_leave_reason_code_valid
@@ -164,6 +166,9 @@ CREATE UNIQUE INDEX sm_prevent_double_active
     WHERE status IN ('joined','waitlisted');
 CREATE INDEX sm_slot_id_status_idx ON session_memberships (slot_id, status);
 CREATE INDEX sm_user_id_idx        ON session_memberships (user_id);
+CREATE UNIQUE INDEX sm_attendance_token_unique
+    ON session_memberships (attendance_token)
+    WHERE attendance_token IS NOT NULL;
 
 -- 4.6 chat_messages
 
@@ -776,6 +781,43 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION public.attest_attendance(
+    p_token    uuid,
+    p_attended boolean
+)
+RETURNS text
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+    v_membership_id uuid;
+    v_already_set   boolean;
+BEGIN
+    -- Lookup by token; gate on expiry.
+    SELECT id, (attended IS NOT NULL)
+      INTO v_membership_id, v_already_set
+    FROM public.session_memberships
+    WHERE attendance_token = p_token
+      AND attendance_token_expires_at > now();
+
+    IF v_membership_id IS NULL THEN
+        RETURN 'invalid_or_expired';
+    END IF;
+
+    -- Idempotent: second tap (including opposite path) is a no-op success.
+    IF v_already_set THEN
+        RETURN 'success';
+    END IF;
+
+    UPDATE public.session_memberships
+       SET attended         = p_attended,
+           attendance_token = NULL
+     WHERE id = v_membership_id;
+
+    RETURN 'success';
+END;
+$$;
+
 -- 6. RLS ENABLE + policies (Part 8) ----------------------------
 
 -- 8.1 Reference tables
@@ -896,6 +938,7 @@ REVOKE ALL ON FUNCTION public.leave_slot(uuid,text,text)              FROM PUBLI
 REVOKE ALL ON FUNCTION public.kick_member(uuid,text)                  FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.promote_from_waitlist(uuid)             FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.sync_slot_counts()                      FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.attest_attendance(uuid,boolean)          FROM PUBLIC;
 
 GRANT EXECUTE ON FUNCTION public.slot_fill_meets_social_threshold(uuid) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.claim_lookups(uuid)                   TO anon, authenticated;
@@ -911,6 +954,7 @@ GRANT EXECUTE ON FUNCTION public.join_slot(uuid)                      TO authent
 GRANT EXECUTE ON FUNCTION public.leave_slot(uuid,text,text)           TO authenticated;
 GRANT EXECUTE ON FUNCTION public.kick_member(uuid,text)               TO authenticated;
 GRANT EXECUTE ON FUNCTION public.signup_claim(text,uuid,text,text,text,text,uuid,jsonb,jsonb) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.attest_attendance(uuid,boolean)       TO authenticated;
 
 -- promote_from_waitlist and sync_slot_counts: NO grant. Called
 -- only internally by other definer fns / as a trigger. Never
