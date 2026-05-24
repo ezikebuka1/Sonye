@@ -82,3 +82,49 @@ intent (competitive vs casual) and letting players filter. Fragments
 density. Field research confirmed players compromise on vibe for
 court time anyway. Revisit post-launch if mismatched-intent games
 visibly produce bad experiences.
+
+**Public discovery surface + anonymous-viewer privacy posture.**
+v1 ships with the locked Partiful Model — anonymous viewers on
+slot detail pages (`/slot/<id>`) see first names of joined
+members. If Instagram bio-link traffic becomes a meaningful share
+channel and the privacy posture starts to feel worth hardening,
+this becomes a focused work stream rather than a one-off feature.
+Two pieces, designed together:
+
+1. **Public browse-all surface at `/games`** — auth-less list of
+   open slots, sorted soonest-first, locked games excluded.
+   Top-level route, not an affordance on slot detail (a "see
+   other games" button on a slot page is conversion poison — it
+   diverts the invited visitor away from the specific game the
+   share was for). Bio link points at `/games` when no specific
+   slot is being featured; points at `/slot/<id>` when one is.
+
+2. **Anonymous-viewer projection hardening** — for unauthenticated
+   viewers across all public surfaces (`/slot/<id>` and `/games`),
+   member identity drops to initials only, neutral avatar color,
+   no gender tags, no skill badges. Authenticated viewers continue
+   to see first names + D8.1 gender-derived avatar colors per the
+   existing D10 lobby semantics. Amends D7's Partiful Model.
+
+Deferred because it's one piece of a larger v1.5/v2 privacy pass
+that will also need to address profile visibility, attendance-
+history exposure, the `chat_messages` dormant table revisit,
+account deletion / data export (GDPR-shaped if growth crosses
+state or national lines), and possibly rate-limiting on public
+slot URLs to defeat scraping. Doing browse-all in isolation now
+means redoing it in privacy-pass context later.
+
+Trigger to revisit: when Instagram (or another social channel)
+becomes a meaningful share channel and bio-link traffic feels
+worth measuring — at which point this work stream and the
+broader v1.5/v2 privacy pass earn the build cost together. Also
+revisit if a user surfaces a concrete privacy complaint about
+the Partiful Model surface during v1.
+
+Structural counter-argument to keep in view when revisiting: a
+browse-all surface is a comparison surface. Anonymous visitors
+with no specific intent self-select into the most-filled slots —
+the ones that least need them — and the lowest-density slots stay
+low-density. Same density-fracturing logic that defers skill
+filters and play-reason matching. Worth weighing against the
+top-of-funnel marketing flexibility browse-all unlocks.
