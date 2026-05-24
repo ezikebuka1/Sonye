@@ -324,3 +324,37 @@ non-determinism issue in phase3b_proofs_d10.sql that predates M3.2.
 P11 (deterministic test-owner fixture) passed cleanly in both runs.
 The D10 label-inversion issue is slated for a separate post-M3.2
 cleanup dispatch.
+
+## M3.2.1 patch — P9/P10 race-fixture cleanup
+
+The pre-existing label-inversion issue flagged in the M3.2 closeout is
+now resolved. Proofs 9 and 10 previously hardcoded Grace=joined and
+Henry=waitlisted in their assertion labels and JWT sub fields. When the
+P6 race landed the other way (Henry joined, Grace waitlisted), the
+labels inverted and the proofs appeared to fail even though the
+slot_roster phone projection logic was correct.
+
+Mechanism: the rigid grace_auth / henry_auth variable lookups in the
+compound \gset at the top of phase3b_proofs_d10.sql have been replaced
+with two inline \gset queries against session_memberships truth:
+
+  SELECT u.first_name AS joined_racer_name, u.auth_user_id AS joined_racer_auth
+  FROM session_memberships sm JOIN users u ON u.id = sm.user_id
+  WHERE sm.slot_id = :'s_race_id'::uuid AND sm.status = 'joined'
+    AND u.first_name IN ('Grace', 'Henry') LIMIT 1 \gset
+
+  SELECT u.first_name AS waitlisted_racer_name, u.auth_user_id AS waitlisted_racer_auth
+  FROM session_memberships sm JOIN users u ON u.id = sm.user_id
+  WHERE sm.slot_id = :'s_race_id'::uuid AND sm.status = 'waitlisted'
+    AND u.first_name IN ('Grace', 'Henry') LIMIT 1 \gset
+
+P9 now sets its JWT sub to :'joined_racer_auth' and P10 to
+:'waitlisted_racer_auth'. The count assertions (joined_with_phone=6,
+waitlisted_null=1, total_rows=7, rows_with_phone=0) are role-symmetric
+and unchanged. P11 (deterministic TestOwner fixture) is untouched.
+
+The battery was run twice back-to-back (both runs landed Henry joined /
+Grace waitlisted) and all 12 proofs passed cleanly in both runs. The
+proof suite is now deterministic across race outcomes.
+
+No schema change. Migration file untouched. Cloud apply is unaffected.
