@@ -56,9 +56,7 @@ CREATE TABLE users (
     id                      uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
     auth_user_id            uuid        UNIQUE,
     phone                   text        NOT NULL UNIQUE,
-    claim_token             uuid        UNIQUE,
-    claim_token_expires_at  timestamptz,
-    claimed_at              timestamptz,
+    claim_token             uuid        NULL,
     first_name              text        NOT NULL,
     last_name               text,
     skill_level             text        NOT NULL,
@@ -77,16 +75,12 @@ CREATE TABLE users (
     CONSTRAINT users_willing_to_drive_valid
         CHECK (willing_to_drive IN ('under_20','flexible','wont_drive') OR willing_to_drive IS NULL),
     CONSTRAINT users_role_valid
-        CHECK (role IN ('player','owner')),
-    CONSTRAINT users_claim_consistency
-        CHECK (
-            (claim_token IS NULL AND claim_token_expires_at IS NULL)
-            OR
-            (claim_token IS NOT NULL AND claim_token_expires_at IS NOT NULL)
-        )
+        CHECK (role IN ('player','owner'))
 );
 CREATE INDEX users_auth_user_id_idx ON users (auth_user_id);
-CREATE INDEX users_claim_token_idx  ON users (claim_token);
+CREATE UNIQUE INDEX users_claim_token_unique
+  ON public.users (claim_token)
+  WHERE claim_token IS NOT NULL;
 
 -- 4.4 slots
 
@@ -245,12 +239,8 @@ LANGUAGE sql SECURITY DEFINER SET search_path = ''
 AS $$
     SELECT
         CASE WHEN u.id IS NOT NULL
-             AND u.claimed_at IS NULL
-             AND u.claim_token_expires_at > now()
              THEN u.first_name ELSE NULL END AS first_name,
-        (u.id IS NOT NULL
-            AND u.claimed_at IS NULL
-            AND u.claim_token_expires_at > now()) AS is_valid
+        (u.id IS NOT NULL) AS is_valid
     FROM (SELECT 1) dummy
     LEFT JOIN public.users u ON u.claim_token = token
 $$;
@@ -386,42 +376,31 @@ BEGIN
             USING ERRCODE = 'check_violation';
     END IF;
 
-    -- Step 1: token path (Path A happy case)
+    -- D2 Flow 3 (waitlist claim) — strict match on
+    -- claim_token + JWT phone; atomic nullify on bind;
+    -- RAISE on mismatch. No expiry, no claimed_at.
     IF p_claim_token IS NOT NULL THEN
-        SELECT id INTO v_user_id
-        FROM public.users
-        WHERE claim_token = p_claim_token
-          AND claimed_at IS NULL
-          AND claim_token_expires_at > now()
-        FOR UPDATE;
+      DECLARE
+        v_jwt_phone text := auth.jwt() ->> 'phone';
+        v_jwt_sub   uuid := (auth.jwt() ->> 'sub')::uuid;
+      BEGIN
+        UPDATE public.users
+           SET auth_user_id = v_jwt_sub,
+               claim_token  = NULL
+         WHERE claim_token = p_claim_token
+           AND phone       = v_jwt_phone
+       RETURNING id INTO v_user_id;
 
-        IF v_user_id IS NOT NULL THEN
-            -- *** 3.8.3 FIX: wrap auth-binding to convert an
-            -- auth_user_id UNIQUE violation into a legible,
-            -- loud error (corruption: one auth id, two phones) ***
-            BEGIN
-                UPDATE public.users
-                SET auth_user_id = p_auth_user_id,
-                    claimed_at   = now(),
-                    first_name   = COALESCE(p_first_name, first_name),
-                    last_name    = COALESCE(p_last_name,  last_name),
-                    skill_level  = COALESCE(p_skill_level, skill_level),
-                    gender       = COALESCE(p_gender,     gender),
-                    general_availability =
-                        COALESCE(p_general_availability, general_availability),
-                    preferred_venues =
-                        COALESCE(p_preferred_venues, preferred_venues)
-                WHERE id = v_user_id;
-            EXCEPTION WHEN unique_violation THEN
-                RAISE EXCEPTION
-                  'signup_claim: auth identity % already bound to another user (corruption) — token path',
-                  p_auth_user_id
-                  USING ERRCODE = 'unique_violation';
-            END;
-            RETURN v_user_id;
+        IF v_user_id IS NULL THEN
+          RAISE EXCEPTION 'claim_token_mismatch'
+            USING ERRCODE = 'P0001';
         END IF;
-        -- token unusable: fall through. No error, no duplicate.
+
+        RETURN v_user_id;
+      END;
     END IF;
+
+    -- Net-new INSERT path continues below, unchanged.
 
     -- Step 2: phone + unclaimed (Path A, no usable token)
     SELECT id INTO v_user_id
@@ -435,7 +414,6 @@ BEGIN
         BEGIN
             UPDATE public.users
             SET auth_user_id = p_auth_user_id,
-                claimed_at   = now(),
                 first_name   = COALESCE(p_first_name, first_name),
                 last_name    = COALESCE(p_last_name,  last_name),
                 skill_level  = COALESCE(p_skill_level, skill_level),
@@ -465,12 +443,12 @@ BEGIN
         INSERT INTO public.users (
             auth_user_id, phone, first_name, last_name,
             skill_level, gender, general_availability,
-            preferred_venues, role, claim_token, claimed_at
+            preferred_venues, role
         )
         VALUES (
             p_auth_user_id, p_phone, p_first_name, p_last_name,
             p_skill_level, p_gender, p_general_availability,
-            p_preferred_venues, 'player', NULL, now()
+            p_preferred_venues, 'player'
         )
         RETURNING id INTO v_user_id;
         RETURN v_user_id;
