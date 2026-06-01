@@ -496,3 +496,51 @@ Watch the first month of real M4+ data:
   needs deeper identity than phone (e.g., privacy-sensitive
   chat needing real-name verification — unlikely in v1.5
   scope but plausible in v2).
+
+## Amendment A — M3.3 reconciliation (2026-05-26)
+
+When D2 was drafted, the assumption was that M3.3 would
+add `claim_token` as a new column. Phase 1 audit of M3.3
+revealed the column already existed in the M3 migration
+with a fundamentally different design: an expiry-coupled
+pattern using `claim_token_expires_at` + `claimed_at`
+columns, a `users_claim_consistency` CHECK constraint, and
+a `signup_claim` claim branch that trusted client-passed
+`p_auth_user_id` rather than reading the JWT.
+
+This pre-existing logic contradicted D2's locked decisions
+on two structural points (no expiry; JWT-authoritative
+phone-match for link-forwarding self-correction) and on
+one stylistic point (nullify-on-success vs. separate
+timestamp).
+
+M3.3 therefore became a reconciliation, not an addition:
+
+- Dropped `claim_token_expires_at` column.
+- Dropped `claimed_at` column.
+- Dropped `users_claim_consistency` CHECK constraint.
+- Converted `users.claim_token UNIQUE` to a partial unique
+  index `WHERE claim_token IS NOT NULL` (matches D11
+  `sm_attendance_token_unique` pattern).
+- Replaced `signup_claim`'s claim branch with the strict-
+  match path specified in D2 sub-decision 6: lookup by
+  claim_token + `auth.jwt() ->> 'phone'` match, UPDATE
+  with atomic nullify and `auth.jwt() ->> 'sub'` bind,
+  `RAISE EXCEPTION 'claim_token_mismatch'` on no-match.
+- Updated `claim_lookups` view to drop the expiry
+  predicate.
+
+The `p_claim_token` parameter remained at position 7 in
+the `signup_claim` signature (audit confirmed the existing
+position is reasonable; D2's "append last" instruction
+was based on the incorrect assumption that the parameter
+didn't yet exist).
+
+The implementation requirements section above (under
+"M3.3 — schema patch") reflects the current post-M3.3
+state, not the pre-M3.3 state. The 2026-05-26 architect
+session that drafted D2 did not have the M3 migration
+contents in context when writing those requirements;
+the audit-driven correction is captured here rather than
+edited into the original requirements to preserve the
+historical record of how the divergence was discovered.
