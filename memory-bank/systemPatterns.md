@@ -144,6 +144,65 @@ are validated lazily and do not have this constraint.
 **Apply the same check to `CREATE VIEW`:** views are also validated at
 creation time and will fail on forward references.
 
+### Seed PII Discipline (effective 2026-06-02)
+
+Production seeds may need real PII (the owner's phone number,
+real service account UUIDs, secret-bearing config rows) that
+must NEVER enter git history.
+
+**Root cause (M3 cloud apply, 2026-06-02):** the M3 migration's
+final seed INSERT for the owner row uses the placeholder phone
+`+10000000000` and `auth_user_id = NULL` as a loud tripwire. To
+apply real owner identity to cloud, the operational thread:
+(1) edited the migration locally to insert the real phone +
+`claim_token`, (2) ran `supabase db push`, (3) reverted the local
+edit, (4) verified `git status` and `git grep` showed zero
+references to the real values.
+
+The dance worked, but it has three failure modes that will bite
+on the second use:
+- Forgetting step 3 commits PII to the repo.
+- Different environments needing different PII (staging vs prod)
+  produce per-environment edit/revert dances that drift.
+- A second operator doing the same task will likely skip the
+  verify step or miss a reference.
+
+**Rule for future cloud applies that involve PII:**
+
+1. The committed migration always carries the placeholder, never
+   the real value. Placeholders are loud (`+10000000000`, NULL
+   `auth_user_id`, `00000000-0000-0000-0000-000000000000` UUIDs,
+   etc.) so the tripwire is visible at a glance.
+
+2. Apply the migration to cloud as-is. The placeholder seed lands
+   on the cloud DB.
+
+3. After apply, swap real values into cloud only via a separate
+   one-off SQL script that is NOT committed. Options:
+   - A `.gitignore`'d file under `/scripts/cloud-only/` invoked
+     via `psql` against the cloud connection.
+   - A Supabase dashboard SQL editor snippet pasted manually.
+   - For long-lived secrets (API keys, webhook secrets), use
+     Supabase Vault rather than seeding into application tables.
+
+4. Verify post-swap with a query that confirms the real values
+   are in cloud and the placeholder row is gone or replaced.
+   Document the verification query in the swap script as a
+   comment so future operators reproduce the same check.
+
+**Why a separate script, not edit-and-revert:** the edit/revert
+dance couples a network side effect (cloud apply) with a local
+state mutation (the migration file). The local state can drift
+silently if the revert is incomplete. A separate, never-committed
+script enforces the separation: the committed schema is always
+truthful, and the cloud-only mutations live in a file the repo
+cannot accidentally publish.
+
+**Apply this rule retroactively when adding any future seed
+rows that contain real-world PII or secrets.** The M3 owner-row
+swap stands as a one-time exception; subsequent applies follow
+the script-based pattern.
+
 ## Push Discipline
 
 Pushes to GitHub are manual — never automated. Rationale: network side

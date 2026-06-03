@@ -421,3 +421,57 @@ Watch the first month of real M5+ data:
   ships, the peer-report link becomes the natural place for
   surfacing trust signals — D11's low-fi pattern becomes the
   seed of a richer surface.
+
+## Amendment A — Supabase Free-Tier Auto-Pause (2026-06-02)
+
+Supabase projects on the free tier auto-pause after `~7 days` of
+inactivity. First request after pause unpauses the project with
+a 5-10 second cold start. This is documented Supabase free-tier
+behavior, not a bug.
+
+**Why this is load-bearing for Sonye:**
+
+D11's scheduled job dispatches attendance SMS at each slot's
+`starts_at + 2h`. In a low-traffic week (e.g., one slot per
+week during early v1, or a quiet stretch between sessions),
+the cron firing may be the FIRST request the cloud DB has seen
+in `~7 days`. If the cron's HTTP timeout is below the cold-start
+window (default Vercel Cron timeout is 10s; Supabase Edge
+Function cold start can exceed it under load), the job will
+time out before the DB responds, and the attendance SMS will
+fail to send for that slot.
+
+The failure mode is silent: no SMS goes out, `attended` stays
+NULL for all joined members, the owner-review queue fills with
+ghosts that aren't actually flakes. By the time it's noticed,
+the data for that game is unrecoverable.
+
+**Three viable mitigations, ranked by structural soundness:**
+
+1. **Upgrade to Pro tier before launch.** $25/month. No auto-
+   pause. This is the recommended path — the cost of one
+   debugging session during launch week exceeds a month of Pro.
+   Budget this as a v1 launch cost, not a v1.5 upgrade.
+
+2. **Tune cron timeouts to absorb cold-start.** Set the
+   scheduled job's HTTP timeout to ≥30 seconds. Works on free
+   tier, but couples the cron's reliability to Supabase's
+   cold-start variance. Not recommended for any user-facing
+   write path (the attendance SMS is a write path — every
+   miss is a data quality hit).
+
+3. **Keep-warm ping every 6 days.** A no-op cron that runs
+   every 6 days to keep the project active. Defeats the cost-
+   saving purpose of free tier and adds operational complexity.
+   Only use if Pro tier is genuinely unaffordable.
+
+**Pre-launch checklist addition:** before launch day, confirm
+the production Supabase project is on Pro tier (or has one of
+the alternative mitigations active and tested). Document the
+chosen mitigation in the launch-day runbook.
+
+**M5 framing implication:** the scheduled-job implementation
+choice (Vercel Cron vs. Supabase Edge Function on cron trigger
+vs. `pg_cron`) is downstream of this decision. `pg_cron` lives
+inside Postgres and is immune to cold-start by definition, but
+free-tier `pg_cron` has its own quotas; verify before choosing.
