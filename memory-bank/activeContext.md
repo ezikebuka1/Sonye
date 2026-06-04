@@ -4,6 +4,8 @@
 Working name finalized as Sonye (was SquadUp / InTotality).
 M2 complete — onJoin wired with optimistic Zustand state, Toast/D5 landed 2026-04-28. Post-ship iOS fix: `type="button"` audit across all `<button>` elements + WebKit Playwright project added (2026-04-28). No backend, no auth, no API calls. D7 v1 product mechanics decided 2026-04-15; D8 design system approved 2026-04-17.
 
+**Phase 0 complete (2026-06-04):** Local auth spine live. Supabase phone OTP configured for local dev (test number +15555550101, static OTP 123456). Dev owner seeded as `public.users` row (role=owner); auth_user_id bound at first test-OTP login via `signup_claim`. Full M3 battery (P1–P16c) re-verified on fresh reset with two-owner baseline — all proofs pass.
+
 ## What Exists
 - Home screen at `/` per Option A (greeting, hero, social proof, conditional onboarding banner, slot cards with 50% fill rule, bottom tab bar) — mock data only
 - Mock data module at `src/lib/mockData.ts` with D7-aligned flat ID-referenced shapes and v2 breadcrumb fields; includes `seedUser` named export (demo identity for ?onboarded=1 toggle)
@@ -19,19 +21,23 @@ M2 complete — onJoin wired with optimistic Zustand state, Toast/D5 landed 2026
 - D7 onboarding form at `/onboarding` capturing all 7 fields (name, phone, sport, skill_level, general_availability, preferred_venues, willing_to_drive); submit navigates to `/?onboarded=1` (M1 uses URL param demo toggle; real persistence in M3)
 - Group Lobby at `/group-lobby` — read-only view of the seeded "forming" session: header with venue + neighborhood + day/time + skill badge, commitment tracker (5/6), member avatar stack, read-only chat with 3 seeded messages, non-functional Leave session button
 - Seeded session + chat messages in mockData with consistency assertion between session.member_user_ids and slot.opted_in_user_ids
+- Supabase client wiring: `src/lib/supabase/client.ts` (browser, createBrowserClient) and `src/lib/supabase/server.ts` (server, createServerClient + Next cookies())
+- Throwaway dev-login route at `src/app/dev-login/` (Phase 0 only — delete when Phase 3 auth UI lands)
+- `.env.local` with local Supabase URL, anon key, service role key (gitignored, not committed)
+- `supabase/seed.sql` with local dev owner (+15555550101, role=owner, auth_user_id NULL at seed — bound at first OTP login)
+- `scripts/verify-phase0.mjs` — Phase 0 terminal verification script
 
 ## What Does NOT Exist Yet
 - Persistence (store is in-memory only; localStorage/Supabase in M3)
-- Real backend/Supabase (M3)
-- Auth flow (M4, D2 decision pending)
+- Real backend/Supabase API calls from Next.js (M3 — schema exists locally, no Next.js data layer yet)
+- Auth flow / polished phone-entry UI (Phase 3, M4 — D2 decided; dev spine is Phase 0)
 
 ## Icebox
 (no current items)
 
 ## Current Focus
 M2 complete. D1 (Zustand) and D5 (minimal toast) both decided and implemented.
-Next: M3 — Supabase backend. D3 (database schema) decision must be made first,
-then D2 (auth flow) before M4. Real persistence replaces in-memory store.
+Phase 0 complete. Next: Phase 1 — owner create-slot UI. Dev owner is live and authenticated locally (test OTP +15555550101 / 123456). D2 decided (Model C). Schema complete (M3 migrations applied locally). Real Twilio + 10DLC prerequisites outstanding before cloud M4.
 
 ## Decisions Made
 - Next.js App Router (already scaffolded; not Vite)
