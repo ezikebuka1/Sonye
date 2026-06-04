@@ -81,30 +81,30 @@ SELECT id AS owner_id FROM public.users WHERE role = 'owner' LIMIT 1
 \echo 'Seeding 4 slots...'
 
 -- S_race: 5/6 filled for Proof 6 race. Sat 2026-07-11 18:00 CDT
-INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity)
+INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
 VALUES ('cole-park', 'pickleball', :'owner_id'::uuid,
-        '2026-07-11 18:00:00-05:00', '2026-07-11 20:00:00-05:00', 6)
+        '2026-07-11 18:00:00-05:00', '2026-07-11 20:00:00-05:00', 6, 'intermediate')
 RETURNING id AS s_race_id
 \gset
 
 -- S_promote: 6/6 full + waitlist for Proof 7. Sat 2026-07-18 18:00 CDT
-INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity)
+INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
 VALUES ('cole-park', 'pickleball', :'owner_id'::uuid,
-        '2026-07-18 18:00:00-05:00', '2026-07-18 20:00:00-05:00', 6)
+        '2026-07-18 18:00:00-05:00', '2026-07-18 20:00:00-05:00', 6, 'intermediate')
 RETURNING id AS s_promote_id
 \gset
 
 -- S_conflict: same Dallas day as S_promote (2026-07-18), used to D9-block Maria/Uma
-INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity)
+INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
 VALUES ('churchill-park', 'pickleball', :'owner_id'::uuid,
-        '2026-07-18 14:00:00-05:00', '2026-07-18 16:00:00-05:00', 6)
+        '2026-07-18 14:00:00-05:00', '2026-07-18 16:00:00-05:00', 6, 'intermediate')
 RETURNING id AS s_conflict_id
 \gset
 
 -- S_drift: Proof 8 drift slot. Sat 2026-07-25 18:00 CDT
-INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity)
+INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
 VALUES ('cole-park', 'pickleball', :'owner_id'::uuid,
-        '2026-07-25 18:00:00-05:00', '2026-07-25 20:00:00-05:00', 6)
+        '2026-07-25 18:00:00-05:00', '2026-07-25 20:00:00-05:00', 6, 'intermediate')
 RETURNING id AS s_drift_id
 \gset
 

@@ -28,28 +28,28 @@ SELECT id AS owner_id FROM public.users WHERE role = 'owner' LIMIT 1
 \gset
 
 -- Slot S1: Cole Park, sport, 2026-06-13 18:00 CDT (23:00 UTC)
-INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity)
+INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
 VALUES (
     'cole-park', 'pickleball', :'owner_id'::uuid,
-    '2026-06-13 18:00:00-05:00', '2026-06-13 20:00:00-05:00', 6
+    '2026-06-13 18:00:00-05:00', '2026-06-13 20:00:00-05:00', 6, 'intermediate'
 )
 RETURNING id AS s1_id
 \gset
 
 -- Slot S2: same Dallas day, same venue, 21:00 CDT
-INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity)
+INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
 VALUES (
     'cole-park', 'pickleball', :'owner_id'::uuid,
-    '2026-06-13 21:00:00-05:00', '2026-06-13 23:00:00-05:00', 6
+    '2026-06-13 21:00:00-05:00', '2026-06-13 23:00:00-05:00', 6, 'intermediate'
 )
 RETURNING id AS s2_id
 \gset
 
 -- Slot S_tz: 11:30pm CDT Saturday = 04:30 UTC Sunday (timezone red-flag)
-INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity)
+INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
 VALUES (
     'cole-park', 'pickleball', :'owner_id'::uuid,
-    '2026-06-13 23:30:00-05:00', '2026-06-14 01:00:00-05:00', 6
+    '2026-06-13 23:30:00-05:00', '2026-06-14 01:00:00-05:00', 6, 'intermediate'
 )
 RETURNING id AS stz_id
 \gset
