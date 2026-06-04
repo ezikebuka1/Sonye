@@ -259,9 +259,10 @@ template = "Your code is {{ .Code }}"
 # Controls the minimum amount of time that must pass before sending another sms otp.
 max_frequency = "5s"
 
-# LOCAL ONLY — deterministic OTP for dev owner. Never add to cloud dashboard.
+# LOCAL ONLY — deterministic OTPs for dev testing. Never add to cloud dashboard.
 [auth.sms.test_otp]
-"+15555550101" = "123456"
+"+15555550101" = "123456"   # dev owner (Phase 0)
+"+15555550102" = "123456"   # throwaway player (Phase 1 checkpoint 3)
 
 # Configure logged in session timeouts.
 # [auth.sessions]

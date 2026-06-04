@@ -6,6 +6,8 @@ M2 complete — onJoin wired with optimistic Zustand state, Toast/D5 landed 2026
 
 **Phase 0 complete (2026-06-04):** Local auth spine live. Supabase phone OTP configured for local dev (test number +15555550101, static OTP 123456). Dev owner seeded as `public.users` row (role=owner); auth_user_id bound at first test-OTP login via `signup_claim`. Full M3 battery (P1–P16c) re-verified on fresh reset with two-owner baseline — all proofs pass.
 
+**Phase 1 complete (2026-06-04):** Owner create-slot form live at `/create-slot`. Direct RLS-gated INSERT under `slots_insert_owner` (no new DB function). R2 TZ: Dallas wall-clock passed as named-timezone string `America/Chicago` — PostgreSQL handles DST at parse time. Player test OTP +15555550102 added to config. All four checkpoints pass: slot created (created_by=current_user_id(), sport_id set, member_count=0), TZ proof (18:00 CDT stored as 23:00 UTC, civil_date correct), non-owner INSERT rejected (RLS 42501), anon filter non-vacuous (0 rows on table, preview function works).
+
 ## What Exists
 - Home screen at `/` per Option A (greeting, hero, social proof, conditional onboarding banner, slot cards with 50% fill rule, bottom tab bar) — mock data only
 - Mock data module at `src/lib/mockData.ts` with D7-aligned flat ID-referenced shapes and v2 breadcrumb fields; includes `seedUser` named export (demo identity for ?onboarded=1 toggle)
@@ -37,7 +39,7 @@ M2 complete — onJoin wired with optimistic Zustand state, Toast/D5 landed 2026
 
 ## Current Focus
 M2 complete. D1 (Zustand) and D5 (minimal toast) both decided and implemented.
-Phase 0 complete. Next: Phase 1 — owner create-slot UI. Dev owner is live and authenticated locally (test OTP +15555550101 / 123456). D2 decided (Model C). Schema complete (M3 migrations applied locally). Real Twilio + 10DLC prerequisites outstanding before cloud M4.
+Phase 1 complete. Next dispatch TBD. Dev owner can create slots locally at `/create-slot`. Throwaway player OTP +15555550102 available for testing player flows. Real Twilio + 10DLC prerequisites outstanding before any cloud M4 auth work.
 
 ## Deployment Guardrails
 
