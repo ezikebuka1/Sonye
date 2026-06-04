@@ -39,6 +39,12 @@ M2 complete — onJoin wired with optimistic Zustand state, Toast/D5 landed 2026
 M2 complete. D1 (Zustand) and D5 (minimal toast) both decided and implemented.
 Phase 0 complete. Next: Phase 1 — owner create-slot UI. Dev owner is live and authenticated locally (test OTP +15555550101 / 123456). D2 decided (Model C). Schema complete (M3 migrations applied locally). Real Twilio + 10DLC prerequisites outstanding before cloud M4.
 
+## Deployment Guardrails
+
+The dummy Twilio credentials in supabase/config.toml are for local test_otp only.
+Production SMS auth must be configured directly in the Supabase Cloud Dashboard.
+Do not attempt to push local SMS config to the cloud.
+
 ## Decisions Made
 - Next.js App Router (already scaffolded; not Vite)
 - Claude Code + Cursor AI running simultaneously on same project
