@@ -358,3 +358,32 @@ Grace waitlisted) and all 12 proofs passed cleanly in both runs. The
 proof suite is now deterministic across race outcomes.
 
 No schema change. Migration file untouched. Cloud apply is unaffected.
+
+## M3.5 patch — ends_at in slot_share_preview (audit trail)
+
+Dispatched 2026-06-05. Finding: `ends_at timestamptz` was already present in
+`slot_share_preview`'s RETURNS TABLE from the original base migration
+(column 5, immediately after `starts_at`) and was correctly preserved by M3.4
+when that migration rebuilt the function to add `skill_level`. No schema change
+was needed.
+
+Migration `20260605183024_m3_5_slot_share_preview_ends_at.sql` exists as an
+audit trail only (body is `SELECT 1;` — intentional no-op). It applies cleanly
+on fresh reset and on cloud push without touching the live function.
+
+Current `slot_share_preview` RETURNS TABLE shape (all 12 columns):
+```
+venue_name text, neighborhood text, sport_name text,
+starts_at timestamptz, ends_at timestamptz,   ← adjacent, correct order
+capacity int, gender_category text, is_cancelled boolean,
+owner_first_name text, fill_count int, fill_ratio_shown boolean, skill_level text
+```
+
+Grants confirmed: EXECUTE on `anon` and `authenticated`; not on `PUBLIC`.
+
+Proof 16c updated (`supabase/verifications/phase3b_proofs_m34.sql`) to assert
+`ends_at` alongside `skill_level` for all three callers (service-role, anon,
+authenticated). Full 16-proof battery (P1–P16c) run on fresh reset post-M3.5:
+all proofs green.
+
+Cloud apply is unaffected (no DDL in M3.5 migration).
