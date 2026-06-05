@@ -1,0 +1,19 @@
+-- =============================================================
+-- M3.5 audit-trail: ends_at in slot_share_preview
+-- STATUS: NO SCHEMA CHANGE REQUIRED.
+--
+-- Finding: ends_at timestamptz was present in slot_share_preview
+-- from the ORIGINAL base migration
+-- (20260520044919_m3_initial_schema.sql, RETURNS TABLE column 5).
+-- M3.4 (20260604050433_m3_4_slot_skill_level.sql) correctly
+-- preserved it when recreating the function to add skill_level.
+-- Current live shape (confirmed pg_get_functiondef 2026-06-05):
+--   venue_name, neighborhood, sport_name,
+--   starts_at, ends_at,          ← already adjacent, correct order
+--   capacity, gender_category, is_cancelled,
+--   owner_first_name, fill_count, fill_ratio_shown, skill_level
+--
+-- This file exists solely as the M3.5 audit trail. It applies
+-- cleanly to both fresh-reset and cloud-apply; it changes nothing.
+-- =============================================================
+SELECT 1; -- intentional no-op

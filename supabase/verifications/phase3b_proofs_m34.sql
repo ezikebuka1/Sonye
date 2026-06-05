@@ -122,36 +122,39 @@ WHERE skill_level = 'pro';
 \echo 'EXPECTED: PASS notice from DO block, pro_count=0'
 
 -- ---------------------------------------------------------------
--- PROOF 16c -- slot_share_preview returns correct skill_level
+-- PROOF 16c -- slot_share_preview returns skill_level + ends_at
+-- (M3.5: ends_at was already present from the base migration;
+--  this assertion confirms it survives across migrations.)
 -- ---------------------------------------------------------------
 \echo ''
-\echo '=== PROOF 16c: slot_share_preview returns skill_level column ==='
+\echo '=== PROOF 16c: slot_share_preview returns skill_level + ends_at columns ==='
 
-\echo 'P16c: slot_share_preview on the intermediate slot (EXPECTED: skill_level=intermediate):'
-SELECT venue_name, skill_level
+\echo 'P16c: slot_share_preview on the intermediate slot:'
+\echo 'EXPECTED: skill_level=intermediate, ends_at=2026-08-03T13:00:00Z (10:00 CDT)'
+SELECT venue_name, starts_at, ends_at, skill_level
 FROM public.slot_share_preview(:'s_intermediate_id'::uuid);
 
-\echo 'P16c-anon: same call as anon role (EXPECTED: skill_level=intermediate -- grant preserved):'
+\echo 'P16c-anon: same call as anon role (EXPECTED: ends_at + skill_level -- grants preserved):'
 BEGIN;
 SET LOCAL ROLE anon;
-SELECT skill_level
+SELECT starts_at, ends_at, skill_level
 FROM public.slot_share_preview(:'s_intermediate_id'::uuid);
 COMMIT;
 
-\echo 'P16c-authenticated: same call as authenticated (EXPECTED: skill_level=intermediate):'
+\echo 'P16c-authenticated: same call as authenticated (EXPECTED: ends_at + skill_level):'
 BEGIN;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims',
     json_build_object('sub', gen_random_uuid()::text, 'role', 'authenticated')::text, true);
-SELECT skill_level
+SELECT starts_at, ends_at, skill_level
 FROM public.slot_share_preview(:'s_intermediate_id'::uuid);
 COMMIT;
 
 \echo 'PROOF 16c COMPLETE.'
-\echo 'EXPECTED: skill_level=intermediate for all three callers (service-role, anon, authenticated)'
+\echo 'EXPECTED: starts_at/ends_at/skill_level all returned for service-role, anon, authenticated'
 
 \echo ''
-\echo '=== ALL M3.4 PROOFS COMPLETE ==='
-\echo 'Proof 16a: all four valid tiers accepted.                    EXPECTED: PASS'
-\echo 'Proof 16b: pro tier rejected by CHECK constraint.            EXPECTED: PASS'
-\echo 'Proof 16c: slot_share_preview returns skill_level correctly. EXPECTED: PASS'
+\echo '=== ALL M3.4/M3.5 PROOFS COMPLETE ==='
+\echo 'Proof 16a: all four valid tiers accepted.                         EXPECTED: PASS'
+\echo 'Proof 16b: pro tier rejected by CHECK constraint.                 EXPECTED: PASS'
+\echo 'Proof 16c: slot_share_preview returns ends_at + skill_level.      EXPECTED: PASS'
