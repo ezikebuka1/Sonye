@@ -4,7 +4,7 @@ Snapshot of *now* — kept lean. History lives in git; load-bearing rules live i
 
 ## Current focus
 
-**M4 Phase 2 — anon read surfaces:** slot-detail landing page + state-aware OG share images. Next step: sketch the detail page (Sketches-Before-Code) before dispatch.
+**M4 Phase 2 — anon read surfaces (IN FLIGHT):** slot-detail landing page + state-aware OG share images. Implementation committed; running 5-checkpoint battery.
 
 ## Just shipped
 
