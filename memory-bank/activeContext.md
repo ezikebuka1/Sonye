@@ -4,10 +4,11 @@ Snapshot of *now* — kept lean. History lives in git; load-bearing rules live i
 
 ## Current focus
 
-**M4 Phase 2 — anon read surfaces (IN FLIGHT):** slot-detail landing page + state-aware OG share images. Implementation committed; running 5-checkpoint battery.
+**M4 Phase 3 — player auth UI (D2):** phone entry, OTP verify, post-verify routing (Model C branching), onboarding forms → `signup_claim` + join.
 
 ## Just shipped
 
+- **Phase 2** — `/slot/[id]` server-rendered detail page (4 states: FORMING/FILLING/FULL/CANCELLED) + `/slot/[id]/opengraph-image` (1200×630, `runtime=nodejs`, Baloo 2 hero + Nunito Sans body). Shared `slot-preview` lib. All times `America/Chicago` (R2). Anon path only — `slot_share_preview` exclusively; zero identity leak. State flip confirmed at 3/6. `generateMetadata`: absolute `og:image`, `og:title` ≤35 chars, `og:description`. All 5 checkpoints green.
 - **M3.5** — audit-trail migration confirming `ends_at` already in `slot_share_preview` from base; P16c updated to assert `ends_at` + `skill_level`. Full 16-proof battery green.
 - **Phase 1** — owner-only create-slot (direct RLS INSERT under `slots_insert_owner`; `created_by = current_user_id()`; Dallas-timezone).
 - **Phase 0** — local auth spine (`@supabase/ssr`, local test-OTP, bound dev owner).
@@ -16,7 +17,7 @@ Snapshot of *now* — kept lean. History lives in git; load-bearing rules live i
 
 ## M4 spine (local-first; cloud is the last step)
 
-Phase 0 ✅ · Phase 1 ✅ · **Phase 2 (next)** anon reads + OG · Phase 3 player auth UI (D2) · Phase 4 lobby / join / attendance · Phase 5 owner dashboard / cancel · Phase 6 Twilio swap + cloud. **Only Phase 6 is Twilio-gated.**
+Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ · **Phase 3 (next)** player auth UI (D2) · Phase 4 lobby / join / attendance · Phase 5 owner dashboard / cancel · Phase 6 Twilio swap + cloud. **Only Phase 6 is Twilio-gated.**
 
 ## Working facts the build needs now
 

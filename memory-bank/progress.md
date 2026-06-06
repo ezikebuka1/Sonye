@@ -11,10 +11,11 @@ Compact milestone ledger. Full detail lives in git history.
 - **D8.2** — New visual identity (brand palette → app tokens); v1 product scope unchanged.
 - **M4 Phase 0** — Local auth spine: `@supabase/ssr`, local test-OTP, bound dev owner. All checkpoints green.
 - **M4 Phase 1** — Owner create-slot: direct RLS INSERT, Dallas-timezone, owner-gating + non-vacuous anon-filter proven. All checkpoints green.
+- **M4 Phase 2** — Anon read surfaces: `/slot/[id]` server-rendered detail page (4 states: FORMING/FILLING/FULL/CANCELLED) + `/slot/[id]/opengraph-image` (1200×630 ImageResponse, `runtime=nodejs`). Shared `slot-preview` lib owns fetch/format/state. All times `America/Chicago` (R2). Anon path only — `slot_share_preview` exclusively. Baloo 2 hero, Nunito Sans body. `generateMetadata`: absolute `og:image`, `og:title` ≤35 chars, `og:description`. All 5 checkpoints green.
 
 ## In progress 🔧
 
-- **M4 Phase 2** — Anon read surfaces (slot-detail page + state-aware OG share images). Detail page to be sketched first.
+- **M4 Phase 3** — Player auth UI (D2 Model C): phone entry, OTP verify, post-verify routing, onboarding forms → `signup_claim` + join.
 
 ## Up next ⏳
 
