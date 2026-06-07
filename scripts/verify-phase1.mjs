@@ -7,7 +7,8 @@ import { execSync } from 'child_process';
 
 const URL          = 'http://127.0.0.1:54321';
 const ANON         = 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
-const SVC          = '***PURGED***';
+const SVC          = process.env.SUPABASE_SECRET_KEY;
+if (!SVC) throw new Error('SUPABASE_SECRET_KEY is not set. Add it to .env.local and export it before running this script.');
 const OWNER_PHONE  = '+15555550101';
 const PLAYER_PHONE = '+15555550102';
 const OTP          = '123456';
