@@ -8,7 +8,7 @@ Snapshot of *now* — kept lean. History lives in git; load-bearing rules live i
 
 ## Just shipped
 
-- **Phase 2** — `/slot/[id]` server-rendered detail page (4 states: FORMING/FILLING/FULL/CANCELLED) + `/slot/[id]/opengraph-image` (1200×630, `runtime=nodejs`, Baloo 2 hero + Nunito Sans body). Shared `slot-preview` lib. All times `America/Chicago` (R2). Anon path only — `slot_share_preview` exclusively; zero identity leak. State flip confirmed at 3/6. `generateMetadata`: absolute `og:image`, `og:title` ≤35 chars, `og:description`. All 5 checkpoints green.
+- **Phase 2** — `/slot/[id]` server-rendered detail page (4 states: FORMING/FILLING/FULL/CANCELLED) + `/slot/[id]/opengraph-image` (1200×630, `runtime=nodejs`, Baloo 2 hero + Nunito Sans body). Shared `slot-preview` lib. All times `America/Chicago` (R2). Anon path only — `slot_share_preview` exclusively; zero identity leak. State flip confirmed at 3/6. `generateMetadata`: absolute `og:image`, `og:title` ≤35 chars, `og:description`. All 5 checkpoints green. Copy fix: FORMING bodyCopy + locked subline; FILLING statusCopy="Filling up", count shown separately, locked subline; "Be first in" and "Spots go fast" deleted.
 - **M3.5** — audit-trail migration confirming `ends_at` already in `slot_share_preview` from base; P16c updated to assert `ends_at` + `skill_level`. Full 16-proof battery green.
 - **Phase 1** — owner-only create-slot (direct RLS INSERT under `slots_insert_owner`; `created_by = current_user_id()`; Dallas-timezone).
 - **Phase 0** — local auth spine (`@supabase/ssr`, local test-OTP, bound dev owner).

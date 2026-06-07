@@ -237,6 +237,22 @@ export default async function SlotDetailPage({
             >
               {ds.statusCopy}
             </p>
+            {ds.bodyCopy && (
+              <p
+                className="mt-2 text-[13px] leading-snug"
+                style={{ color: '#7A9AB8', fontFamily: 'var(--font-nunito)' }}
+              >
+                {ds.bodyCopy}
+              </p>
+            )}
+            {ds.state === 'FILLING' && ds.spotsLeft !== null && (
+              <p
+                className="mt-1 text-[13px] font-semibold"
+                style={{ color: '#D4724A', fontFamily: 'var(--font-nunito)' }}
+              >
+                {ds.spotsLeft} spot{ds.spotsLeft === 1 ? '' : 's'} left
+              </p>
+            )}
           </div>
 
           {/* Pips — FILLING and FULL only */}
@@ -261,17 +277,18 @@ export default async function SlotDetailPage({
 
           {/* Footer band */}
           <div
-            className="px-5 py-3 flex items-center justify-between"
+            className={`px-5 py-3 flex items-center ${ds.state === 'FORMING' ? 'justify-end' : 'justify-between'}`}
             style={{ backgroundColor: ds.footerBg }}
           >
-            <span
-              className="text-white text-[13px] font-medium opacity-90"
-              style={{ fontFamily: 'var(--font-nunito)' }}
-            >
-              {ds.state === 'CANCELLED' ? 'Game cancelled' :
-               ds.state === 'FORMING'   ? 'Be first in' :
-               ds.state === 'FILLING'   ? `${ds.spotsLeft} left` : 'Full'}
-            </span>
+            {ds.state !== 'FORMING' && (
+              <span
+                className="text-white text-[13px] font-medium opacity-90"
+                style={{ fontFamily: 'var(--font-nunito)' }}
+              >
+                {ds.state === 'CANCELLED' ? 'Game cancelled' :
+                 ds.state === 'FILLING'   ? `${ds.spotsLeft} spots left` : 'Full'}
+              </span>
+            )}
             {ds.ctaLabel && (
               <a
                 href={ds.ctaHref!}

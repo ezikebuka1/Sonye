@@ -34,6 +34,7 @@ export type DerivedState = {
   ctaLabel: string | null;
   ctaHref: string | null;
   statusCopy: string;
+  bodyCopy: string | null;
   smsCopy: string | null;
 };
 
@@ -97,6 +98,7 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
       ctaLabel: null,
       ctaHref: null,
       statusCopy: 'This game was cancelled',
+      bodyCopy: null,
       smsCopy: null,
     };
   }
@@ -111,7 +113,8 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
       ctaLabel: 'Join this game',
       ctaHref: `/auth?slotId=${slotId}`,
       statusCopy: 'Game forming',
-      smsCopy: "You'll get a text when the group is confirmed",
+      bodyCopy: 'Spots are open — grab one and the group builds out from here.',
+      smsCopy: "Takes about 20 seconds — we'll text you a code",
     };
   }
 
@@ -126,8 +129,9 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
       spotsLeft: spots,
       ctaLabel: 'Join this game',
       ctaHref: `/auth?slotId=${slotId}`,
-      statusCopy: `${spots} spot${spots === 1 ? '' : 's'} left`,
-      smsCopy: 'Spots go fast — grab yours now',
+      statusCopy: 'Filling up',
+      bodyCopy: null,
+      smsCopy: "Filling up — we'll text you a code to lock your spot",
     };
   }
 
@@ -140,6 +144,7 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
     ctaLabel: 'Join the waitlist',
     ctaHref: `/auth?slotId=${slotId}&waitlist=true`,
     statusCopy: 'Full · join the waitlist',
+    bodyCopy: null,
     smsCopy: "We'll text you if a spot opens",
   };
 }
