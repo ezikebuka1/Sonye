@@ -4,10 +4,11 @@ Snapshot of *now* — kept lean. History lives in git; load-bearing rules live i
 
 ## Current focus
 
-**M4 Phase 3 — player auth UI (D2):** phone entry, OTP verify, post-verify routing (Model C branching), onboarding forms → `signup_claim` + join.
+**M4 Phase 3B — onboarding forms + signup_claim + join_slot:** all three flows land in stubs; 3B fills them in.
 
 ## Just shipped
 
+- **Phase 3A** — player auth UI + server-side D2 router (Amendment B). `/auth` route: phone-entry and OTP-verify screens. `sendOtpAction` stateless (Property 4 — no public.users read). `verifyOtpAction`: SSR session via `@supabase/ssr` server client → reads `public.users` (0 or 1 row) → branches server-side: Flow 3 (claim) → `/onboarding?flow=3`, Flow 2 (new+slot) → `/onboarding?flow=2`, Flow 2′ (returning+slot) → `/join`, Flow 1 (new) → `/onboarding?flow=1`, returning → `/`. Pinned banner (`slot_share_preview` anon read, Dallas-local format) on both screens when `?slotId` present. Locked error copy wired. config.toml: `+15555550199` net-new test-OTP (no `public.users` row). All 6 CPs green.
 - **Phase 2** — `/slot/[id]` server-rendered detail page (4 states: FORMING/FILLING/FULL/CANCELLED) + `/slot/[id]/opengraph-image` (1200×630, `runtime=nodejs`, Baloo 2 hero + Nunito Sans body). Shared `slot-preview` lib. All times `America/Chicago` (R2). Anon path only — `slot_share_preview` exclusively; zero identity leak. State flip confirmed at 3/6. `generateMetadata`: absolute `og:image`, `og:title` ≤35 chars, `og:description`. All 5 checkpoints green. Copy fix: FORMING bodyCopy + locked subline; FILLING statusCopy="Filling up", count shown separately, locked subline; "Be first in" and "Spots go fast" deleted.
 - **M3.5** — audit-trail migration confirming `ends_at` already in `slot_share_preview` from base; P16c updated to assert `ends_at` + `skill_level`. Full 16-proof battery green.
 - **Phase 1** — owner-only create-slot (direct RLS INSERT under `slots_insert_owner`; `created_by = current_user_id()`; Dallas-timezone).
@@ -17,7 +18,7 @@ Snapshot of *now* — kept lean. History lives in git; load-bearing rules live i
 
 ## M4 spine (local-first; cloud is the last step)
 
-Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ · **Phase 3 (next)** player auth UI (D2) · Phase 4 lobby / join / attendance · Phase 5 owner dashboard / cancel · Phase 6 Twilio swap + cloud. **Only Phase 6 is Twilio-gated.**
+Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ · Phase 3A ✅ · **Phase 3B (next)** onboarding forms + `signup_claim` + join · Phase 4 lobby / join / attendance · Phase 5 owner dashboard / cancel · Phase 6 Twilio swap + cloud. **Only Phase 6 is Twilio-gated.**
 
 ## Working facts the build needs now
 
