@@ -7,8 +7,9 @@ import { execSync } from 'child_process';
 
 const URL          = 'http://127.0.0.1:54321';
 const ANON         = 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
-const SVC          = process.env.SUPABASE_SECRET_KEY;
-if (!SVC) throw new Error('SUPABASE_SECRET_KEY is not set. Add it to .env.local and export it before running this script.');
+// Local dev keys — standard Supabase demo JWTs emitted by `supabase status`.
+// Never commit real keys; .env.local is gitignored and holds the source of truth.
+const SVC          = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU';
 const OWNER_PHONE  = '+15555550101';
 const PLAYER_PHONE = '+15555550102';
 const OTP          = '123456';
