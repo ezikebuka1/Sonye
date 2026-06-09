@@ -544,3 +544,19 @@ contents in context when writing those requirements;
 the audit-driven correction is captured here rather than
 edited into the original requirements to preserve the
 historical record of how the divergence was discovered.
+
+---
+
+## Amendment B — Server-side post-verify branching (2026-06-09)
+
+**Amends:** Sub-decision 4 ("Branching: client-side, post-JWT, on URL context").
+
+Sub-decision 4 located post-verify flow branching on the client. The rationale named a real risk but over-scoped where it applied. The enumeration concern (Property 4) lives at the OTP-send step: a `public.users` lookup there would leak which phones are registered. It does not apply after verify, once the caller has proven phone ownership with a valid OTP.
+
+**Amended decision:** post-verify branching moves server-side. One round trip: `verifyOtp` → set the `@supabase/ssr` session cookie → `public.users` existence check → evaluate URL context (`slotId` / `claim_token`) → 302/303 redirect to the resolved flow. The browser lands directly on the correct destination.
+
+**Preserved:** Property 4 holds — the send path stays stateless, no registration leak, no probing existence without a valid OTP. The branching table (Flows 1 / 2 / 2′ / 3 and the `claim_token` mismatch fallthrough) is unchanged; only the execution location moved.
+
+**Why:** handing the session to the client just to run a DB lookup and `router.push()` forces a loading state, a session-sync race, or a flash of wrong UI. Server-side resolution avoids all three.
+
+**Implementation:** send and verify run as Next.js Server Actions; send stays stateless. (Mechanism recorded for the build, not itself load-bearing — a Route Handler would satisfy the same decision.)
