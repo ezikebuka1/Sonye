@@ -128,3 +128,45 @@ the ones that least need them — and the lowest-density slots stay
 low-density. Same density-fracturing logic that defers skill
 filters and play-reason matching. Worth weighing against the
 top-of-funnel marketing flexibility browse-all unlocks.
+
+**Availability + courts (optional profile surface).** D7.4
+(PENDING LOCK) iceboxes `general_availability` and
+`preferred_venues` from the in-app onboarding form. Both columns
+stay in the schema (nullable). Revisit as an optional, returninguser
+profile edit — at their own pace, never onboarding friction — once
+v1 ships venue- or time-aware matching that would actually read
+these fields.
+
+Cell Division — automated waitlist → new game.
+Captured 2026-06-10 (from Phase 3B waitlist design discussion).
+Revisit trigger: v1 density proven AND waitlists routinely run
+deep — per D7's "automate after first month of observation." This
+is the automation of D7's manual owner-spawn step.
+
+The mechanic (proposed): threshold = 4 (minimum viable doubles
+game). On hitting 4 waitlisted players: pull them into a NEW slot
+inheriting day, time, and skill. Venue = TBD. SMS the four:
+"you've got 4 players for [day/time]. claim a venue to unlock the
+game." First to claim a venue becomes the organizer.
+
+The court-collision footgun (the keeper insight): cloning the
+venue stacks multiple games on one public court — 18 people, one
+court, a real turf war. Venue-TBD + organizer-claim forces
+geographic distribution instead of stacking.
+
+Why it's v2, not v1:
+- Contradicts D7's locked "no automated slot spawning in v1" (the
+  manual step earns the demand intel that sets the threshold).
+- Introduces user-organized games, which reworks the
+  `slots_insert_owner` / `is_owner()` RLS gate and the Public
+  Commons venue-vetting model.
+- Venueless slots ripple through everything shipped: slot detail
+  + OG (Phase 2), lobby, attendance, `slot_share_preview`.
+- Depends on outbound SMS (Phase 6).
+
+v1 stays: uncapped waitlist, no hard reject; owner monitors depth
+via a saved query and spins up slots by hand.
+
+Open v2 questions: no-claim timeout / fallback; organizer trust +
+venue vetting for user-claimed courts; threshold tuning from real
+data; interaction with eventual Play-Now matching.
