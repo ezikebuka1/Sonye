@@ -63,6 +63,31 @@ export default function HomeClient() {
     }
   }, [searchParams]);
 
+  // Read ?toast= URL params from Server Action redirects and dispatch to toast store.
+  useEffect(() => {
+    const toastKey = searchParams.get("toast");
+    if (!toastKey) return;
+
+    const slotDesc = searchParams.get("slot") ?? "your game";
+    const decoded  = decodeURIComponent(slotDesc);
+
+    const TOAST_MAP: Record<string, { message: string; variant: "success" | "error" }> = {
+      joined:    { message: `you're in — ${decoded}`, variant: "success" },
+      waitlisted: { message: "on the waitlist — we'll text you", variant: "success" },
+      welcomed:  { message: "you're all set — find your game", variant: "success" },
+      cancelled: { message: "that game was cancelled", variant: "error" },
+      d9:        { message: "you're already in a game on that day", variant: "error" },
+    };
+
+    const entry = TOAST_MAP[toastKey];
+    if (entry) {
+      useAppStore.getState().showToast({ message: entry.message, variant: entry.variant });
+    }
+
+    // Clean URL so toast doesn't re-fire on refresh
+    router.replace("/");
+  }, [searchParams, router]);
+
   const slots = sortSlotsForHome(Object.values(storeSlots));
 
   return (

@@ -264,6 +264,7 @@ max_frequency = "5s"
 "+15555550101" = "123456"   # dev owner (Phase 0)
 "+15555550102" = "123456"   # throwaway player (Phase 1 checkpoint 3)
 "+15555550199" = "123456"   # net-new player for Phase 3A Flow-2 checkpoint (no public.users row)
+"+15555550033" = "123456"   # WaitlistBob — claim_token 33333333-... for Phase 3B CP6
 
 # Configure logged in session timeouts.
 # [auth.sessions]
