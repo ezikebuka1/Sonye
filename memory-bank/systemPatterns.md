@@ -218,3 +218,14 @@ a pushed commit is a coordination problem.
   local file state to network side effects ("spooky action at a
   distance"), and every implicit push is a potentially irreversible
   operation made without deliberation
+
+## Known Gotchas
+
+**GoTrue JWT strips the leading `+` from phone numbers.**
+`auth.jwt() ->> 'phone'` returns `'15555550033'`, not `'+15555550033'`.
+Any comparison against `public.users.phone` (stored as strict E.164 with
+the leading `+`) must normalise the JWT phone before the WHERE clause.
+Fixed in `20260610120000_fix_signup_claim_jwt_phone.sql` for the
+`signup_claim` claim-token path. Apply the same `CASE WHEN ... LIKE '+%'
+THEN ... ELSE '+' || ...` guard to any future function that reads
+`auth.jwt() ->> 'phone'` and compares it against `public.users.phone`.

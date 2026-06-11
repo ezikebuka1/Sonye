@@ -152,15 +152,14 @@ export function OnboardingForm({ flow, slotId, slotPreview }: Props) {
             />
           </div>
 
-          {/* Skill level — chip group */}
+          {/* Skill level — radiogroup (single-select required) */}
           <div>
             <span id="skill-label" className="block text-sm font-semibold text-[#1A3650] mb-2">
               Skill level
             </span>
             <div
-              role="group"
+              role="radiogroup"
               aria-labelledby="skill-label"
-              aria-invalid={!!errors?.skill_level}
               aria-describedby={errors?.skill_level ? 'skill-error' : undefined}
               className="flex flex-wrap gap-2"
             >
@@ -168,7 +167,8 @@ export function OnboardingForm({ flow, slotId, slotPreview }: Props) {
                 <button
                   key={opt.value}
                   type="button"
-                  aria-pressed={selectedSkill === opt.value}
+                  role="radio"
+                  aria-checked={selectedSkill === opt.value}
                   onClick={() => setSelectedSkill(opt.value)}
                   className={`${CHIP_BASE} ${selectedSkill === opt.value ? SKILL_CHIP_SELECTED[opt.value] : CHIP_UNSELECTED}`}
                 >
