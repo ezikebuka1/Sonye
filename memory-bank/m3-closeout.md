@@ -387,3 +387,51 @@ authenticated). Full 16-proof battery (P1–P16c) run on fresh reset post-M3.5:
 all proofs green.
 
 Cloud apply is unaffected (no DDL in M3.5 migration).
+
+## Post-M3 patch — signup_claim JWT-phone normalization (2026-06-10, found in M4 Phase 3B)
+
+A launch-critical bug in `signup_claim`'s claim-token branch was found
+and fixed during Phase 3B's live-flow wiring. Full decision record:
+D2 Amendment D. Schema-relevant facts here:
+
+**The bug.** GoTrue strips the leading `+` from the phone claim in its
+JWTs: `auth.jwt() ->> 'phone'` returns `15555550033`. The claim branch
+compared that raw claim against `users.phone`, which is strictly E.164
+(`users_phone_e164_format` CHECK). Always-mismatch — every waitlist
+claim (D2 Flow 3) would have raised `claim_token_mismatch` and fallen
+through to net-new, silently locking the pre-launch cohort out of
+their seeded rows.
+
+**Why the battery missed it.** The M3 proofs set test phones and JWT
+sub/phone fields directly in psql, bypassing GoTrue's claim shaping.
+Synthetic JWT fixtures cannot catch claim-format divergence; only the
+live auth flow does. (Recorded in systemPatterns Known Gotchas.)
+
+**The fix.** Forward migration
+`supabase/migrations/20260610120000_fix_signup_claim_jwt_phone.sql` —
+CREATE OR REPLACE of `signup_claim`. Only executable change: the claim
+branch derives `v_jwt_phone` via a CASE that prepends `+` when absent
+(idempotent; strips nothing; `users.phone` stays strictly E.164).
+Scope proven by extracted-function `diff -u` against the working-tree
+base: Paths A (phone-unclaimed bind), C (returning read-only), and
+D (net-new INSERT) byte-identical in all executable content; remaining
+deltas are comment relabels and one whitespace join.
+
+**Proof.** Live Flow 3 round-trip on the seeded WaitlistBob fixture:
+before — `auth_user_id` NULL, `claim_token` set; after `signup_claim`
+through the real verify flow — `auth_user_id` = JWT sub,
+`claim_token` NULL.
+
+**Deployment state.** Applied LOCAL only. **Cloud still runs the
+pre-fix function.** The cloud apply is human-gated and rides with the
+Phase 6 cloud step; it MUST land before launch — waitlist-claim is
+the launch-day mechanism.
+
+**Process deviation, accepted once.** The fix was applied autonomously
+mid-build and committed inside the Phase 3B feature commit (c0b57a6)
+rather than as its own reviewed dispatch + commit. Reviewed and
+blessed post-hoc; deliberately NOT rebased apart (3-deep agent-driven
+rebase risk outweighs the cosmetic gain — the migration file remains
+independently auditable by path). Going forward, schema/function
+changes follow the Schema-Change Dispatch Discipline in
+systemPatterns.md: own dispatch, own commit, surgical edits only.

@@ -560,3 +560,27 @@ Sub-decision 4 located post-verify flow branching on the client. The rationale n
 **Why:** handing the session to the client just to run a DB lookup and `router.push()` forces a loading state, a session-sync race, or a flash of wrong UI. Server-side resolution avoids all three.
 
 **Implementation:** send and verify run as Next.js Server Actions; send stays stateless. (Mechanism recorded for the build, not itself load-bearing — a Route Handler would satisfy the same decision.)
+
+Committed as its own doc commit (`c457df0`) per the two-commit discipline; implemented in Phase 3A (`e427724`).
+
+## Amendment C — Session cookie not HttpOnly (2026-06-09, Phase 3A CP5)
+
+**Amends:** the Phase 3A dispatch's Rule 6 ("SSR cookie … HttpOnly auth cookie"). **Settled — do not re-litigate.**
+
+`@supabase/ssr` deliberately does NOT set the session cookie HttpOnly by default: the browser-side Supabase client (`createBrowserClient`) must read the session token to run authenticated queries client-side. Sonye's interactive surfaces — lobby roster, join, attendance — lean on exactly those client-side reads in Phases 4+. Forcing HttpOnly breaks client-side auth.
+
+**Decision:** accept the library default (non-HttpOnly session cookie). XSS defense is the standard posture instead of the cookie flag: React's output escaping, a Content-Security-Policy, and no `dangerouslySetInnerHTML`. Code surfaced the deviation rather than silently forcing the flag (correct instinct); architect ruled, Gemini nodded, recorded here so "make it HttpOnly" doesn't resurface as a regression-looking bug report.
+
+## Amendment D — GoTrue JWT-phone normalization in signup_claim (2026-06-10, Phase 3B)
+
+**Amends:** the Flow 3 phone-match mechanics in sub-decision 6 / Amendment A. **Launch-critical fix.**
+
+GoTrue strips the leading `+` from the phone claim in its JWTs: `auth.jwt() ->> 'phone'` returns `15555550033`, not `+15555550033`. The M3.3 claim branch compared that raw claim against `users.phone`, which is strictly E.164 (`+`-prefixed, CHECK-enforced). The comparison was an **always-mismatch**: every claim-token bind would have raised `claim_token_mismatch` and fallen through to net-new — i.e., every launch-day waitlist claim would have silently failed, locking the highest-value cohort out of their pre-seeded rows.
+
+**Why earlier proofs missed it:** the M3 verification battery set test phones and JWT claims directly in psql, bypassing GoTrue's claim shaping. Only the live auth flow (Phase 3B wiring) surfaced it. Lesson recorded in `systemPatterns.md` Known Gotchas.
+
+**Fix:** migration `20260610120000_fix_signup_claim_jwt_phone.sql` — a `CREATE OR REPLACE` of `signup_claim` whose only executable change is in the claim branch: derive `v_jwt_phone` from the raw claim via a CASE that **prepends `+` when absent** (idempotent if GoTrue ever changes; strips nothing, so no international-format fragility; keeps `users.phone` strictly E.164). Paths A/C/D verified character-identical via extracted-function `diff -u` (remaining deltas are comments/whitespace only). End-to-end proof: seeded WaitlistBob row bound through the real flow — `auth_user_id` NULL→JWT-sub, `claim_token`→NULL.
+
+**Status:** applied locally; **cloud still runs the pre-fix function.** The cloud apply rides with the Phase 6 cloud step and must land before launch.
+
+**Process note:** the fix was applied autonomously mid-build inside the Phase 3B feature commit (`c0b57a6`) — accepted as a one-time deviation (reviewed post-hoc, deliberately not rebased apart). Schema/function changes now require their own dispatch + commit per the Schema-Change Dispatch Discipline in `systemPatterns.md`.
