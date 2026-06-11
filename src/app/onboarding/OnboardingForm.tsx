@@ -183,7 +183,7 @@ export function OnboardingForm({ flow, slotId, slotPreview }: Props) {
             )}
           </div>
 
-          {/* Gender — optional chip group */}
+          {/* Gender — optional radiogroup (single-select; deselectable) */}
           <div>
             <span id="gender-label" className="block text-sm font-semibold text-[#1A3650] mb-0.5">
               Gender <span className="font-normal text-[#7A9AB8]">(optional)</span>
@@ -191,14 +191,15 @@ export function OnboardingForm({ flow, slotId, slotPreview }: Props) {
             <p className="text-xs text-[#7A9AB8] mb-2">
               Used to show game gender composition in the lobby.
             </p>
-            <div role="group" aria-labelledby="gender-label" className="flex flex-wrap gap-2">
+            <div role="radiogroup" aria-labelledby="gender-label" className="flex flex-wrap gap-2">
               {GENDER_OPTIONS.map(opt => {
                 const isSelected = selectedGender === opt.value;
                 return (
                   <button
                     key={opt.value}
                     type="button"
-                    aria-pressed={isSelected}
+                    role="radio"
+                    aria-checked={isSelected}
                     onClick={() => setSelectedGender(isSelected ? null : opt.value)}
                     className={`${CHIP_BASE} ${isSelected ? GENDER_SELECTED : CHIP_UNSELECTED}`}
                   >
