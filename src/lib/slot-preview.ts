@@ -91,7 +91,7 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
   if (preview.is_cancelled) {
     return {
       state: 'CANCELLED',
-      footerBg: '#7A9AB8',
+      footerBg: '#5E80A3',
       pipsFilled: 0,
       pipsEmpty: 0,
       spotsLeft: null,
@@ -106,7 +106,7 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
   if (!preview.fill_ratio_shown) {
     return {
       state: 'FORMING',
-      footerBg: '#1A3650',
+      footerBg: '#14304D',
       pipsFilled: 0,
       pipsEmpty: 0,
       spotsLeft: null,
@@ -123,7 +123,7 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
     const spots = preview.capacity - filled;
     return {
       state: 'FILLING',
-      footerBg: '#D4724A',
+      footerBg: '#FF6A00',
       pipsFilled: filled,
       pipsEmpty: spots,
       spotsLeft: spots,
@@ -137,7 +137,7 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
 
   return {
     state: 'FULL',
-    footerBg: '#7A9AB8',
+    footerBg: '#5E80A3',
     pipsFilled: preview.capacity,
     pipsEmpty: 0,
     spotsLeft: 0,

@@ -17,8 +17,8 @@ export function PhoneForm({ slotId, claimToken }: Props) {
       <input type="hidden" name="claim_token" value={claimToken} />
 
       {/* Phone field — +1 prefix fixed for v1 */}
-      <div className="flex items-center border border-[#DAE7F1] rounded-xl overflow-hidden bg-white">
-        <span className="px-3 py-3 text-[#7A9AB8] text-sm font-medium border-r border-[#DAE7F1] select-none">
+      <div className="flex items-center border border-[#CFE0F4] rounded-xl overflow-hidden bg-white">
+        <span className="px-3 py-3 text-[#5E80A3] text-sm font-medium border-r border-[#CFE0F4] select-none">
           +1
         </span>
         <input
@@ -27,18 +27,18 @@ export function PhoneForm({ slotId, claimToken }: Props) {
           required
           placeholder="(555) 000-0000"
           autoComplete="tel-national"
-          className="flex-1 px-3 py-3 text-[#1A3650] text-sm outline-none bg-transparent placeholder:text-[#7A9AB8]"
+          className="flex-1 px-3 py-3 text-[#14304D] text-sm outline-none bg-transparent placeholder:text-[#5E80A3]"
         />
       </div>
 
       {error && (
-        <p className="text-sm text-[#D4724A]">{error}</p>
+        <p className="text-sm text-[#D64B4B]">{error}</p>
       )}
 
       <button
         type="submit"
         disabled={isPending}
-        className="bg-[#D4724A] hover:bg-[#B85D3A] disabled:opacity-60 text-white font-semibold rounded-xl py-3 px-6 transition-colors"
+        className="bg-[#EE5E00] hover:brightness-95 disabled:opacity-60 text-white font-semibold rounded-xl py-3 px-6 transition-colors"
       >
         {isPending ? 'Sending…' : 'Send code'}
       </button>

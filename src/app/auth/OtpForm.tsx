@@ -27,17 +27,17 @@ export function OtpForm({ phone, slotId, claimToken }: Props) {
         required
         placeholder="000000"
         autoComplete="one-time-code"
-        className="w-full border border-[#DAE7F1] rounded-xl px-4 py-4 text-[#1A3650] text-center text-2xl tracking-[0.4em] bg-white outline-none focus:border-[#3A7CB8] placeholder:text-[#7A9AB8] placeholder:tracking-normal"
+        className="w-full border border-[#CFE0F4] rounded-xl px-4 py-4 text-[#14304D] text-center text-2xl tracking-[0.4em] bg-white outline-none focus:border-[#8DBCF1] placeholder:text-[#5E80A3] placeholder:tracking-normal"
       />
 
       {error && (
-        <p className="text-sm text-[#D4724A]">{error}</p>
+        <p className="text-sm text-[#D64B4B]">{error}</p>
       )}
 
       <button
         type="submit"
         disabled={isPending}
-        className="bg-[#D4724A] hover:bg-[#B85D3A] disabled:opacity-60 text-white font-semibold rounded-xl py-3 px-6 transition-colors"
+        className="bg-[#EE5E00] hover:brightness-95 disabled:opacity-60 text-white font-semibold rounded-xl py-3 px-6 transition-colors"
       >
         {isPending ? 'Verifying…' : 'Verify'}
       </button>

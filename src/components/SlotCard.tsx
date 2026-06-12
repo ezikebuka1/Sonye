@@ -159,7 +159,7 @@ export default function SlotCard({
         <button
           type="button"
           onClick={() => onJoinWaitlist(slotId)}
-          className="w-full bg-coral text-white rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:bg-coral-dark active:bg-coral-dark"
+          className="w-full bg-coral text-white rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:brightness-95 active:brightness-90"
           aria-label={`Join waitlist for ${dayLabel} ${timeLabel}`}
         >
           Join waitlist
@@ -168,7 +168,7 @@ export default function SlotCard({
         <button
           type="button"
           onClick={() => onJoin(slotId)}
-          className="w-full bg-coral text-white rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:bg-coral-dark active:bg-coral-dark"
+          className="w-full bg-coral text-white rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:brightness-95 active:brightness-90"
           aria-label={`Join game on ${dayLabel} ${timeLabel}`}
         >
           Join game

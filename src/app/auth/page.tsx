@@ -50,21 +50,21 @@ export default async function AuthPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#EEF4FA] flex flex-col items-center justify-start px-5 pt-14 pb-10 max-w-[390px] mx-auto">
+    <main className="min-h-screen bg-[#E6F0FF] flex flex-col items-center justify-start px-5 pt-14 pb-10 max-w-[390px] mx-auto">
 
       {/* Pinned banner — shown on both screens when ?slotId is present */}
       {bannerText && (
-        <div className="w-full mb-7 rounded-2xl bg-white border border-[#DAE7F1] px-4 py-3">
-          <p className="text-xs font-medium text-[#7A9AB8] uppercase tracking-wide mb-0.5">
+        <div className="w-full mb-7 rounded-2xl bg-white border border-[#CFE0F4] px-4 py-3">
+          <p className="text-xs font-medium text-[#5E80A3] uppercase tracking-wide mb-0.5">
             You&apos;re joining
           </p>
-          <p className="text-sm font-semibold text-[#1A3650]">{bannerText}</p>
+          <p className="text-sm font-semibold text-[#14304D]">{bannerText}</p>
         </div>
       )}
 
       {step === 'otp' ? (
         <>
-          <h1 className="text-xl font-bold text-[#1A3650] mb-6 text-center w-full">
+          <h1 className="text-xl font-bold text-[#14304D] mb-6 text-center w-full">
             we texted you a 6-digit code
           </h1>
           <OtpForm phone={phone} slotId={slotId} claimToken={claimToken} />
@@ -72,7 +72,7 @@ export default async function AuthPage({
       ) : (
         <>
           {!bannerText && (
-            <p className="text-sm text-[#7A9AB8] mb-6 text-center w-full">
+            <p className="text-sm text-[#5E80A3] mb-6 text-center w-full">
               enter your phone number to log in or sign up
             </p>
           )}

@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
-import { DM_Sans, Instrument_Serif } from "next/font/google";
+import { Nunito_Sans, Baloo_2 } from "next/font/google";
 import "./globals.css";
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const nunitoSans = Nunito_Sans({
+  variable: "--font-nunito",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
+const baloo2 = Baloo_2({
+  variable: "--font-baloo2",
   subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
+  weight: ["600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -28,7 +27,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${instrumentSerif.variable} h-full antialiased`}
+      className={`${nunitoSans.variable} ${baloo2.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

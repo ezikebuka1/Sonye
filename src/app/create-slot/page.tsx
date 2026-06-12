@@ -81,7 +81,7 @@ export default async function CreateSlotPage({
   if (!isOwner) {
     return (
       <main className="p-8 font-mono">
-        <p className="text-[#D4724A]">Access denied — owner only.</p>
+        <p className="text-[#D64B4B]">Access denied — owner only.</p>
       </main>
     );
   }
@@ -96,7 +96,7 @@ export default async function CreateSlotPage({
   if (venuesErr || !venues?.length) {
     return (
       <main className="p-8 font-mono">
-        <p className="text-[#D4724A] font-bold">
+        <p className="text-[#D64B4B] font-bold">
           FLAG (Rule 6): venues SELECT failed —{' '}
           {venuesErr ? String(venuesErr) : 'empty result'}.
           Check RLS policy venues_select_authenticated.
@@ -115,13 +115,13 @@ export default async function CreateSlotPage({
 
     return (
       <main className="p-8 font-mono max-w-lg">
-        <h1 className="text-xl font-bold text-[#1A3650] mb-4">Slot created</h1>
-        <pre className="bg-[#EEF4FA] border border-[#DAE7F1] rounded-2xl p-4 text-sm overflow-auto">
+        <h1 className="text-xl font-bold text-[#14304D] mb-4">Slot created</h1>
+        <pre className="bg-[#E6F0FF] border border-[#CFE0F4] rounded-2xl p-4 text-sm overflow-auto">
           {JSON.stringify(slot, null, 2)}
         </pre>
         <a
           href="/create-slot"
-          className="inline-block mt-4 text-[#D4724A] underline"
+          className="inline-block mt-4 text-[#EE5E00] underline"
         >
           Create another
         </a>
@@ -131,10 +131,10 @@ export default async function CreateSlotPage({
 
   return (
     <main className="p-8 max-w-lg">
-      <h1 className="text-2xl font-bold text-[#1A3650] mb-6">Create Slot</h1>
+      <h1 className="text-2xl font-bold text-[#14304D] mb-6">Create Slot</h1>
 
       {params.err && (
-        <p className="mb-4 text-[#D4724A] text-sm">
+        <p className="mb-4 text-[#D64B4B] text-sm">
           Error: {decodeURIComponent(params.err)}
         </p>
       )}
@@ -143,11 +143,11 @@ export default async function CreateSlotPage({
 
         {/* Venue */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold text-[#1A3650]">Venue</span>
+          <span className="text-sm font-semibold text-[#14304D]">Venue</span>
           <select
             name="venue_id"
             required
-            className="border border-[#DAE7F1] rounded-xl px-3 py-2 text-[#1A3650] bg-white"
+            className="border border-[#CFE0F4] rounded-xl px-3 py-2 text-[#14304D] bg-white"
           >
             {venues.map((v) => (
               <option key={v.id} value={v.id}>{v.name}</option>
@@ -157,45 +157,45 @@ export default async function CreateSlotPage({
 
         {/* Date */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold text-[#1A3650]">Date (Dallas)</span>
+          <span className="text-sm font-semibold text-[#14304D]">Date (Dallas)</span>
           <input
             name="date"
             type="date"
             required
-            className="border border-[#DAE7F1] rounded-xl px-3 py-2 text-[#1A3650]"
+            className="border border-[#CFE0F4] rounded-xl px-3 py-2 text-[#14304D]"
           />
         </label>
 
         {/* Start time */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold text-[#1A3650]">Start time (Dallas local)</span>
+          <span className="text-sm font-semibold text-[#14304D]">Start time (Dallas local)</span>
           <input
             name="start_time"
             type="time"
             required
-            className="border border-[#DAE7F1] rounded-xl px-3 py-2 text-[#1A3650]"
+            className="border border-[#CFE0F4] rounded-xl px-3 py-2 text-[#14304D]"
           />
         </label>
 
         {/* End time */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold text-[#1A3650]">End time (Dallas local)</span>
+          <span className="text-sm font-semibold text-[#14304D]">End time (Dallas local)</span>
           <input
             name="end_time"
             type="time"
             required
-            className="border border-[#DAE7F1] rounded-xl px-3 py-2 text-[#1A3650]"
+            className="border border-[#CFE0F4] rounded-xl px-3 py-2 text-[#14304D]"
           />
         </label>
 
         {/* Capacity */}
-        <fieldset className="border border-[#DAE7F1] rounded-xl p-3">
-          <legend className="text-sm font-semibold text-[#1A3650] px-1">Capacity</legend>
+        <fieldset className="border border-[#CFE0F4] rounded-xl p-3">
+          <legend className="text-sm font-semibold text-[#14304D] px-1">Capacity</legend>
           <div className="flex gap-6 mt-1">
-            <label className="flex items-center gap-2 text-[#1A3650]">
+            <label className="flex items-center gap-2 text-[#14304D]">
               <input type="radio" name="capacity" value="6" defaultChecked /> 6
             </label>
-            <label className="flex items-center gap-2 text-[#1A3650]">
+            <label className="flex items-center gap-2 text-[#14304D]">
               <input type="radio" name="capacity" value="4" /> 4
             </label>
           </div>
@@ -203,11 +203,11 @@ export default async function CreateSlotPage({
 
         {/* Gender category */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold text-[#1A3650]">Gender category</span>
+          <span className="text-sm font-semibold text-[#14304D]">Gender category</span>
           <select
             name="gender_category"
             required
-            className="border border-[#DAE7F1] rounded-xl px-3 py-2 text-[#1A3650] bg-white"
+            className="border border-[#CFE0F4] rounded-xl px-3 py-2 text-[#14304D] bg-white"
           >
             <option value="open">Open</option>
             <option value="women">Women</option>
@@ -217,11 +217,11 @@ export default async function CreateSlotPage({
 
         {/* Skill level */}
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold text-[#1A3650]">Skill level</span>
+          <span className="text-sm font-semibold text-[#14304D]">Skill level</span>
           <select
             name="skill_level"
             required
-            className="border border-[#DAE7F1] rounded-xl px-3 py-2 text-[#1A3650] bg-white"
+            className="border border-[#CFE0F4] rounded-xl px-3 py-2 text-[#14304D] bg-white"
           >
             <option value="beginner">Beginner</option>
             <option value="advanced_beginner">Advanced Beginner</option>
@@ -232,7 +232,7 @@ export default async function CreateSlotPage({
 
         <button
           type="submit"
-          className="mt-2 bg-[#D4724A] hover:bg-[#B85D3A] text-white font-semibold rounded-xl py-3 px-6 transition-colors"
+          className="mt-2 bg-[#EE5E00] hover:brightness-95 text-white font-semibold rounded-xl py-3 px-6 transition-colors"
         >
           Create Slot
         </button>

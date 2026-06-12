@@ -12,11 +12,11 @@ interface ToastProps {
 
 const AUTO_DISMISS_MS = 5000;
 
-// Accent color per variant. #88D7A0 (success green) is hardcoded at M2.2 —
-// no D8 token exists yet. See D5 doc for when to add it.
+// Accent color per variant — D8.2 feedback tokens (error #D64B4B,
+// success #4BAE78). Mirrors --color-error / --color-success in globals.css.
 const ACCENT: Record<"error" | "success", string> = {
-  error: "#D4724A",
-  success: "#88D7A0",
+  error: "#D64B4B",
+  success: "#4BAE78",
 };
 
 export function Toast({ message, action, variant, onDismiss }: ToastProps) {

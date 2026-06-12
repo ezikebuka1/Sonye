@@ -1,34 +1,50 @@
 @import "tailwindcss";
 
 :root {
-  --background: #EEF4FA;
-  --foreground: #1A3650;
+  --background: #E6F0FF;
+  --foreground: #14304D;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-dm-sans);
-  --font-serif: var(--font-instrument-serif);
+  --font-sans: var(--font-nunito);
+  --font-serif: var(--font-baloo2);
 
-  /* D8 — "Pickup Ready" design tokens */
-  --color-wash: #EEF4FA;
+  /* D8.2 "Pickup Ready" v2 — canonical sheet. Legacy D8 names kept as
+     aliases (D8.2 values) for Tailwind token-utility back-compat e.g. bg-ink.
+     No off-palette colors. */
+
+  /* surfaces */
+  --color-bg: #E6F0FF;
+  --color-wash: #E6F0FF;          /* alias → bg */
   --color-card: #FFFFFF;
-  --color-card-border: #DAE7F1;
-  --color-inset: #F6F9FC;
-  --color-coral: #D4724A;
-  --color-coral-dark: #B85D3A; /* hover/active state for coral buttons */
-  --color-ink: #1A3650;
-  --color-ink-soft: #7A9AB8;
+  --color-inset: #E6F0FF;         /* alias → bg: inset panels show page tint inside white cards */
+  --color-border: #CFE0F4;
+  --color-border-strong: #B7D2EE;
+  --color-card-border: #CFE0F4;   /* alias → border */
 
-  --color-skill-beg-bg: #E0EEF9;
-  --color-skill-beg-ink: #0C447C;
-  --color-skill-advbeg-bg: #FAF0DC;
-  --color-skill-advbeg-ink: #854F0B;
-  --color-skill-int-bg: #E8F5E9;
-  --color-skill-int-ink: #27500A;
-  --color-skill-adv-bg: #FBEAF0;
-  --color-skill-adv-ink: #72243E;
+  /* text + neutrals */
+  --color-ink: #14304D;
+  --color-steel: #5E80A3;
+  --color-ink-soft: #5E80A3;      /* alias → steel */
+  --color-muted: #9DB8D2;
+  --color-sky: #8DBCF1;
+
+  /* action + status */
+  --color-cta: #EE5E00;
+  --color-coral: #EE5E00;         /* alias → cta */
+  --color-coral-dark: #EE5E00;    /* alias → cta; hover now via brightness util */
+  --color-decorative: #FF6A00;
+  --color-yellow: #FFC63D;
+  --color-error: #D64B4B;
+  --color-success: #4BAE78;
+
+  /* skill ramp */
+  --color-skill-beg-bg: #DCEBFF;   --color-skill-beg-ink: #15457B;
+  --color-skill-advbeg-bg: #FFF1CC; --color-skill-advbeg-ink: #8A5A00;
+  --color-skill-int-bg: #D8EFDF;   --color-skill-int-ink: #246B42;
+  --color-skill-adv-bg: #D7E0EC;   --color-skill-adv-ink: #14304D;
 }
 
 /* D8 is explicitly light-only — no dark mode override */

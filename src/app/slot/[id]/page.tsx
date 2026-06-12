@@ -1,6 +1,5 @@
 import { cache } from 'react';
 import { headers } from 'next/headers';
-import { Baloo_2, Nunito_Sans } from 'next/font/google';
 import type { Metadata } from 'next';
 import {
   fetchSlotPreview,
@@ -9,18 +8,6 @@ import {
   deriveState,
   SKILL_DISPLAY,
 } from '@/lib/slot-preview';
-
-const baloo2 = Baloo_2({
-  subsets: ['latin'],
-  weight: ['600', '700'],
-  variable: '--font-baloo2',
-});
-
-const nunitoSans = Nunito_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-nunito',
-});
 
 // Deduplicate the fetch between generateMetadata and the page render
 const getCachedPreview = cache((id: string) => fetchSlotPreview(id));
@@ -89,14 +76,14 @@ export default async function SlotDetailPage({
   if (!preview) {
     return (
       <main
-        className={`${baloo2.variable} ${nunitoSans.variable} min-h-screen bg-[#EEF4FA] flex flex-col items-center justify-center px-6`}
+        className="min-h-screen bg-[#E6F0FF] flex flex-col items-center justify-center px-6"
       >
-        <p className="text-[#7A9AB8] text-sm text-center font-[family-name:var(--font-nunito)]">
+        <p className="text-[#5E80A3] text-sm text-center font-[family-name:var(--font-nunito)]">
           This game isn&apos;t available.
         </p>
         <a
           href="/"
-          className="mt-4 text-[#D4724A] text-sm underline underline-offset-2 font-[family-name:var(--font-nunito)]"
+          className="mt-4 text-[#EE5E00] text-sm underline underline-offset-2 font-[family-name:var(--font-nunito)]"
         >
           Browse games
         </a>
@@ -116,20 +103,20 @@ export default async function SlotDetailPage({
 
   return (
     <main
-      className={`${baloo2.variable} ${nunitoSans.variable} min-h-screen bg-[#EEF4FA] flex flex-col items-center`}
+      className="min-h-screen bg-[#E6F0FF] flex flex-col items-center"
     >
       <div className="w-full max-w-[390px] flex flex-col min-h-screen">
 
         {/* Wordmark */}
         <div className="pt-10 pb-2 flex flex-col items-center gap-2">
           <span
-            className="text-[13px] tracking-[0.12em] uppercase text-[#7A9AB8] font-semibold"
+            className="text-[13px] tracking-[0.12em] uppercase text-[#5E80A3] font-semibold"
             style={{ fontFamily: 'var(--font-nunito)' }}
           >
             sonye
           </span>
           <span
-            className="bg-[#E0EEF9] text-[#0C447C] text-[11px] font-semibold px-3 py-1 rounded-full tracking-wide uppercase"
+            className="bg-[#DCEBFF] text-[#15457B] text-[11px] font-semibold px-3 py-1 rounded-full tracking-wide uppercase"
             style={{ fontFamily: 'var(--font-nunito)' }}
           >
             {preview.sport_name}
@@ -139,13 +126,13 @@ export default async function SlotDetailPage({
         {/* Day / Time hero — Baloo 2 */}
         <div className="mt-6 px-6 text-center">
           <p
-            className="text-[#7A9AB8] text-[12px] font-semibold uppercase tracking-widest mb-1"
+            className="text-[#5E80A3] text-[12px] font-semibold uppercase tracking-widest mb-1"
             style={{ fontFamily: 'var(--font-nunito)' }}
           >
             {dayLabel}
           </p>
           <p
-            className="text-[#1A3650] text-[36px] font-bold leading-tight"
+            className="text-[#14304D] text-[36px] font-bold leading-tight"
             style={{ fontFamily: 'var(--font-baloo2)' }}
           >
             {timeRange}
@@ -153,16 +140,16 @@ export default async function SlotDetailPage({
         </div>
 
         {/* Venue line */}
-        <div className="mt-5 mx-6 bg-white border border-[#DAE7F1] rounded-2xl px-4 py-3 flex items-center gap-2">
+        <div className="mt-5 mx-6 bg-white border border-[#CFE0F4] rounded-2xl px-4 py-3 flex items-center gap-2">
           <span
-            className="text-[#4A7A9E] text-[14px] font-medium"
+            className="text-[#14304D] text-[14px] font-medium"
             style={{ fontFamily: 'var(--font-nunito)' }}
           >
             {preview.venue_name}
           </span>
-          <span className="text-[#DAE7F1]">·</span>
+          <span className="text-[#CFE0F4]">·</span>
           <span
-            className="text-[#7A9AB8] text-[13px]"
+            className="text-[#5E80A3] text-[13px]"
             style={{ fontFamily: 'var(--font-nunito)' }}
           >
             {preview.neighborhood}, Dallas
@@ -182,14 +169,14 @@ export default async function SlotDetailPage({
             {skill.label}
           </span>
           <span
-            className="bg-[#EEF4FA] text-[#1A3650] border border-[#DAE7F1] text-[12px] font-semibold px-3 py-1 rounded-full"
+            className="bg-[#E6F0FF] text-[#14304D] border border-[#CFE0F4] text-[12px] font-semibold px-3 py-1 rounded-full"
             style={{ fontFamily: 'var(--font-nunito)' }}
           >
             Group of {preview.capacity}
           </span>
           {genderTag && (
             <span
-              className="bg-[#EEF4FA] text-[#7A9AB8] border border-[#DAE7F1] text-[12px] font-medium px-3 py-1 rounded-full"
+              className="bg-[#E6F0FF] text-[#5E80A3] border border-[#CFE0F4] text-[12px] font-medium px-3 py-1 rounded-full"
               style={{ fontFamily: 'var(--font-nunito)' }}
             >
               {genderTag}
@@ -206,32 +193,32 @@ export default async function SlotDetailPage({
             {initial}
           </div>
           <span
-            className="text-[#7A9AB8] text-[13px]"
+            className="text-[#5E80A3] text-[13px]"
             style={{ fontFamily: 'var(--font-nunito)' }}
           >
             Organized by{' '}
-            <span className="text-[#1A3650] font-medium">{preview.owner_first_name}</span>
+            <span className="text-[#14304D] font-medium">{preview.owner_first_name}</span>
           </span>
         </div>
 
         {/* State card */}
-        <div className="mt-6 mx-6 rounded-2xl overflow-hidden border border-[#DAE7F1]">
+        <div className="mt-6 mx-6 rounded-2xl overflow-hidden border border-[#CFE0F4]">
 
           {/* Status header */}
           <div
             className="px-5 py-4"
             style={{
               backgroundColor:
-                ds.state === 'FILLING' ? '#FFF0EB' :
-                ds.state === 'FORMING' ? '#EEF4FA' : '#F6F9FC',
+                ds.state === 'FILLING' ? '#FF6A001A' :
+                ds.state === 'FORMING' ? '#E6F0FF' : '#FFFFFF',
             }}
           >
             <p
               className="text-[15px] font-semibold"
               style={{
                 color:
-                  ds.state === 'FILLING' ? '#D4724A' :
-                  ds.state === 'FORMING' ? '#1A3650' : '#7A9AB8',
+                  ds.state === 'FILLING' ? '#FF6A00' :
+                  ds.state === 'FORMING' ? '#14304D' : '#5E80A3',
                 fontFamily: 'var(--font-nunito)',
               }}
             >
@@ -240,7 +227,7 @@ export default async function SlotDetailPage({
             {ds.bodyCopy && (
               <p
                 className="mt-2 text-[13px] leading-snug"
-                style={{ color: '#7A9AB8', fontFamily: 'var(--font-nunito)' }}
+                style={{ color: '#5E80A3', fontFamily: 'var(--font-nunito)' }}
               >
                 {ds.bodyCopy}
               </p>
@@ -248,7 +235,7 @@ export default async function SlotDetailPage({
             {ds.state === 'FILLING' && ds.spotsLeft !== null && (
               <p
                 className="mt-1 text-[13px] font-semibold"
-                style={{ color: '#D4724A', fontFamily: 'var(--font-nunito)' }}
+                style={{ color: '#FF6A00', fontFamily: 'var(--font-nunito)' }}
               >
                 {ds.spotsLeft} spot{ds.spotsLeft === 1 ? '' : 's'} left
               </p>
@@ -257,19 +244,19 @@ export default async function SlotDetailPage({
 
           {/* Pips — FILLING and FULL only */}
           {(ds.state === 'FILLING' || ds.state === 'FULL') && (
-            <div className="px-5 py-4 flex flex-wrap gap-2 border-t border-[#DAE7F1] bg-white">
+            <div className="px-5 py-4 flex flex-wrap gap-2 border-t border-[#CFE0F4] bg-white">
               {Array.from({ length: ds.pipsFilled }).map((_, i) => (
                 <span
                   key={`f${i}`}
                   className="w-6 h-6 rounded-full"
-                  style={{ backgroundColor: '#D4724A' }}
+                  style={{ backgroundColor: '#FF6A00' }}
                 />
               ))}
               {Array.from({ length: ds.pipsEmpty }).map((_, i) => (
                 <span
                   key={`e${i}`}
                   className="w-6 h-6 rounded-full border-2"
-                  style={{ borderColor: '#DAE7F1' }}
+                  style={{ borderColor: '#CFE0F4' }}
                 />
               ))}
             </div>
@@ -304,7 +291,7 @@ export default async function SlotDetailPage({
         {/* SMS subline */}
         {ds.smsCopy && (
           <p
-            className="mt-3 px-6 text-[#7A9AB8] text-[12px] text-center"
+            className="mt-3 px-6 text-[#5E80A3] text-[12px] text-center"
             style={{ fontFamily: 'var(--font-nunito)' }}
           >
             {ds.smsCopy}
@@ -319,9 +306,9 @@ export default async function SlotDetailPage({
             'Leave before it locks',
           ].map((item) => (
             <div key={item} className="flex items-center gap-2 mb-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#D4724A] flex-shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6A00] flex-shrink-0" />
               <span
-                className="text-[#7A9AB8] text-[12px]"
+                className="text-[#5E80A3] text-[12px]"
                 style={{ fontFamily: 'var(--font-nunito)' }}
               >
                 {item}
@@ -333,7 +320,7 @@ export default async function SlotDetailPage({
         {/* Page footer */}
         <div className="px-6 pb-8 text-center">
           <p
-            className="text-[#A8C4DB] text-[11px]"
+            className="text-[#9DB8D2] text-[11px]"
             style={{ fontFamily: 'var(--font-nunito)' }}
           >
             Recurring pickleball games in Dallas · sonye.app
