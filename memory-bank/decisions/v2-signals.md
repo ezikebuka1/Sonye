@@ -130,7 +130,7 @@ filters and play-reason matching. Worth weighing against the
 top-of-funnel marketing flexibility browse-all unlocks.
 
 **Availability + courts (optional profile surface).** D7.4
-(PENDING LOCK) iceboxes `general_availability` and
+(Locked 2026-06-10) iceboxes `general_availability` and
 `preferred_venues` from the in-app onboarding form. Both columns
 stay in the schema (nullable). Revisit as an optional, returninguser
 profile edit — at their own pace, never onboarding friction — once
@@ -170,3 +170,37 @@ via a saved query and spins up slots by hand.
 Open v2 questions: no-claim timeout / fallback; organizer trust +
 venue vetting for user-claimed courts; threshold tuning from real
 data; interaction with eventual Play-Now matching.
+
+## Phone-reveal timing & opt-out — declined for v1 (2026-06-11)
+
+Two related proposals evaluated and declined (Ebuka + Gemini + architect):
+
+1. Per-user reveal opt-out — declined. No home without breaking canon
+   (5th onboarding field breaks D7.4's locked form; join-screen toggle
+   taxes the conversion-critical funnel); placebo (first outbound text
+   reveals you anyway); reciprocity trap (hidden = unreachable = no-show
+   risk, or voyeur-mode degrading group trust).
+
+2. Confirmation-gated reveal (reveal only after "everyone confirms") —
+   declined. Reveal is permanent, so delay shrinks but never closes the
+   harvest window (a motivated harvester just confirms first); gate fires
+   early = reveal-at-lock (already rejected in D10), fires late = kills
+   the coordination window D10 exists for; a pre-game confirmation state
+   machine is net-new scope overlapping D11's locked post-game flow.
+
+Harvest exposure is already structurally bounded: mutual reveal (you
+expose your own verified number to see others'), D9 caps at one joined
+game per day (≤5 numbers/day), manual curation surfaces repeat
+join-and-bail by name.
+
+Revisit triggers (first month of M4+ data, per D10 provisional):
+(a) signups dropping at the join disclosure, (b) women's-game signups
+materially lagging, (c) exposure/harassment complaints, (d) no-show
+divergence in any hidden-pattern cohort.
+
+If triggered: the canon path is a Sonye-mediated layer (proxy numbers /
+hosted group thread per D10) — never a roster toggle or reveal gate.
+Pre-explored design banked (2026-06-11 exploration, Direction B):
+profile-level "who can text me first," default share, group-facing
+label "texts first," disclosure restates the current setting at every
+join.
