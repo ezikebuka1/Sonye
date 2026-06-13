@@ -8,6 +8,7 @@ import {
   deriveState,
   SKILL_DISPLAY,
 } from '@/lib/slot-preview';
+import JoinDisclosure from '@/components/JoinDisclosure';
 
 // Deduplicate the fetch between generateMetadata and the page render
 const getCachedPreview = cache((id: string) => fetchSlotPreview(id));
@@ -259,6 +260,13 @@ export default async function SlotDetailPage({
                   style={{ borderColor: '#CFE0F4' }}
                 />
               ))}
+            </div>
+          )}
+
+          {/* D10 join disclosure — above the CTA (Phase 4A ruling G4) */}
+          {ds.ctaLabel && (
+            <div className="px-5 py-2.5 bg-white border-t border-[#CFE0F4]">
+              <JoinDisclosure />
             </div>
           )}
 

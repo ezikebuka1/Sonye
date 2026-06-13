@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from 'react';
 import { submitOnboardingAction, type OnboardingErrors } from './actions';
+import JoinDisclosure from '@/components/JoinDisclosure';
 
 type SkillLevel = 'beginner' | 'advanced_beginner' | 'intermediate' | 'advanced';
 type Gender     = 'woman' | 'man' | 'non_binary' | 'prefer_not_to_say';
@@ -220,12 +221,16 @@ export function OnboardingForm({ flow, slotId, slotPreview }: Props) {
               {isPending ? 'Saving…' : (isSlot ? 'Join the game' : 'Find games')}
             </button>
 
-            {/* D10 privacy disclosure */}
-            <p className="text-center text-xs text-[#5E80A3] mt-2">
-              {isSlot
-                ? 'your number is only shared with joined players'
-                : 'your number stays private until you join a game'}
-            </p>
+            {/* D10 privacy disclosure — slot flow carries the locked
+                join-disclosure copy (Phase 4A ruling G5); generic flow
+                keeps the pre-join contrast line verbatim */}
+            {isSlot ? (
+              <JoinDisclosure className="mt-2" />
+            ) : (
+              <p className="text-center text-xs text-[#5E80A3] mt-2">
+                your number stays private until you join a game
+              </p>
+            )}
           </div>
         </form>
       </div>

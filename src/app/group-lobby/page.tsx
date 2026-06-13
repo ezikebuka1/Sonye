@@ -1,10 +1,348 @@
-import { Suspense } from "react";
-import GroupLobbyClient from "./GroupLobbyClient";
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
+import {
+  fetchSlotPreview,
+  formatDallas,
+  formatTimeRange,
+  type SkillLevel,
+} from '@/lib/slot-preview';
+import { getAvatar, type Gender } from '@/lib/avatar';
+import { formatPhone, smsHref } from '@/lib/phone';
 
-export default function GroupLobbyPage() {
+// Roster must be fresh per request — never cached, never streamed
+// (no Suspense: the page renders synchronously so the full payload is
+// provable in one response).
+export const dynamic = 'force-dynamic';
+
+// Canonical D8.2 ramp — LOCAL map per ruling G8 (SKILL_DISPLAY in
+// slot-preview.ts is old-D8 and OG-consumed/quarantined; consolidation
+// banked for the OG re-skin dispatch). NOT copied from the
+// OnboardingForm chip map, which carries the banked tier-shift bug.
+const SKILL_RAMP: Record<SkillLevel, { bg: string; ink: string; label: string }> = {
+  beginner:          { bg: '#DCEBFF', ink: '#15457B', label: 'Beginner' },
+  advanced_beginner: { bg: '#FFF1CC', ink: '#8A5A00', label: 'Adv. Beginner' },
+  intermediate:      { bg: '#D8EFDF', ink: '#246B42', label: 'Intermediate' },
+  advanced:          { bg: '#D7E0EC', ink: '#14304D', label: 'Advanced' },
+};
+
+type RosterRow = {
+  membership_id: string;
+  first_name: string;
+  gender: Gender | null;
+  phone: string | null;
+  status: 'joined' | 'waitlisted';
+};
+
+type SelfMembership = { id: string; status: 'joined' | 'waitlisted' };
+
+// "1st" / "2nd" / "3rd" / "4th" … (11th–13th handled)
+function ordinal(n: number): string {
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+  const suffix = ({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ?? 'th';
+  return `${n}${suffix}`;
+}
+
+function MessageGlyph() {
   return (
-    <Suspense>
-      <GroupLobbyClient />
-    </Suspense>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      className="flex-shrink-0 text-[#5E80A3]"
+    >
+      <path d="M12 3C6.92 3 2.8 6.36 2.8 10.5c0 2.37 1.36 4.48 3.49 5.85-.1.86-.42 2.03-1.29 3.15 0 0 1.95-.27 3.6-1.5.44.09 1.62.3 3.4.3 5.08 0 9.2-3.36 9.2-7.5S17.08 3 12 3z" />
+    </svg>
+  );
+}
+
+function PadlockIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="flex-shrink-0"
+    >
+      <rect x="5" y="11" width="14" height="9" rx="2" fill="currentColor" />
+      <path d="M8 11V7a4 4 0 1 1 8 0v4" stroke="currentColor" strokeWidth="2" fill="none" />
+    </svg>
+  );
+}
+
+function Avatar({ row }: { row: RosterRow }) {
+  const av = getAvatar(row.gender, row.membership_id);
+  return (
+    <span
+      className="w-10 h-10 rounded-full flex items-center justify-center text-[15px] font-semibold flex-shrink-0"
+      style={{ backgroundColor: av.bg, color: av.fg }}
+    >
+      {row.first_name.charAt(0).toUpperCase()}
+    </span>
+  );
+}
+
+function SelfChip({ label }: { label: string }) {
+  return (
+    <span className="flex-shrink-0 text-[11px] font-semibold text-[#5E80A3] bg-white border border-[#CFE0F4] rounded-full px-2 py-0.5">
+      {label}
+    </span>
+  );
+}
+
+export default async function GroupLobbyPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const params = await searchParams;
+  const slotId = params.slotId ?? '';
+  if (!slotId) redirect('/');
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect(`/auth?slotId=${encodeURIComponent(slotId)}`);
+
+  // Header data (anon-safe projection); null ⇒ invalid slotId
+  const preview = await fetchSlotPreview(slotId);
+  if (!preview) redirect('/');
+
+  // D10 roster — server NULLs phones per viewer; rows arrive in the
+  // ruled order (joined first, FIFO by created_at)
+  const { data: rosterData, error: rosterErr } = await supabase.rpc('slot_roster', {
+    target_slot: slotId,
+  });
+  const roster = (rosterData as RosterRow[] | null) ?? [];
+  if (rosterErr || roster.length === 0) {
+    // Non-member (player) per the RPC gate — never reaches the lobby
+    redirect(`/slot/${encodeURIComponent(slotId)}`);
+  }
+
+  // G2: pin self explicitly — never "the row I can see"
+  const { data: uidData } = await supabase.rpc('current_user_id');
+  const uid = (uidData as string | null) ?? null;
+  if (!uid) redirect(`/slot/${encodeURIComponent(slotId)}`);
+
+  const { data: selfData } = await supabase
+    .from('session_memberships')
+    .select('id,status')
+    .eq('slot_id', slotId)
+    .eq('user_id', uid)
+    .in('status', ['joined', 'waitlisted'])
+    .maybeSingle();
+  const self = (selfData as SelfMembership | null) ?? null;
+
+  const joined   = roster.filter((r) => r.status === 'joined');
+  const waitlist = roster.filter((r) => r.status === 'waitlisted');
+
+  // G3: three member viewer states; roster non-empty with no self row
+  // is only reachable by the owner → owner-view (joined layout, no
+  // pill / self row / banner)
+  const viewer: 'joined' | 'waitlisted' | 'owner' = self ? self.status : 'owner';
+  const selfId = self?.id ?? null;
+
+  const waitlistPos =
+    viewer === 'waitlisted'
+      ? waitlist.findIndex((r) => r.membership_id === selfId) + 1
+      : 0;
+
+  // sms prefill needs the viewer's first name: members read their own
+  // roster row; the owner (no roster row) reads their own users row.
+  let selfFirstName = roster.find((r) => r.membership_id === selfId)?.first_name ?? '';
+  if (viewer === 'owner') {
+    const { data: ownRow } = await supabase
+      .from('users')
+      .select('first_name')
+      .eq('id', uid)
+      .maybeSingle();
+    selfFirstName = (ownRow as { first_name: string } | null)?.first_name ?? '';
+  }
+  const smsBody = `hey — it's ${selfFirstName} from the ${preview.venue_name} pickleball game`;
+
+  const { dayLabel, startLabel, endLabel } = formatDallas(preview.starts_at, preview.ends_at);
+  const timeRange = formatTimeRange(startLabel, endLabel);
+  const skill = SKILL_RAMP[preview.skill_level];
+  const genderTag =
+    preview.gender_category === 'women' ? 'Women' :
+    preview.gender_category === 'men'   ? 'Men'   : null;
+
+  const cap = preview.capacity;
+  const fillCount = joined.length;
+  const isLocked = fillCount >= cap;
+
+  const dirHelp =
+    viewer === 'waitlisted'
+      ? "numbers show once you're in the game"
+      : 'tap a number to text — parking, balls, last-minute changes';
+
+  return (
+    <main
+      className="min-h-screen bg-[#E6F0FF]"
+      style={{ fontFamily: 'var(--font-nunito)' }}
+    >
+      <div className="w-full max-w-[390px] mx-auto px-5 pt-4 pb-12">
+
+        {/* Topbar: back + status pill */}
+        <div className="flex items-center justify-between">
+          <a
+            href="/"
+            aria-label="Back to home"
+            className="flex items-center justify-center w-11 h-11 -ml-3 text-[#14304D]"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </a>
+          {viewer === 'joined' && (
+            <span className="bg-[#D8EFDF] text-[#246B42] text-[12px] font-semibold px-3 py-1 rounded-full">
+              {"you're in"}
+            </span>
+          )}
+          {viewer === 'waitlisted' && (
+            <span className="bg-[#FFF1CC] text-[#8A5A00] text-[12px] font-semibold px-3 py-1 rounded-full">
+              waitlist
+            </span>
+          )}
+        </div>
+
+        {/* Venue — the ONLY Baloo on screen */}
+        <h1
+          className="mt-3 text-[#14304D] text-[30px] font-bold leading-tight"
+          style={{ fontFamily: 'var(--font-baloo2)' }}
+        >
+          {preview.venue_name}
+        </h1>
+        <p className="mt-1 text-[#5E80A3] text-[13px]">
+          {dayLabel} · {timeRange}
+        </p>
+
+        {/* Meta pills: skill ramp + gender category */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span
+            className="text-[12px] font-semibold px-3 py-1 rounded-full"
+            style={{ backgroundColor: skill.bg, color: skill.ink }}
+          >
+            {skill.label}
+          </span>
+          {genderTag && (
+            <span className="bg-white text-[#5E80A3] border border-[#CFE0F4] text-[12px] font-medium px-3 py-1 rounded-full">
+              {genderTag}
+            </span>
+          )}
+        </div>
+
+        {/* Waitlist banner — waitlisted viewer only */}
+        {viewer === 'waitlisted' && (
+          <div className="mt-5 bg-[#FFF1CC] border-l-[3px] border-[#FFC63D] rounded-r-xl px-4 py-3">
+            <p className="text-[#8A5A00] text-[14px] font-semibold">
+              {`you're ${ordinal(waitlistPos)} in line`}
+            </p>
+            <p className="mt-0.5 text-[#8A5A00] text-[12px] leading-snug">
+              {"we'll text you if a spot opens — no need to check back"}
+            </p>
+          </div>
+        )}
+
+        {/* Group header */}
+        <div className="mt-6 flex items-center justify-between">
+          <h2 className="text-[#14304D] text-[16px] font-bold">your group</h2>
+          <span className="flex items-center gap-1 text-[#5E80A3] text-[13px] font-semibold [font-variant-numeric:tabular-nums]">
+            {`${fillCount}/${cap}`}
+            {isLocked && (
+              <>
+                <span>· locked</span>
+                <PadlockIcon />
+              </>
+            )}
+          </span>
+        </div>
+        <p className="mt-1 text-[#5E80A3] text-[12px]">{dirHelp}</p>
+
+        {/* Directory — single card, hairline dividers */}
+        <div className="mt-3 bg-white border border-[#CFE0F4] rounded-2xl overflow-hidden">
+          <div className="divide-y divide-[#CFE0F4]">
+            {joined.map((row) => {
+              const isSelf = row.membership_id === selfId;
+              // D10 UI double-gate: digits render only when the server
+              // sent a phone AND the row is a joined member AND it is
+              // not the viewer's own row (server already NULLs per D10)
+              const showSms = !isSelf && row.status === 'joined' && row.phone !== null;
+              return (
+                <div
+                  key={row.membership_id}
+                  className={`flex items-center gap-3 px-4 py-2.5 min-h-[56px] ${
+                    isSelf ? 'bg-[#E6F0FF]' : ''
+                  }`}
+                >
+                  <Avatar row={row} />
+                  <span className="text-[#14304D] text-[14px] font-medium truncate">
+                    {row.first_name}
+                  </span>
+                  {isSelf && <SelfChip label={"that's you"} />}
+                  {showSms && (
+                    <a
+                      href={smsHref(row.phone!, smsBody)}
+                      aria-label={`Text ${row.first_name}`}
+                      className="ml-auto flex items-center gap-1.5 min-h-[44px] pl-3 -my-1.5"
+                    >
+                      <span className="text-[#14304D] text-[14px] font-semibold [font-variant-numeric:tabular-nums]">
+                        {formatPhone(row.phone!)}
+                      </span>
+                      <MessageGlyph />
+                    </a>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Waitlist subsection */}
+          {waitlist.length > 0 && (
+            <div className="border-t border-[#CFE0F4]">
+              <p className="px-4 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[#5E80A3]">
+                waitlist
+              </p>
+              <div className="divide-y divide-[#CFE0F4]">
+                {waitlist.map((row, i) => {
+                  const isSelf = row.membership_id === selfId;
+                  return (
+                    <div
+                      key={row.membership_id}
+                      className={`flex items-center gap-3 px-4 py-2.5 min-h-[56px] ${
+                        isSelf ? 'bg-[#E6F0FF]' : ''
+                      }`}
+                    >
+                      {/* ordinal cell — kept on self rows (empty) so avatars align;
+                          the self chip carries the ordinal instead */}
+                      <span className="w-7 flex-shrink-0 text-[#5E80A3] text-[12px] font-semibold">
+                        {isSelf ? '' : ordinal(i + 1)}
+                      </span>
+                      <Avatar row={row} />
+                      <span className="text-[#14304D] text-[14px] font-medium truncate">
+                        {row.first_name}
+                      </span>
+                      {isSelf && <SelfChip label={`${ordinal(i + 1)} · that's you`} />}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
   );
 }
