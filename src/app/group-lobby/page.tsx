@@ -8,6 +8,7 @@ import {
 } from '@/lib/slot-preview';
 import { getAvatar, type Gender } from '@/lib/avatar';
 import { formatPhone, smsHref } from '@/lib/phone';
+import PeerReportLink from '@/components/PeerReportLink';
 
 // Roster must be fresh per request — never cached, never streamed
 // (no Suspense: the page renders synchronously so the full payload is
@@ -341,6 +342,11 @@ export default async function GroupLobbyPage({
               </div>
             </div>
           )}
+        </div>
+
+        {/* D11 peer-report link — below the directory, muted steel */}
+        <div className="mt-4 text-center">
+          <PeerReportLink venue={preview.venue_name} day={dayLabel} />
         </div>
       </div>
     </main>

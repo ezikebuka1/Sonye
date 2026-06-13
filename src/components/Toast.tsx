@@ -22,7 +22,7 @@ const ACCENT: Record<"error" | "success", string> = {
 export function Toast({ message, action, variant, onDismiss }: ToastProps) {
   const [visible, setVisible] = useState(false);
 
-  // Slide down from above viewport on mount
+  // Slide up from below viewport on mount
   useEffect(() => {
     const id = requestAnimationFrame(() => setVisible(true));
     return () => cancelAnimationFrame(id);
@@ -55,8 +55,8 @@ export function Toast({ message, action, variant, onDismiss }: ToastProps) {
         className={`fixed left-4 right-4 z-50 flex items-center gap-3 rounded-2xl px-4 py-3 shadow-lg
           bg-ink text-white
           transition-transform duration-200
-          ${visible ? "translate-y-0" : "-translate-y-full"}`}
-        style={{ top: "calc(env(safe-area-inset-top, 0px) + 16px)" }}
+          ${visible ? "translate-y-0" : "translate-y-full"}`}
+        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)" }}
       >
         {/* Variant dot */}
         <div

@@ -76,7 +76,7 @@ export default function HomeClient() {
       waitlisted: { message: "on the waitlist — we'll text you", variant: "success" },
       welcomed:  { message: "you're all set — find your game", variant: "success" },
       cancelled: { message: "that game was cancelled", variant: "error" },
-      d9:        { message: "you're already in a game on that day", variant: "error" },
+      d9:        { message: "You're already in a game today. Leave that one or complete it to join another.", variant: "error" },
     };
 
     const entry = TOAST_MAP[toastKey];

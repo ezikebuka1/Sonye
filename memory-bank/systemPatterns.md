@@ -94,6 +94,10 @@ No cloud keys in any committed file, ever — including verify scripts (the inci
 - **Real-device verification needs the production build** (`npm run build && npm run start`), not `npm run dev` — HMR WebSocket binds to localhost only; React won't hydrate on a phone over wifi.
 - **Return-shape changes to functions need DROP + CREATE** (not `CREATE OR REPLACE`), and DROP silently wipes grants — re-assert them (the M3.4 lesson).
 - **Playwright `.click()` inside `evaluate` fires before React re-renders** — use Playwright's native click / dispatch bubbling events when asserting post-interaction DOM state.
+- **`member_count` trigger covers INSERT + UPDATE OF status only; DELETE is intentionally uncovered.** `trg_sync_slot_counts` fires `AFTER INSERT OR UPDATE OF status` and its body reads `NEW.slot_id` (NULL on DELETE). No app path deletes a membership row — RLS exposes no DELETE policy, FKs are `ON DELETE RESTRICT`, and leave/kick are status→left UPDATEs (covered). A DELETE-reconcile branch would be dead code. (Phase 4B G2 ruling.) Battery probes the real paths (join → +1, full-join → waitlist, status→left → reconcile, CHECK backstop) — not raw DELETE.
+- **BSD `grep -E` treats `\d` as a literal `d`, not a digit class.** macOS grep is BSD; a verbatim `\d{3}` pattern silently matches nothing useful. Use POSIX `[0-9]{3}` in digit-pattern proofs. (Surfaced in 4A's D10 curl proof — the spec's `\(\d{3}\) \d{3}-\d{4}` grep was weaker than intended; the `[0-9]` variant is authoritative.)
+- **RSC flight payload doubles raw substring counts.** `grep -o "sms:" page.html | wc -l` counts each server-rendered anchor twice (once in DOM, once in the hydration/flight stream). For DOM-truth counts use `grep -o 'href="sms:'` (the attribute form appears once). (4A D10 proof.)
+- **psql `UPDATE … RETURNING` with `-A -t` still emits the `UPDATE 1` command tag**, so `TOKEN=$(psql -c "UPDATE … RETURNING x")` captures `<value>\nUPDATE 1` and breaks any URL built from it (embedded newline → curl HTTP 000). Extract the value defensively: pipe through `grep -oiE '<uuid-regex>' | head -1`. (4B token-lifecycle battery.)
 
 ## Push Discipline
 
