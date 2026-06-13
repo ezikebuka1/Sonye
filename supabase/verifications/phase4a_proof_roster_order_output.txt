@@ -1,0 +1,357 @@
+================================================================
+ Phase 4A-pre proof output — slot_roster deterministic ORDER BY
+ Captured: 2026-06-12 (local) / 2026-06-13 UTC
+ DB: fresh 'supabase db reset' (5 migrations incl 20260613001515),
+ then chain: phase3a_proofs → phase3b_setup → P6 race (concurrent
+ session1+session2) → phase3b_proofs → this proof ×2 → d10 re-run.
+================================================================
+
+════════════════════ ORDERING PROOF — RUN 1 ════════════════════
+Timing is on.
+
+=== 4A-PRE PROOF: slot_roster deterministic ordering ===
+Time: 4.545 ms
+Time: 2.839 ms
+PRE: S_race counts (EXPECTED: member_count=6, waitlist_count=1):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              1
+(1 row)
+
+Time: 0.230 ms
+BEGIN
+Time: 0.134 ms
+FIXTURE: inserting TestWaitlister2 (rolled back at end):
+INSERT 0 1
+Time: 1.463 ms
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "00000000-0000-0000-0000-4a0000000002", "role" : "authenticated"}
+(1 row)
+
+Time: 0.375 ms
+SET
+Time: 0.472 ms
+FIXTURE: TestWaitlister2 calls join_slot (EXPECTED: waitlisted):
+            membership_id             | resulting_status 
+--------------------------------------+------------------
+ 317a92a7-27e6-4a28-82d3-95b27c2374fd | waitlisted
+(1 row)
+
+Time: 6.840 ms
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "53eee1b3-0a3b-44a5-8bda-024b28e48b2a", "role" : "authenticated"}
+(1 row)
+
+Time: 0.298 ms
+
+ORDER PROOF RUN A (caller = joined racer Grace ):
+ pos |            membership_id             |   first_name    |   status   | phone_visible 
+-----+--------------------------------------+-----------------+------------+---------------
+   1 | e9f2bae9-efcd-4dc0-89dc-4090c0f402ba | Alice           | joined     | t
+   2 | e1843a1e-bef7-4cbb-afed-bb5f3cbe456a | Bob             | joined     | t
+   3 | 41b51766-39a3-41c1-877c-ac414dd157fa | Charlie         | joined     | t
+   4 | b999770f-d2d4-413b-aa43-b2be5552bf3a | Dana            | joined     | t
+   5 | 6017d599-27d0-40e3-92e6-e7f4015ca509 | Eve             | joined     | t
+   6 | 47556f5f-c230-4d34-8161-6ad717a47bc9 | Grace           | joined     | t
+   7 | 01617116-d745-42fb-9e0c-2aab0703642c | Henry           | waitlisted | f
+   8 | 317a92a7-27e6-4a28-82d3-95b27c2374fd | TestWaitlister2 | waitlisted | f
+(8 rows)
+
+Time: 3.785 ms
+ORDER PROOF RUN B (same caller, second call):
+ pos |            membership_id             |   first_name    |   status   | phone_visible 
+-----+--------------------------------------+-----------------+------------+---------------
+   1 | e9f2bae9-efcd-4dc0-89dc-4090c0f402ba | Alice           | joined     | t
+   2 | e1843a1e-bef7-4cbb-afed-bb5f3cbe456a | Bob             | joined     | t
+   3 | 41b51766-39a3-41c1-877c-ac414dd157fa | Charlie         | joined     | t
+   4 | b999770f-d2d4-413b-aa43-b2be5552bf3a | Dana            | joined     | t
+   5 | 6017d599-27d0-40e3-92e6-e7f4015ca509 | Eve             | joined     | t
+   6 | 47556f5f-c230-4d34-8161-6ad717a47bc9 | Grace           | joined     | t
+   7 | 01617116-d745-42fb-9e0c-2aab0703642c | Henry           | waitlisted | f
+   8 | 317a92a7-27e6-4a28-82d3-95b27c2374fd | TestWaitlister2 | waitlisted | f
+(8 rows)
+
+Time: 1.458 ms
+RESET
+Time: 0.364 ms
+GROUND TRUTH (base table, ruled ORDER BY):
+ pos |            membership_id             |   first_name    |   status   |          created_at           
+-----+--------------------------------------+-----------------+------------+-------------------------------
+   1 | e9f2bae9-efcd-4dc0-89dc-4090c0f402ba | Alice           | joined     | 2026-06-13 00:22:37.214728+00
+   2 | e1843a1e-bef7-4cbb-afed-bb5f3cbe456a | Bob             | joined     | 2026-06-13 00:22:37.217474+00
+   3 | 41b51766-39a3-41c1-877c-ac414dd157fa | Charlie         | joined     | 2026-06-13 00:22:37.218094+00
+   4 | b999770f-d2d4-413b-aa43-b2be5552bf3a | Dana            | joined     | 2026-06-13 00:22:37.218526+00
+   5 | 6017d599-27d0-40e3-92e6-e7f4015ca509 | Eve             | joined     | 2026-06-13 00:22:37.219197+00
+   6 | 47556f5f-c230-4d34-8161-6ad717a47bc9 | Grace           | joined     | 2026-06-13 00:22:57.876271+00
+   7 | 01617116-d745-42fb-9e0c-2aab0703642c | Henry           | waitlisted | 2026-06-13 00:22:59.407212+00
+   8 | 317a92a7-27e6-4a28-82d3-95b27c2374fd | TestWaitlister2 | waitlisted | 2026-06-13 00:23:43.547715+00
+(8 rows)
+
+Time: 0.545 ms
+ASSERT (EXPECTED mismatches=0):
+ mismatches 
+------------
+          0
+(1 row)
+
+Time: 2.203 ms
+ROLLBACK
+Time: 0.161 ms
+POST (after ROLLBACK): S_race counts (EXPECTED: member_count=6, waitlist_count=1):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              1
+(1 row)
+
+Time: 0.127 ms
+
+=== 4A-PRE ORDERING PROOF COMPLETE ===
+Run this script twice; order must be identical across runs.
+
+════════════════════ ORDERING PROOF — RUN 2 ════════════════════
+Timing is on.
+
+=== 4A-PRE PROOF: slot_roster deterministic ordering ===
+Time: 8.595 ms
+Time: 2.837 ms
+PRE: S_race counts (EXPECTED: member_count=6, waitlist_count=1):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              1
+(1 row)
+
+Time: 0.237 ms
+BEGIN
+Time: 0.327 ms
+FIXTURE: inserting TestWaitlister2 (rolled back at end):
+INSERT 0 1
+Time: 0.984 ms
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "00000000-0000-0000-0000-4a0000000002", "role" : "authenticated"}
+(1 row)
+
+Time: 0.541 ms
+SET
+Time: 0.525 ms
+FIXTURE: TestWaitlister2 calls join_slot (EXPECTED: waitlisted):
+            membership_id             | resulting_status 
+--------------------------------------+------------------
+ 075e51a5-a897-46cc-8d3e-843968d2efa0 | waitlisted
+(1 row)
+
+Time: 5.232 ms
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "53eee1b3-0a3b-44a5-8bda-024b28e48b2a", "role" : "authenticated"}
+(1 row)
+
+Time: 0.108 ms
+
+ORDER PROOF RUN A (caller = joined racer Grace ):
+ pos |            membership_id             |   first_name    |   status   | phone_visible 
+-----+--------------------------------------+-----------------+------------+---------------
+   1 | e9f2bae9-efcd-4dc0-89dc-4090c0f402ba | Alice           | joined     | t
+   2 | e1843a1e-bef7-4cbb-afed-bb5f3cbe456a | Bob             | joined     | t
+   3 | 41b51766-39a3-41c1-877c-ac414dd157fa | Charlie         | joined     | t
+   4 | b999770f-d2d4-413b-aa43-b2be5552bf3a | Dana            | joined     | t
+   5 | 6017d599-27d0-40e3-92e6-e7f4015ca509 | Eve             | joined     | t
+   6 | 47556f5f-c230-4d34-8161-6ad717a47bc9 | Grace           | joined     | t
+   7 | 01617116-d745-42fb-9e0c-2aab0703642c | Henry           | waitlisted | f
+   8 | 075e51a5-a897-46cc-8d3e-843968d2efa0 | TestWaitlister2 | waitlisted | f
+(8 rows)
+
+Time: 1.946 ms
+ORDER PROOF RUN B (same caller, second call):
+ pos |            membership_id             |   first_name    |   status   | phone_visible 
+-----+--------------------------------------+-----------------+------------+---------------
+   1 | e9f2bae9-efcd-4dc0-89dc-4090c0f402ba | Alice           | joined     | t
+   2 | e1843a1e-bef7-4cbb-afed-bb5f3cbe456a | Bob             | joined     | t
+   3 | 41b51766-39a3-41c1-877c-ac414dd157fa | Charlie         | joined     | t
+   4 | b999770f-d2d4-413b-aa43-b2be5552bf3a | Dana            | joined     | t
+   5 | 6017d599-27d0-40e3-92e6-e7f4015ca509 | Eve             | joined     | t
+   6 | 47556f5f-c230-4d34-8161-6ad717a47bc9 | Grace           | joined     | t
+   7 | 01617116-d745-42fb-9e0c-2aab0703642c | Henry           | waitlisted | f
+   8 | 075e51a5-a897-46cc-8d3e-843968d2efa0 | TestWaitlister2 | waitlisted | f
+(8 rows)
+
+Time: 1.139 ms
+RESET
+Time: 0.211 ms
+GROUND TRUTH (base table, ruled ORDER BY):
+ pos |            membership_id             |   first_name    |   status   |          created_at           
+-----+--------------------------------------+-----------------+------------+-------------------------------
+   1 | e9f2bae9-efcd-4dc0-89dc-4090c0f402ba | Alice           | joined     | 2026-06-13 00:22:37.214728+00
+   2 | e1843a1e-bef7-4cbb-afed-bb5f3cbe456a | Bob             | joined     | 2026-06-13 00:22:37.217474+00
+   3 | 41b51766-39a3-41c1-877c-ac414dd157fa | Charlie         | joined     | 2026-06-13 00:22:37.218094+00
+   4 | b999770f-d2d4-413b-aa43-b2be5552bf3a | Dana            | joined     | 2026-06-13 00:22:37.218526+00
+   5 | 6017d599-27d0-40e3-92e6-e7f4015ca509 | Eve             | joined     | 2026-06-13 00:22:37.219197+00
+   6 | 47556f5f-c230-4d34-8161-6ad717a47bc9 | Grace           | joined     | 2026-06-13 00:22:57.876271+00
+   7 | 01617116-d745-42fb-9e0c-2aab0703642c | Henry           | waitlisted | 2026-06-13 00:22:59.407212+00
+   8 | 075e51a5-a897-46cc-8d3e-843968d2efa0 | TestWaitlister2 | waitlisted | 2026-06-13 00:24:15.474601+00
+(8 rows)
+
+Time: 0.395 ms
+ASSERT (EXPECTED mismatches=0):
+ mismatches 
+------------
+          0
+(1 row)
+
+Time: 3.885 ms
+ROLLBACK
+Time: 0.142 ms
+POST (after ROLLBACK): S_race counts (EXPECTED: member_count=6, waitlist_count=1):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              1
+(1 row)
+
+Time: 0.151 ms
+
+=== 4A-PRE ORDERING PROOF COMPLETE ===
+Run this script twice; order must be identical across runs.
+
+═══════════ PHASE3B D10 PROOFS 9-11 — RE-RUN (post-ORDER BY) ═══════════
+Timing is on.
+
+=== D10 PROOFS: slot_roster phone projection ===
+Time: 2.279 ms
+P11-FIXTURE: inserting dedicated test-owner (not the seeded placeholder):
+INSERT 0 1
+Time: 1.572 ms
+D10-PRE: S_race counts (EXPECTED: member_count=6, waitlist_count=1):
+ member_count | waitlist_count 
+--------------+----------------
+            6 |              1
+(1 row)
+
+Time: 1.276 ms
+Time: 2.650 ms
+Time: 0.223 ms
+
+=== PROOF 9: joined caller -- joined phones visible, waitlisted NULL ===
+Joined racer this run:  Grace
+BEGIN
+Time: 0.109 ms
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "53eee1b3-0a3b-44a5-8bda-024b28e48b2a", "role" : "authenticated"}
+(1 row)
+
+Time: 0.370 ms
+SET
+Time: 0.422 ms
+P9-A: full roster as joined racer: Grace
+EXPECTED: 6 joined rows with non-NULL phone, 1 waitlisted row with NULL phone.
+   status   |    phone     | phone_visible 
+------------+--------------+---------------
+ waitlisted |              | f
+ joined     | +15550000001 | t
+ joined     | +15550000002 | t
+ joined     | +15550000003 | t
+ joined     | +15550000004 | t
+ joined     | +15550000005 | t
+ joined     | +15550000007 | t
+(7 rows)
+
+Time: 2.438 ms
+P9-B: count check:
+ joined_with_phone | joined_no_phone | waitlisted_null | waitlisted_exposed 
+-------------------+-----------------+-----------------+--------------------
+                 6 |               0 |               1 |                  0
+(1 row)
+
+Time: 1.703 ms
+COMMIT
+Time: 0.141 ms
+PROOF 9 COMPLETE.
+EXPECTED: joined_with_phone=6, joined_no_phone=0, waitlisted_null=1, waitlisted_exposed=0
+
+=== PROOF 10: waitlisted caller -- roster returned, every phone NULL ===
+BEGIN
+Time: 0.122 ms
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "5a9f42e0-ea4e-4a63-8091-396ce9448981", "role" : "authenticated"}
+(1 row)
+
+Time: 0.155 ms
+SET
+Time: 0.237 ms
+P10-A: full roster as waitlisted racer: Henry
+EXPECTED: 7 rows returned, phone column NULL on every row.
+   status   | phone 
+------------+-------
+ waitlisted | 
+ joined     | 
+ joined     | 
+ joined     | 
+ joined     | 
+ joined     | 
+ joined     | 
+(7 rows)
+
+Time: 1.965 ms
+P10-B: count check:
+ total_rows | rows_with_phone | rows_null_phone 
+------------+-----------------+-----------------
+          7 |               0 |               7
+(1 row)
+
+Time: 1.780 ms
+COMMIT
+Time: 0.188 ms
+PROOF 10 COMPLETE.
+EXPECTED: total_rows=7, rows_with_phone=0, rows_null_phone=7
+
+=== PROOF 11: owner caller -- is_owner() branch, row-level filter still applies ===
+BEGIN
+Time: 0.066 ms
+                                 set_config                                 
+----------------------------------------------------------------------------
+ {"sub" : "00000000-0000-0000-0000-d10000000001", "role" : "authenticated"}
+(1 row)
+
+Time: 0.188 ms
+SET
+Time: 0.118 ms
+P11-A: confirm is_owner() resolves true for TestOwner JWT:
+ caller_is_owner 
+-----------------
+ t
+(1 row)
+
+Time: 0.646 ms
+P11-B: full roster as TestOwner (owner):
+EXPECTED: joined rows phone NOT NULL, waitlisted rows phone NULL.
+(Row-level CASE filter -- sm.status=joined -- constrains even the owner branch.)
+   status   |    phone     | phone_visible 
+------------+--------------+---------------
+ waitlisted |              | f
+ joined     | +15550000001 | t
+ joined     | +15550000002 | t
+ joined     | +15550000003 | t
+ joined     | +15550000004 | t
+ joined     | +15550000005 | t
+ joined     | +15550000007 | t
+(7 rows)
+
+Time: 1.714 ms
+P11-C: count check (mirrors P9 -- owner and joined caller see identical phone set):
+ joined_with_phone | joined_no_phone | waitlisted_null | waitlisted_exposed 
+-------------------+-----------------+-----------------+--------------------
+                 6 |               0 |               1 |                  0
+(1 row)
+
+Time: 1.634 ms
+COMMIT
+Time: 0.090 ms
+PROOF 11 COMPLETE.
+EXPECTED: caller_is_owner=true, joined_with_phone=6, joined_no_phone=0, waitlisted_null=1, waitlisted_exposed=0
+
+=== ALL D10 PROOFS COMPLETE ===
+Key invariant: phone visible iff (is_joined_member OR is_owner) AND row.status=joined.
+Waitlisted callers: phone NULL on every row. Owner: same phone set as a joined caller.
