@@ -204,3 +204,8 @@ Pre-explored design banked (2026-06-11 exploration, Direction B):
 profile-level "who can text me first," default share, group-facing
 label "texts first," disclosure restates the current setting at every
 join.
+
+## Sport-icon container (blue chip) — multi-sport
+Trigger: 2nd sport added + rows need uniform icon alignment → wrap the sport icon
+in a page-blue tile (#E6F0FF), never orange (reserve orange for actions). V1 ships
+the bare paddle on white (single-sport, no alignment problem). See D8.3.
