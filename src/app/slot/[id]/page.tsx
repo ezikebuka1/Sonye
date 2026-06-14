@@ -41,7 +41,7 @@ export async function generateMetadata({
       description = 'Curated Dallas pickleball game forming — tap to grab a spot.';
       break;
     case 'FILLING':
-      title       = `${ds.spotsLeft} spots left · ${ogShortDay}`.slice(0, 35);
+      title       = `${ds.spotsLeft} spot${ds.spotsLeft === 1 ? '' : 's'} left · ${ogShortDay}`.slice(0, 35);
       description = 'This Dallas game is filling up — join before it locks.';
       break;
     case 'FULL':
@@ -281,7 +281,7 @@ export default async function SlotDetailPage({
                 style={{ fontFamily: 'var(--font-nunito)' }}
               >
                 {ds.state === 'CANCELLED' ? 'Game cancelled' :
-                 ds.state === 'FILLING'   ? `${ds.spotsLeft} spots left` : 'Full'}
+                 ds.state === 'FILLING'   ? `${ds.spotsLeft} spot${ds.spotsLeft === 1 ? '' : 's'} left` : 'Full'}
               </span>
             )}
             {ds.ctaLabel && (

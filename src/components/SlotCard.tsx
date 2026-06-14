@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Activity, MapPin, Check } from "lucide-react";
+import { MapPin, Check } from "lucide-react";
+import PickleballIcon from "@/components/icons/PickleballIcon";
 
 type SkillLevel = "beginner" | "advanced_beginner" | "intermediate" | "advanced";
 type OptedInUser = { id: string; avatar_color: string };
@@ -117,8 +118,9 @@ export default function SlotCard({
     <article className="bg-card rounded-2xl border border-[0.5px] border-card-border p-4 space-y-3">
       {/* Row 1: sport icon chip + badges (skill + gender tag when non-open) */}
       <div className="flex items-center justify-between">
-        <div className="bg-gradient-to-br from-coral/80 to-coral rounded-xl p-2.5 text-white">
-          <Activity size={18} aria-hidden="true" />
+        <div className="flex items-center gap-1.5">
+          <PickleballIcon aria-hidden="true" className="w-7 h-7 text-[#FF6A00]" />
+          <span className="font-sans font-medium text-[15px] text-ink">Pickleball</span>
         </div>
         <div className="flex items-center gap-1.5">
           {genderCategory !== 'open' && (
