@@ -56,3 +56,30 @@ concrete.
 - M3: real Supabase calls need network error copy and skeleton patterns.
 - Any op exceeding ~1s perceived latency needs a spinner.
 - Five or more simultaneous toast variants in-app need queueing.
+
+## Amendment — Phase 4 Dispatch 2 (Home join wiring, 2026-06-15)
+
+Real `join_slot` calls now drive toasts from the Home feed. No new tokens —
+the error `#D64B4B` / success `#4BAE78` variants already exist (D8.2). New copy:
+
+| Case | Copy | Action | Variant |
+|------|------|--------|---------|
+| Slot cancelled mid-tap | That game was cancelled | (none) | error |
+| One-game-per-day collision (D9) | You're already in a game today. Leave that one or complete it to join another. | (none) | error |
+
+The JOINED outcome is intentionally toast-less — the action `redirect()`s to
+`/group-lobby`, and the lobby IS the confirmation (D2 Amdt B). The waitlist
+string is unchanged from M2.2.
+
+### Punctuation nuance (the rule these two strings establish)
+
+- **Single-clause toast → NO trailing period.** "That game was cancelled" is
+  sentence case (capital first), one statement, no period — matching the M2.2
+  tone ("no trailing period") and the bare-statement waitlist string.
+- **Multi-clause toast → keep grammatical punctuation.** The D9 collision
+  string is two sentences (sentence-break period after "today") plus a
+  two-option clause joined on "or", so it keeps both its internal period and
+  its terminal period. Dropping them would garble a two-sentence instruction.
+
+So "no trailing period" is the default for atomic feedback; punctuation
+returns the moment the copy carries more than one clause/sentence.
