@@ -128,6 +128,14 @@ For M4 (enforcement):
 - Server-side authoritative; client-side short-circuit for UX
   speed only, not for security.
 
+> **Amended by D13 (2026-06-14):** the client-side same-day short-circuit
+> above is **dropped**. Phase 4 player surfaces are all-server (see
+> `D13-phase4-player-surface-data-architecture.md`); `join_slot`'s same-day
+> RAISE (`'D9 violation'`, ERRCODE `unique_violation`) is the **sole**
+> same-day guard, caught in the join Server Action and surfaced as the
+> collision toast after a brief round-trip. The "currently active same-day"
+> client pre-query in the M4 bullets above is not built.
+
 For M5 (leave flow + attendance confirmation):
 - Leave flow surfaces reason picker per D7.
 - Reason categories include "Switching to another game" alongside

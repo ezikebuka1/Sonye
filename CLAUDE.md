@@ -38,7 +38,7 @@ Users can browse activities near them, join a queue, and get matched into a grou
 - **Skill badges:** Blue badge `#E0EEF9`/`#0C447C`, Amber badge `#FAF0DC`/`#854F0B`
 - **Border radius:** `rounded-2xl` (20px) for cards, `rounded-xl` (14px) for buttons
 - **Fonts:** DM Sans (headings + body), Instrument Serif italic (hero accent word only)
-- **Avatars:** Blue palette (`#1A3650`, `#3A7CB8`, `#5A9FD4`) — never coral
+- **Avatars:** Blue palette default (`#8DBCF1`, `#5E80A3`, `#14304D`, `#9DB8D2`) — never coral; gender families per D8.1/D8.1a (woman→pink, non-binary→green, else→blue)
 - **50% rule:** Player count + avatars shown on slot cards only when fill ≥ 50% of capacity
 - See `memory-bank/decisions/D8-design-system.md` for full spec
 

@@ -571,6 +571,8 @@ Committed as its own doc commit (`c457df0`) per the two-commit discipline; imple
 
 **Decision:** accept the library default (non-HttpOnly session cookie). XSS defense is the standard posture instead of the cookie flag: React's output escaping, a Content-Security-Policy, and no `dangerouslySetInnerHTML`. Code surfaced the deviation rather than silently forcing the flag (correct instinct); architect ruled, Gemini nodded, recorded here so "make it HttpOnly" doesn't resurface as a regression-looking bug report.
 
+> **D13 note (2026-06-14):** the premise above — "lobby roster, join, attendance lean on exactly those client-side reads in Phases 4+" — is now **orphaned**. Per D13 (`D13-phase4-player-surface-data-architecture.md`), all Phase 4 player surfaces (feed, join, lobby, attendance) are built **server-side**, so no surface relies on the non-HttpOnly cookie for client-side Supabase reads. The cookie is **retained unchanged** at the `@supabase/ssr` default (forward-compatible if client-side Supabase is ever stood up later); this is recorded, **not re-litigated** (see "Settled — do not re-litigate" above). Only the justification's premise shifted — no cookie/flag change.
+
 ## Amendment D — GoTrue JWT-phone normalization in signup_claim (2026-06-10, Phase 3B)
 
 **Amends:** the Flow 3 phone-match mechanics in sub-decision 6 / Amendment A. **Launch-critical fix.**
