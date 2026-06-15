@@ -475,3 +475,59 @@ choice (Vercel Cron vs. Supabase Edge Function on cron trigger
 vs. `pg_cron`) is downstream of this decision. `pg_cron` lives
 inside Postgres and is immune to cold-start by definition, but
 free-tier `pg_cron` has its own quotas; verify before choosing.
+
+## Amendment B — Attendance routes run as `anon` (2026-06-15)
+
+**Supersedes** the original D11 "`authenticated`-only grant" on
+`attest_attendance` AND the interim Phase 4B service-role
+implementation of the `/c/y` and `/c/n` routes.
+
+### The decision
+
+`attest_attendance(uuid, boolean)` is granted EXECUTE to `anon`
+(additive — the `authenticated` grant is left intact). Both
+confirmation routes (`src/app/c/y/[token]/page.tsx`,
+`src/app/c/n/[token]/page.tsx`) call the function through the
+project's **standard `@supabase/ssr` anon server client** (the same
+`@/lib/supabase/server` `createClient` the Home / lobby / join
+Server Components use). The service-role client is removed from
+these routes.
+
+### Rationale — the caller is genuinely `anon`
+
+A tapped SMS magic link opens a **brand-new browser tab / in-app
+browser that does NOT share the user's Supabase session.** At the
+HTTP layer the caller is the `anon` role — there is no cookie, no
+JWT. The interim Phase 4B implementation bridged the
+`authenticated`-only grant with a service-role (admin) client so
+the session-less request could execute the function. The anon
+client now matches the reality of the request, and the new anon
+grant lets it through.
+
+### Why NOT service-role
+
+Putting `SUPABASE_SERVICE_ROLE_KEY` in a **public, session-less
+route** is unacceptable blast radius: if the route is ever
+refactored (e.g. a shared helper, an added query, a logging line)
+or the admin key leaks, the exposure is the entire database with
+RLS bypassed. The token-gated capability needs exactly `anon` +
+the function's own self-gating — not god-mode. **Rejected.**
+
+### The security boundary is unchanged
+
+The single-use `attendance_token` + 48-hour expiry remains the
+sole capability. `attest_attendance` is `SECURITY DEFINER` and
+token-gated: it looks the token up, rejects missing/expired
+tokens (`'invalid_or_expired'`, no write), is idempotent on a
+consumed/already-set row, and on success writes `attended` and
+invalidates the token (`attendance_token = NULL`). Granting `anon`
+EXECUTE does not relax any of this — `anon` can only invoke the
+same token-gated path. An unguessable UUID that expires in 48h and
+dies on first use is the boundary; the role the caller holds is not.
+
+### Why the grant is additive (keep `authenticated`)
+
+A logged-in user who happens to tap the link in a session-bearing
+tab is harmless — they hit the identical token-gated path. Revoking
+`authenticated` would buy nothing and risk a regression. The grant
+migration adds `anon` and touches no other grant.
