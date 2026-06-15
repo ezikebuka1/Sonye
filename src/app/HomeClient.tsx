@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import Greeting from "@/components/Greeting";
 import HeroText from "@/components/HeroText";
@@ -12,71 +11,77 @@ import SlotCard from "@/components/SlotCard";
 import BottomTabBar from "@/components/BottomTabBar";
 import { Toast } from "@/components/Toast";
 
-import {
-  assertSeedConsistency,
-  seedUser,
-  sortSlotsForHome,
-  getVenueById,
-  getUserById,
-  getAvatarColor,
-  type Slot,
-} from "@/lib/mockData";
+import { seedUser } from "@/lib/mockData";
 import { useAppStore } from "@/lib/store";
 
-function dayLabelFor(dow: Slot["day_of_week"]): string {
-  const map: Record<Slot["day_of_week"], string> = {
-    mon: "Monday",
-    tue: "Tuesday",
-    wed: "Wednesday",
-    thu: "Thursday",
-    fri: "Friday",
-    sat: "Saturday",
-    sun: "Sunday",
-  };
-  return map[dow];
-}
+// View-model for one Home-feed card. Built server-side in page.tsx from real
+// `slots` rows (D13 — all-server feed). HomeClient renders; it never fetches.
+export type FeedSlot = {
+  id: string;
+  startsAt: string; // ISO timestamptz from slots.starts_at
+  venueName: string;
+  skillLevel: "beginner" | "advanced_beginner" | "intermediate" | "advanced";
+  capacity: number;
+  fillCount: number; // slots.member_count (joined count)
+  genderCategory: "open" | "women" | "men";
+  membershipStatus: "joined" | "waitlisted" | null; // viewer's ACTIVE row, else null
+};
 
 const STRIP_AVATAR_COLORS = ["#1A3650", "#3A7CB8", "#5A9FD4", "#7FA8C9"];
 
-// Default avatar color for currentUser when their User object has no avatar_color.
-// Form-submitted users get seedUser's avatar_color (#3A7CB8) set in onboarding/page.tsx.
-const CURRENT_USER_AVATAR_FALLBACK = "#3A7CB8";
+// Weekday + time from an ISO instant in Dallas civil time. IANA zone →
+// DST-correct (CDT/CST per date), never a fixed ±offset (D13/R2). Produced
+// once at module scope; matches the card's existing "{weekday} · {time}" shape.
+const DAY_FMT = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
+  timeZone: "America/Chicago",
+});
+const TIME_FMT = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: "America/Chicago",
+});
+function formatCentral(startsAtIso: string): { dayLabel: string; timeLabel: string } {
+  const d = new Date(startsAtIso);
+  return { dayLabel: DAY_FMT.format(d), timeLabel: TIME_FMT.format(d) };
+}
 
-export default function HomeClient() {
+export default function HomeClient({ slots }: { slots: FeedSlot[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const currentUser = useAppStore((s) => s.currentUser);
-  const storeSlots = useAppStore((s) => s.slots);
   const toast = useAppStore((s) => s.toast);
   const dismissToast = useAppStore((s) => s.dismissToast);
 
+  // Dev-only demo toggle: ?onboarded=1 seeds the mock identity for the
+  // greeting only (never clobbers a real submitted user). Unrelated to the
+  // feed, which is now real DB data.
   useEffect(() => {
-    assertSeedConsistency();
-  }, []);
-
-  // Dev-only demo toggle: ?onboarded=1 seeds the store with the canned demo
-  // identity, but only when the store is empty (never clobbers a real submitted user).
-  useEffect(() => {
-    if (searchParams.get("onboarded") === "1" && useAppStore.getState().currentUser === null) {
+    if (
+      searchParams.get("onboarded") === "1" &&
+      useAppStore.getState().currentUser === null
+    ) {
       useAppStore.getState().setUser(seedUser);
     }
   }, [searchParams]);
 
-  // Read ?toast= URL params from Server Action redirects and dispatch to toast store.
+  // Read ?toast= params from Server Action redirects (join / onboarding) and
+  // dispatch to the toast store, then clean the URL so it doesn't re-fire.
   useEffect(() => {
     const toastKey = searchParams.get("toast");
     if (!toastKey) return;
 
     const slotDesc = searchParams.get("slot") ?? "your game";
-    const decoded  = decodeURIComponent(slotDesc);
+    const decoded = decodeURIComponent(slotDesc);
 
     const TOAST_MAP: Record<string, { message: string; variant: "success" | "error" }> = {
-      joined:    { message: `you're in — ${decoded}`, variant: "success" },
-      waitlisted: { message: "on the waitlist — we'll text you", variant: "success" },
-      welcomed:  { message: "you're all set — find your game", variant: "success" },
-      cancelled: { message: "that game was cancelled", variant: "error" },
-      d9:        { message: "You're already in a game today. Leave that one or complete it to join another.", variant: "error" },
+      joined:     { message: `you're in — ${decoded}`, variant: "success" },
+      waitlisted: { message: "On the waitlist — we'll text you", variant: "success" },
+      welcomed:   { message: "you're all set — find your game", variant: "success" },
+      cancelled:  { message: "That game was cancelled", variant: "error" },
+      d9:         { message: "You're already in a game today. Leave that one or complete it to join another.", variant: "error" },
     };
 
     const entry = TOAST_MAP[toastKey];
@@ -84,11 +89,8 @@ export default function HomeClient() {
       useAppStore.getState().showToast({ message: entry.message, variant: entry.variant });
     }
 
-    // Clean URL so toast doesn't re-fire on refresh
     router.replace("/");
   }, [searchParams, router]);
-
-  const slots = sortSlotsForHome(Object.values(storeSlots));
 
   return (
     <main className="min-h-screen bg-wash pb-24">
@@ -108,58 +110,34 @@ export default function HomeClient() {
 
         <div className="space-y-3">
           {slots.map((slot) => {
-            const fillCount = slot.opted_in_user_ids.length;
-            const isFull = fillCount >= slot.capacity;
-            const isJoined = currentUser
-              ? slot.opted_in_user_ids.includes(currentUser.id)
-              : false;
+            const { dayLabel, timeLabel } = formatCentral(slot.startsAt);
+            const isFull = slot.fillCount >= slot.capacity;
 
-            // Resolve avatar objects from the store slot's opted_in_user_ids.
-            // currentUser (id = 'user-self') is not in the static users array,
-            // so they get a special-cased fallback. joinSlot appends user.id
-            // LAST, so their avatar is naturally rightmost in the stack.
-            const optedInUsers = slot.opted_in_user_ids
-              .map((id) => {
-                if (currentUser && id === currentUser.id) {
-                  return {
-                    id: currentUser.id,
-                    avatar_color: getAvatarColor(currentUser.gender),
-                  };
-                }
-                const u = getUserById(id);
-                return u ? { id: u.id, avatar_color: getAvatarColor(u.gender) } : null;
-              })
-              .filter((u): u is { id: string; avatar_color: string } => u !== null);
+            // Neutral fill dots (D8.1): opaque keys only — no identities, no
+            // gender color on the Home feed. Count feeds the existing rule.
+            const optedInUsers = Array.from({ length: slot.fillCount }, (_, i) => ({
+              id: `${slot.id}-fill-${i}`,
+            }));
 
             return (
               <SlotCard
                 key={slot.id}
                 slotId={slot.id}
-                sport={slot.sport}
-                skillLevel={slot.skill_level}
-                dayLabel={dayLabelFor(slot.day_of_week)}
-                timeLabel={slot.time_label}
-                venueName={getVenueById(slot.venueId).name}
-                fillCount={fillCount}
+                skillLevel={slot.skillLevel}
+                dayLabel={dayLabel}
+                timeLabel={timeLabel}
+                venueName={slot.venueName}
+                fillCount={slot.fillCount}
                 capacity={slot.capacity}
-                isJoined={isJoined}
+                membershipStatus={slot.membershipStatus}
                 isFull={isFull}
                 optedInUsers={optedInUsers}
-                genderCategory={slot.gender_category}
+                genderCategory={slot.genderCategory}
                 onJoin={() => {
-                  if (!currentUser) {
-                    // Unauthenticated tap: route to onboarding.
-                    // M4 (D2) revisits this with SMS OTP / view-first auth.
-                    router.push("/onboarding");
-                    return;
-                  }
-                  useAppStore.getState().joinSlot(slot.id);
+                  /* TODO Dispatch 2 — wire join_slot Server Action (render-only here) */
                 }}
                 onJoinWaitlist={() => {
-                  useAppStore.getState().showToast({
-                    message: "On the waitlist — we'll text you",
-                    variant: "success",
-                  });
+                  /* TODO Dispatch 2 — wire join_slot Server Action (render-only here) */
                 }}
               />
             );

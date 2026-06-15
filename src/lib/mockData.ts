@@ -49,7 +49,7 @@ export type User = {
   preferred_venues: VenueId[] | null;          // null when joining via slot link (D7.2)
   willing_to_drive: DrivingWillingness | null; // D7.1: not asked in-form; set via waitlist CSV only
   gender: 'woman' | 'man' | 'non_binary' | 'prefer_not_to_say' | null; // D7.3: optional
-  avatar_color: string;  // seed value retained; render sites use getAvatarColor(gender) per D8.1
+  avatar_color: string;  // seed value retained for seed integrity only; NOT read at render (Home dots neutral per D7.3, lobby uses getAvatar in lib/avatar.ts)
   onboarded: boolean;
 };
 
@@ -321,13 +321,6 @@ export const seedUser: User = {
   avatar_color: "#3A7CB8",
   onboarded: true,
 };
-
-/** Maps gender → avatar color per D8.1. Use at all avatar render sites. */
-export function getAvatarColor(gender: User['gender']): string {
-  if (gender === 'woman') return '#C56B8C'; // TBD: finalize pink palette M5 per D8.1
-  if (gender === 'man') return '#3A7CB8';   // D8 blue family
-  return '#27500A'; // non_binary / prefer_not_to_say / null → D8 skill-int green
-}
 
 // Record form of slots for Zustand store initialization (M2.2+).
 // The store owns mutable slot state at runtime; this is the initial seed only.

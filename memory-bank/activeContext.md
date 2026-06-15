@@ -4,9 +4,45 @@ Snapshot of *now* — kept lean. History lives in git; load-bearing rules live i
 
 ## Current focus
 
-**Phase 4B (D11 attendance routes + peer-report link + D9 toast repair) shipped to the working tree, pending Ebuka's manual push. Phase 5 next: owner dashboard / cancel.** (Phase 4A is pushed — `fdd912d`.)
+**Phase 4 Dispatch 1 (DB-backed Home feed, render-only) landed in the working tree (2026-06-15; pending Ebuka's review/commit).** The Home feed now renders real DB `slots` — server-fetched in `page.tsx` (Server Component, `force-dynamic`) and passed to `HomeClient` as props — with the four locked card button states; the mock Zustand store is no longer the feed source. Join / Join-waitlist taps are render-only stubs (`// TODO Dispatch 2`); In-lobby / On-waitlist link to the lobby. Anon `/` → `redirect('/auth')`. **Next: Dispatch 2 — join wiring** (the five outcomes + the `member_count` integrity proof). Phase 5 (owner dashboard / cancel) follows. (D13 + Phase 4B + D8.1 + dev-login also still uncommitted in the tree; Phase 4A pushed — `fdd912d`.)
 
 ## Just shipped
+
+- **Phase 4 Dispatch 1 — DB-backed Home feed (render-only), 2026-06-15.** `page.tsx` → async Server Component (`dynamic='force-dynamic'`): server-resolves the session (anon → `redirect('/auth')`), fetches eligible `slots` (`cancelled_at IS NULL` + `starts_at > now()`, ordered `starts_at ASC` — the real-data equivalent of the mock `sortSlotsForHome`), reads the viewer's active memberships (`.eq('user_id', current_user_id()).is('left_at', null)` — explicit `user_id` filter REQUIRED since the owner satisfies `is_owner()`, else RLS returns everyone's rows), and passes `FeedSlot[]` to `HomeClient`. `HomeClient` renders from props (no store feed), formatting day/time from `starts_at` in `America/Chicago` via `Intl` (DST-correct IANA; bare-weekday shape matched to the card). `SlotCard` button area → four locked states (D13): no-membership+open → coral `#EE5E00` "Join game" (stub); no-membership+full → sky `#8DBCF1`/ink `#14304D` "Join waitlist" (stub); active joined → outlined-ink "In lobby" (→ lobby); active waitlisted → muted `#EEF2F8`/`#5E80A3` "On the waitlist" (→ lobby). Neutral D8.1 fill dots from `member_count`; skill badge from `slots.skill_level`; 50% rule fed real data. NO client-side Supabase (server-only fetch). Added a non-visual `data-slot-id` to the card root for the UUID proof. New doc `D8_2-action-colors.md`. **Verified e2e via `/dev-login`:** feed renders 9 real DB UUIDs in `starts_at` order (not `slot_a..slot_d`); Join/Join-waitlist colors confirmed at computed-style level (sky `rgb(141,188,241)`/ink `rgb(20,48,77)`, coral `rgb(238,94,0)`/white); In-lobby/On-waitlist proven at component level (owner holds no memberships); anon redirect; 50% both levels; DST boundary (slot at `2026-07-19 01:00Z` → 'Saturday · 8:00 PM' Central). `tsc` clean, `npm run build` ✓. Render-only — join is Dispatch 2. **FLAGS:** (1) all seeded slots are Saturdays → bare-weekday labels read identically ('Saturday · 6:00 PM' ×6); recommend adding the date (e.g. via the existing `formatDallas`). (2) Greeting + onboarding-banner still read the mock store `currentUser` (generic greeting + banner show for the authed owner) — out of feed-source scope; flag for follow-up.
+
+- **D13 recorded (2026-06-14) — Phase 4 player-surface data architecture (all-server).** New decision doc `memory-bank/decisions/D13-phase4-player-surface-data-architecture.md` (number confirmed free; the doc's "D12 = v2 public-browse" numbering note corrected — real D12 is the `slots.skill_level` patch, public-browse is unnumbered in `v2-signals.md`). Amends D9 (client-side same-day short-circuit dropped → `join_slot` RAISE is the sole guard) and touches D2 Amendment C (client-side-reads premise orphaned; cookie retained, not re-litigated) — breadcrumbs wired into both docs. Every Context/DB claim adversarially re-verified against the live codebase (mock feed, zero client Supabase, server-only `join_slot`, RLS supports the authed feed, `slots.starts_at`/`skill_level` present, `member_count` trigger predicate). Decision doc only — no `src/` changes; pending Ebuka's commit. Dispatch 1/2 not yet authored (Dispatch 1 gated by the architect's sketch + waitlist-copy lock).
+
+- **STAGED, UNCOMMITTED — `/dev-login` bind fix (2026-06-14; one-commit dev-tooling change).**
+  The dev shortcut now produces a real RLS-valid session: after `verifyOtp` it binds the seeded
+  owner's `auth_user_id` via `signup_claim` Path A (`p_claim_token` omitted → match on phone +
+  `auth_user_id IS NULL`), mirroring `submitOnboardingAction`; idempotent (2nd run = Path C,
+  read-only). Route gated dev-only — `notFound()` in prod at the page AND both server actions
+  (defense in depth; `next build` prerenders it as 404). Verified end-to-end through the route:
+  owner `auth_user_id` NULL → `2c8b35af-…` (the GoTrue uid); live `/group-lobby?slotId=6e555c6c…`
+  now RENDERS (was redirecting to `/slot/{id}`) with the live `getAvatar` mapping (Maya woman→pink,
+  Theo man→blue, Ray/Jess/Bob null→blue). **Local dev owner can now load RLS-gated surfaces —
+  Phase 4 local testing unblocked.** tsc + build clean. (Tree also still carries the uncommitted
+  D8.1 batch below — commit that separately.)
+
+- **STAGED, UNCOMMITTED (2026-06-14 — pending Ebuka's review; commits as DOCS then IMPL+activeContext).**
+  - **D8.1 avatar swap — LANDED.** `src/lib/avatar.ts`: `WOMAN_FAMILY` finalized to the four
+    pinks (#F18EB7/#A25D7A/#4D142C/#D29DB3, fg by the blue contrast rule); `NEUTRAL_FAMILY`
+    renamed `NONBINARY_FAMILY` (green #246B42, NB-only); `getAvatar` routing now woman→pink,
+    non_binary→green, everything else (man/PNTS/null)→blue (default). MAN_FAMILY blues + the
+    green hex unchanged; shade-hash + signature untouched.
+  - **Home fill dots neutralized (D7.3 enforced).** `HomeClient.tsx` no longer derives per-user
+    color (dropped `getAvatarColor` import + calls; fill row keeps id/count only); `SlotCard.tsx`
+    SocialProofBlock renders every dot in a single neutral `#AEBED0` (`FILL_DOT_COLOR`). Dead
+    `getAvatarColor` removed from `mockData.ts` (0 importers); `User.avatar_color` seed field
+    retained (seed integrity), comment de-staled. Gender→color is now lobby-only.
+  - **Owner avatar unchanged** — it's a text initial (`slot/[id]/page.tsx:99,201`), not a
+    gender-colored avatar; nothing to swap.
+  - **Icon svgo (prior overnight Task A) still staged** — `PickleballIcon.tsx` optimized
+    (5675→4276 B), renders pixel-identical.
+  - **Docs reconciled to the corrected palette:** D8.1 + D7.3 + new `D8_1a-avatar-null-blue.md`
+    (pink now #F18EB7…, green #246B42, blue D8.2 set #8DBCF1…, NOT the earlier stale
+    #511A31/#1A512C); D7.3 + D8.1 record Home-neutral enforcement; `CLAUDE.md` avatar blue
+    updated to the D8.2 set. §5 (opengraph-image, slot-preview) untouched — OG is a separate dispatch.
 
 - D8.3 shipped: slot-card sport icon = bare orange paddle (PickleballIcon,
   currentColor, #FF6A00) + "Pickleball" label, replacing Activity + coral chip.
@@ -33,7 +69,7 @@ Snapshot of *now* — kept lean. History lives in git; load-bearing rules live i
 
 ## M4 spine (local-first; cloud is the last step)
 
-Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ · Phase 3A ✅ · Phase 3B ✅ · Phase 4A ✅ · Phase 4B ✅ · **Phase 5 (next)** owner dashboard / cancel · Phase 6 Twilio swap + cloud. **Only Phase 6 is Twilio-gated.** (D11 attendance routes built in 4B; the scheduled token-dispatch job + SMS send ride Phase 6 / SMS go-live.)
+Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ · Phase 3A ✅ · Phase 3B ✅ · Phase 4A ✅ · Phase 4B ✅ · **Phase 4 player surfaces (D13, all-server): Dispatch 1 DB-backed feed ✅ (render-only, 2026-06-15) → Dispatch 2 join wiring (next)** · Phase 5 owner dashboard / cancel · Phase 6 Twilio swap + cloud. **Only Phase 6 is Twilio-gated.** (D11 attendance routes built in 4B; the scheduled token-dispatch job + SMS send ride Phase 6 / SMS go-live.)
 
 ## Working facts the build needs now
 
@@ -51,7 +87,7 @@ The dummy Twilio creds + test-OTP in `config.toml` are **local-only**. Productio
 
 ## Locked decisions
 
-D1 Zustand · D2 auth (Model C) · D3 schema (+ M3.1–M3.4) · D5 toast states · D7 product mechanics (+ D7.2 form bifurcation, D7.3 optional gender) · D8 design system (+ D8.1 avatar palette, **D8.2 visual identity — supersedes D8 color/type**) · D9 one-game-per-Dallas-day · D10 lobby comms (no in-app chat in v1; phones to joined members only) · D11 attendance (SMS magic link at `starts_at + 2h`).
+D1 Zustand · D2 auth (Model C) · D3 schema (+ M3.1–M3.4) · D5 toast states · D7 product mechanics (+ D7.2 form bifurcation, D7.3 optional gender) · D8 design system (+ D8.1 avatar palette, **D8.2 visual identity — supersedes D8 color/type**) · D9 one-game-per-Dallas-day (**D13: client short-circuit dropped, all-server**) · D10 lobby comms (no in-app chat in v1; phones to joined members only) · D11 attendance (SMS magic link at `starts_at + 2h`) · D12 `slots.skill_level` patch · **D13 Phase 4 player surfaces all-server** (amends D9, touches D2 Amdt C).
 
 ## Process disciplines
 

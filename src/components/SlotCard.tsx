@@ -1,22 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MapPin, Check } from "lucide-react";
+import { MapPin, Check, ChevronRight, Clock } from "lucide-react";
 import PickleballIcon from "@/components/icons/PickleballIcon";
 
 type SkillLevel = "beginner" | "advanced_beginner" | "intermediate" | "advanced";
-type OptedInUser = { id: string; avatar_color: string };
+type OptedInUser = { id: string };
+
+type MembershipStatus = 'joined' | 'waitlisted' | null;
 
 type SlotCardProps = {
   slotId: string;
-  sport: string;
   skillLevel: SkillLevel;
   dayLabel: string;
   timeLabel: string;
   venueName: string;
   fillCount: number;
   capacity: number;
-  isJoined: boolean;
+  // The viewer's ACTIVE membership for this slot (left_at IS NULL), or null.
+  // Drives the four locked button states (D13). isFull splits the null case.
+  membershipStatus: MembershipStatus;
   isFull: boolean;
   optedInUsers: OptedInUser[];
   genderCategory: 'open' | 'women' | 'men';
@@ -33,19 +36,9 @@ const skillBadge: Record<SkillLevel, { bg: string; text: string; label: string }
 
 const MAX_VISIBLE_AVATARS = 5;
 
-function JoinedButton() {
-  return (
-    <button
-      type="button"
-      disabled
-      className="w-full bg-inset text-ink border border-card-border rounded-xl py-2.5 font-sans font-medium text-[15px] flex items-center justify-center gap-1.5 cursor-default"
-      aria-label="Already joined"
-    >
-      <Check size={16} aria-hidden="true" />
-      Joined
-    </button>
-  );
-}
+// D7.3: fill dots are gender-neutral on the pre-join feed (gender is
+// lobby-only). Single slate, distinct from all three gender families.
+const FILL_DOT_COLOR = "#AEBED0";
 
 // Mounts at opacity-0, transitions to opacity-100 after the first frame.
 // Animation fires once on mount — subsequent re-renders do not re-trigger it.
@@ -78,7 +71,7 @@ function SocialProofBlock({
         {visibleUsers.map((u, i) => (
           <div
             key={u.id}
-            style={{ backgroundColor: u.avatar_color }}
+            style={{ backgroundColor: FILL_DOT_COLOR }}
             className={`w-6 h-6 rounded-full border-2 border-card${i > 0 ? " -ml-2" : ""}`}
             aria-hidden="true"
           />
@@ -104,7 +97,7 @@ export default function SlotCard({
   venueName,
   fillCount,
   capacity,
-  isJoined,
+  membershipStatus,
   isFull,
   optedInUsers,
   genderCategory,
@@ -115,7 +108,10 @@ export default function SlotCard({
   const showSocialProof = fillCount / capacity >= 0.5;
 
   return (
-    <article className="bg-card rounded-2xl border border-[0.5px] border-card-border p-4 space-y-3">
+    <article
+      data-slot-id={slotId}
+      className="bg-card rounded-2xl border border-[0.5px] border-card-border p-4 space-y-3"
+    >
       {/* Row 1: sport icon chip + badges (skill + gender tag when non-open) */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
@@ -154,14 +150,33 @@ export default function SlotCard({
         />
       )}
 
-      {/* Row 5: CTA button — three mutually exclusive states */}
-      {isJoined ? (
-        <JoinedButton />
+      {/* Row 5: CTA button — four mutually exclusive states (D13 locked).
+          Join / Join-waitlist taps are render-only stubs (Dispatch 2 wires
+          join_slot); In-lobby / On-waitlist navigate to the lobby. */}
+      {membershipStatus === 'joined' ? (
+        <a
+          href={`/group-lobby?slotId=${slotId}`}
+          className="w-full border border-ink text-ink rounded-xl py-2.5 font-sans font-medium text-[15px] flex items-center justify-center gap-1.5"
+          aria-label={`In lobby — ${dayLabel} ${timeLabel}`}
+        >
+          <Check size={16} aria-hidden="true" />
+          In lobby
+          <ChevronRight size={16} aria-hidden="true" />
+        </a>
+      ) : membershipStatus === 'waitlisted' ? (
+        <a
+          href={`/group-lobby?slotId=${slotId}`}
+          className="w-full bg-[#EEF2F8] text-steel rounded-xl py-2.5 font-sans font-medium text-[15px] flex items-center justify-center gap-1.5"
+          aria-label={`On the waitlist — ${dayLabel} ${timeLabel}`}
+        >
+          <Clock size={16} aria-hidden="true" />
+          On the waitlist
+        </a>
       ) : isFull ? (
         <button
           type="button"
           onClick={() => onJoinWaitlist(slotId)}
-          className="w-full bg-coral text-white rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:brightness-95 active:brightness-90"
+          className="w-full bg-sky text-ink rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:brightness-95 active:brightness-90"
           aria-label={`Join waitlist for ${dayLabel} ${timeLabel}`}
         >
           Join waitlist
