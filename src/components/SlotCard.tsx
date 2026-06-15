@@ -23,6 +23,12 @@ type SlotCardProps = {
   isFull: boolean;
   optedInUsers: OptedInUser[];
   genderCategory: 'open' | 'women' | 'men';
+  // Dispatch 2 (D13): this card's join_slot Server Action is in flight — the
+  // active button shows a disabled "Joining…" (per-card; others unaffected).
+  pending?: boolean;
+  // Dispatch 2 (D13): join_slot RAISEd "is cancelled" for this card — the CTA
+  // is replaced IN PLACE by a non-interactive, greyed "Cancelled" label.
+  cancelled?: boolean;
   onJoin: (slotId: string) => void;
   onJoinWaitlist: (slotId: string) => void;
 };
@@ -101,6 +107,8 @@ export default function SlotCard({
   isFull,
   optedInUsers,
   genderCategory,
+  pending = false,
+  cancelled = false,
   onJoin,
   onJoinWaitlist,
 }: SlotCardProps) {
@@ -150,10 +158,19 @@ export default function SlotCard({
         />
       )}
 
-      {/* Row 5: CTA button — four mutually exclusive states (D13 locked).
-          Join / Join-waitlist taps are render-only stubs (Dispatch 2 wires
-          join_slot); In-lobby / On-waitlist navigate to the lobby. */}
-      {membershipStatus === 'joined' ? (
+      {/* Row 5: CTA button — mutually exclusive states (D13 locked). Join /
+          Join-waitlist taps call the join_slot Server Action (Dispatch 2);
+          In-lobby / On-waitlist navigate to the lobby. Precedence: a
+          cancelled lock wins, then the viewer's membership, then the in-flight
+          "Joining…" state, then the open/full join buttons. */}
+      {cancelled ? (
+        <div
+          className="w-full bg-[#EEF2F8] text-ink-soft rounded-xl py-2.5 font-sans font-medium text-[15px] flex items-center justify-center cursor-not-allowed opacity-80 select-none"
+          aria-label={`Cancelled — ${dayLabel} ${timeLabel}`}
+        >
+          Cancelled
+        </div>
+      ) : membershipStatus === 'joined' ? (
         <a
           href={`/group-lobby?slotId=${slotId}`}
           className="w-full border border-ink text-ink rounded-xl py-2.5 font-sans font-medium text-[15px] flex items-center justify-center gap-1.5"
@@ -172,6 +189,18 @@ export default function SlotCard({
           <Clock size={16} aria-hidden="true" />
           On the waitlist
         </a>
+      ) : pending ? (
+        <button
+          type="button"
+          disabled
+          className={`w-full rounded-xl py-2.5 font-sans font-medium text-[15px] cursor-not-allowed opacity-70 ${
+            isFull ? "bg-sky text-ink" : "bg-coral text-white"
+          }`}
+          aria-label="Joining…"
+          aria-busy="true"
+        >
+          Joining…
+        </button>
       ) : isFull ? (
         <button
           type="button"

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { joinSlotAction } from "./actions";
 import Greeting from "@/components/Greeting";
 import HeroText from "@/components/HeroText";
 import SocialProofStrip from "@/components/SocialProofStrip";
@@ -29,11 +30,15 @@ export type FeedSlot = {
 
 const STRIP_AVATAR_COLORS = ["#1A3650", "#3A7CB8", "#5A9FD4", "#7FA8C9"];
 
-// Weekday + time from an ISO instant in Dallas civil time. IANA zone →
+// Date + time from an ISO instant in Dallas civil time. IANA zone →
 // DST-correct (CDT/CST per date), never a fixed ±offset (D13/R2). Produced
-// once at module scope; matches the card's existing "{weekday} · {time}" shape.
+// once at module scope. The date label carries weekday + month + day
+// ("Sat, Jul 18") so cards are unambiguous across weeks — a bare weekday
+// reads identically for every Saturday slot.
 const DAY_FMT = new Intl.DateTimeFormat("en-US", {
-  weekday: "long",
+  weekday: "short",
+  month: "short",
+  day: "numeric",
   timeZone: "America/Chicago",
 });
 const TIME_FMT = new Intl.DateTimeFormat("en-US", {
@@ -54,6 +59,13 @@ export default function HomeClient({ slots }: { slots: FeedSlot[] }) {
   const currentUser = useAppStore((s) => s.currentUser);
   const toast = useAppStore((s) => s.toast);
   const dismissToast = useAppStore((s) => s.dismissToast);
+
+  // Per-card join state (Dispatch 2, D13). `pendingId` = the one card whose
+  // join_slot Server Action is in flight (others unaffected); `cancelledIds` =
+  // cards join_slot reported as cancelled, locked in place this session.
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [cancelledIds, setCancelledIds] = useState<Set<string>>(() => new Set());
+  const [, startTransition] = useTransition();
 
   // Dev-only demo toggle: ?onboarded=1 seeds the mock identity for the
   // greeting only (never clobbers a real submitted user). Unrelated to the
@@ -91,6 +103,49 @@ export default function HomeClient({ slots }: { slots: FeedSlot[] }) {
 
     router.replace("/");
   }, [searchParams, router]);
+
+  // Single join flow for both buttons — join_slot decides joined-vs-waitlisted
+  // (D13). Maps the five locked outcomes: JOINED redirects server-side to the
+  // lobby (no toast); WAITLISTED → success toast + router.refresh() flips the
+  // card to "On the waitlist"; COLLISION → error toast, button returns pre-tap;
+  // CANCELLED → error toast + the card locks to a disabled "Cancelled", no nav.
+  const handleJoin = useCallback(
+    (slotId: string) => {
+      if (pendingId) return; // one join in flight at a time
+      setPendingId(slotId);
+      startTransition(async () => {
+        try {
+          const result = await joinSlotAction(slotId);
+          // 'joined' (and route-only edge cases) redirect server-side — we only
+          // reach here when the outcome stays on Home, so result is defined.
+          if (result && "status" in result && result.status === "waitlisted") {
+            useAppStore.getState().showToast({
+              message: "On the waitlist — we'll text you",
+              variant: "success",
+            });
+            router.refresh(); // re-fetch the real membership → "On the waitlist"
+          } else if (result && "error" in result) {
+            if (result.error === "collision") {
+              useAppStore.getState().showToast({
+                message:
+                  "You're already in a game today. Leave that one or complete it to join another.",
+                variant: "error",
+              });
+            } else if (result.error === "cancelled") {
+              useAppStore.getState().showToast({
+                message: "That game was cancelled",
+                variant: "error",
+              });
+              setCancelledIds((prev) => new Set(prev).add(slotId));
+            }
+          }
+        } finally {
+          setPendingId(null);
+        }
+      });
+    },
+    [pendingId, router],
+  );
 
   return (
     <main className="min-h-screen bg-wash pb-24">
@@ -133,12 +188,10 @@ export default function HomeClient({ slots }: { slots: FeedSlot[] }) {
                 isFull={isFull}
                 optedInUsers={optedInUsers}
                 genderCategory={slot.genderCategory}
-                onJoin={() => {
-                  /* TODO Dispatch 2 — wire join_slot Server Action (render-only here) */
-                }}
-                onJoinWaitlist={() => {
-                  /* TODO Dispatch 2 — wire join_slot Server Action (render-only here) */
-                }}
+                pending={pendingId === slot.id}
+                cancelled={cancelledIds.has(slot.id)}
+                onJoin={handleJoin}
+                onJoinWaitlist={handleJoin}
               />
             );
           })}
