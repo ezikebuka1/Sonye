@@ -1,9 +1,10 @@
-import { createServiceClient } from '@/lib/supabase/service';
+import { createClient } from '@/lib/supabase/server';
 import AttendanceResult, { type AttestStatus } from '@/components/AttendanceResult';
 
 // Attendance confirmation — YES path. The token is the sole capability;
-// attest_attendance self-gates on token validity + expiry. Service-role
-// satisfies the authenticated-only grant (the tapper has no session).
+// attest_attendance self-gates on token validity + expiry. The tapped SMS
+// link opens a session-less tab, so this standard @supabase/ssr client runs
+// as `anon` — which holds EXECUTE on attest_attendance per D11 Amendment B.
 export const dynamic = 'force-dynamic';
 
 export default async function ConfirmAttendedPage({
@@ -13,7 +14,7 @@ export default async function ConfirmAttendedPage({
 }) {
   const { token } = await params;
 
-  const supabase = createServiceClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.rpc('attest_attendance', {
     p_token: token,
     p_attended: true,
