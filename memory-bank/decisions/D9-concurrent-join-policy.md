@@ -144,6 +144,33 @@ For M5 (leave flow + attendance confirmation):
 - Post-game prompt: "Did you make it? Yes / No / I'll let you know."
 - Setting attended unblocks the cap independently of left_at.
 
+### M5 status-transition constraint (recorded 2026-06-15) — NO HARD DELETES
+
+Per R4 ("no client deletes"), the M5 leave path and any
+waitlist-promotion path MUST mutate the membership **status**
+(→ `'left'` / `'removed'`) and set `left_at` / `leave_reason` —
+**never hard-delete the row.**
+
+**Why this is load-bearing:** `trg_sync_slot_counts` fires
+`AFTER INSERT OR UPDATE OF status` only, and its body reads
+`NEW.slot_id`. On a `DELETE` there is no `NEW` row (`NEW.slot_id`
+is NULL), so the trigger does not reconcile — a hard delete
+**silently drifts `member_count`** with no error. A status→`'left'`
+UPDATE is covered by the trigger; the count reconciles correctly.
+
+**Use the existing transaction function if present.** M5 should
+reuse a `leave_slot` (or equivalently-named) transaction function
+IF one already exists — confirm at M5 time. If absent, build the
+leave path with status-transition semantics (status→`'left'` +
+`left_at` + `leave_reason`), **not** a delete, and behind a
+transaction function (M3 discipline — all membership mutations go
+through explicit Postgres transaction functions).
+
+**Harmless aside:** `attest_attendance` updates `attended`, not
+`status`, so it correctly does **not** trip `trg_sync_slot_counts`
+— counts don't depend on attendance. Only status transitions move
+`member_count`.
+
 ## Provisional for v1
 
 Watch the first month of real M5+ data:
