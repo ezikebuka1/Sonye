@@ -1,0 +1,22 @@
+-- ============================================================
+-- D11 Amendment B (2026-06-15) — attendance routes run as `anon`.
+--
+-- A tapped SMS attendance magic link opens a brand-new browser tab /
+-- in-app browser that does NOT share the user's Supabase session, so the
+-- caller is genuinely the `anon` role at the HTTP layer. The interim
+-- Phase 4B implementation bridged the `authenticated`-only grant with a
+-- service-role (admin) client; that put the admin key in a public,
+-- session-less route (unacceptable blast radius) and is rejected.
+--
+-- This grants EXECUTE to `anon` so the standard @supabase/ssr anon client
+-- can invoke the function in a session-less request. The security boundary
+-- is unchanged: the single-use attendance_token + 48h expiry is the sole
+-- capability; attest_attendance is SECURITY DEFINER and self-gates on token
+-- validity + expiry. `anon` can only reach that same token-gated path.
+--
+-- ADDITIVE ONLY — the `authenticated` grant from the m3 initial schema is
+-- left intact (a logged-in caller hits the identical token-gated path; a
+-- revoke would buy nothing and risk a regression). No other grant touched.
+-- ============================================================
+
+GRANT EXECUTE ON FUNCTION public.attest_attendance(uuid, boolean) TO anon;
