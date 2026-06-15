@@ -12,7 +12,6 @@ import SlotCard from "@/components/SlotCard";
 import BottomTabBar from "@/components/BottomTabBar";
 import { Toast } from "@/components/Toast";
 
-import { seedUser } from "@/lib/mockData";
 import { useAppStore } from "@/lib/store";
 
 // View-model for one Home-feed card. Built server-side in page.tsx from real
@@ -52,11 +51,16 @@ function formatCentral(startsAtIso: string): { dayLabel: string; timeLabel: stri
   return { dayLabel: DAY_FMT.format(d), timeLabel: TIME_FMT.format(d) };
 }
 
-export default function HomeClient({ slots }: { slots: FeedSlot[] }) {
+export default function HomeClient({
+  slots,
+  firstName,
+}: {
+  slots: FeedSlot[];
+  firstName: string | null; // viewer's public.users.first_name (D13 — server-fetched), null if unset
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const currentUser = useAppStore((s) => s.currentUser);
   const toast = useAppStore((s) => s.toast);
   const dismissToast = useAppStore((s) => s.dismissToast);
 
@@ -66,18 +70,6 @@ export default function HomeClient({ slots }: { slots: FeedSlot[] }) {
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [cancelledIds, setCancelledIds] = useState<Set<string>>(() => new Set());
   const [, startTransition] = useTransition();
-
-  // Dev-only demo toggle: ?onboarded=1 seeds the mock identity for the
-  // greeting only (never clobbers a real submitted user). Unrelated to the
-  // feed, which is now real DB data.
-  useEffect(() => {
-    if (
-      searchParams.get("onboarded") === "1" &&
-      useAppStore.getState().currentUser === null
-    ) {
-      useAppStore.getState().setUser(seedUser);
-    }
-  }, [searchParams]);
 
   // Read ?toast= params from Server Action redirects (join / onboarding) and
   // dispatch to the toast store, then clean the URL so it doesn't re-fire.
@@ -150,7 +142,7 @@ export default function HomeClient({ slots }: { slots: FeedSlot[] }) {
   return (
     <main className="min-h-screen bg-wash pb-24">
       <div className="max-w-[390px] mx-auto px-5 pt-6 space-y-5">
-        <Greeting name={currentUser?.onboarded ? currentUser.name : null} />
+        <Greeting name={firstName} />
 
         <HeroText />
 
@@ -159,7 +151,7 @@ export default function HomeClient({ slots }: { slots: FeedSlot[] }) {
           message="12 players active in Dallas this week"
         />
 
-        {!currentUser?.onboarded && (
+        {!firstName && (
           <OnboardingBanner onClick={() => router.push("/onboarding")} />
         )}
 

@@ -56,6 +56,23 @@ export default async function HomePage() {
   const { data: uidData } = await supabase.rpc("current_user_id");
   const uid = (uidData as string | null) ?? null;
 
+  // The viewer's own profile, for the greeting + onboarding banner (D13 —
+  // all-server, no client Supabase). Self-pin on `id` (= current_user_id):
+  // the explicit filter is REQUIRED because the owner satisfies is_owner(),
+  // so users_select_self_or_owner would otherwise return every row. A blank/
+  // unset first_name (e.g. the placeholder dev-owner row) reads as null →
+  // fallback greeting + "set up your profile" banner.
+  let firstName: string | null = null;
+  if (uid) {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("first_name")
+      .eq("id", uid)
+      .maybeSingle();
+    const raw = (profile?.first_name as string | null) ?? null;
+    firstName = raw && raw.trim() !== "" ? raw : null;
+  }
+
   const bySlot = new Map<string, MembershipRow["status"]>();
   const slotIds = rows.map((r) => r.id);
   if (uid && slotIds.length > 0) {
@@ -83,7 +100,7 @@ export default async function HomePage() {
 
   return (
     <Suspense>
-      <HomeClient slots={slots} />
+      <HomeClient slots={slots} firstName={firstName} />
     </Suspense>
   );
 }
