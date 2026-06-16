@@ -39,6 +39,13 @@ V1 of Sonye implements brief-aligned matching via **manually curated, recurring 
 - No reschedule prompt in v1. Reasoning: a user cancelling is the least-likely person to commit to a new time in the same flow. Reschedule UX must be tested with real users before being built.
 - Cancellation reason data is collected to inform v2 reschedule design.
 
+> **Owner-cancel (D14):** the "one question / one reason" above is the *player's*
+> self-leave reason. The *owner* cancelling an entire slot is a distinct
+> operation — its mechanics (a `cancel_slot` RPC that flips every active
+> membership to `'left'` with the cancel-only reason `'slot_cancelled'`) are
+> specified in `D14-owner-cancel-slot-mechanics.md`. D7's player-leave reason is
+> unaffected.
+
 ### Sole-occupant slot handling
 - If a slot has only 1 opted-in user as game time approaches, the user is notified and prompted to either:
   - Join an existing slot that has room, OR

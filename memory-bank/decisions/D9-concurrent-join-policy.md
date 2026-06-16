@@ -20,6 +20,11 @@ The cap unlocks when:
 
 Across different days, no aggregate cap.
 
+> **Owner-cancel (D14):** an owner cancelling the slot is a third unlock path —
+> `cancel_slot` flips every active membership to `'left'` (a status transition,
+> exactly like a self-leave), so the same-day lock releases. See
+> `D14-owner-cancel-slot-mechanics.md`.
+
 ## The Problem
 
 Without a cap, a user can join unlimited concurrent slots. This
