@@ -52,3 +52,43 @@ export async function joinSlotAction(slotId: string): Promise<JoinResult> {
   // card flips to "On the waitlist" via router.refresh() (real membership).
   return { status: 'waitlisted' };
 }
+
+// Phase 5 Dispatch 2 — owner cancels one of their own slots from the dashboard.
+// Mirrors joinSlotAction's shape EXACTLY: server client (so the owner's
+// auth.uid() reaches the SECURITY DEFINER cancel_slot — never the browser
+// client), one RPC call, RAISE-message mapping. cancel_slot RETURNS boolean
+// (not a table), so success = no error — there is no row to unpack.
+export type CancelResult =
+  | { ok: true }
+  | { error: 'already_cancelled' | 'forbidden' | 'reason_required' | 'unknown' };
+
+export async function cancelSlotAction(
+  slotId: string,
+  reason: string,
+): Promise<CancelResult> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc('cancel_slot', {
+    p_slot_id: slotId,
+    p_cancellation_reason: reason,
+  });
+
+  if (error) {
+    const msg = error.message ?? '';
+    // Double-cancel race ('cancel_slot: slot % already cancelled') — the slot is
+    // already gone; the caller closes the sheet + refreshes (it drops off).
+    if (msg.includes('already cancelled')) return { error: 'already_cancelled' };
+    // Session lapsed mid-tap → the login wall (the dashboard already guards anon).
+    if (msg.includes('not authenticated')) redirect('/auth');
+    // is_owner() false ('cancel_slot: owner only') — shouldn't happen from the
+    // owner dashboard; defensive.
+    if (msg.includes('owner only')) return { error: 'forbidden' };
+    // Blank-reason guard ('cancel_slot: cancellation reason required') — the UI
+    // already blocks empty reasons; defensive.
+    if (msg.includes('reason')) return { error: 'reason_required' };
+    // Slot vanished / unexpected — surfaced as a retry toast by the caller.
+    return { error: 'unknown' };
+  }
+
+  return { ok: true };
+}
