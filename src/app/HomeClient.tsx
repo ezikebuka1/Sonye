@@ -13,6 +13,7 @@ import BottomTabBar from "@/components/BottomTabBar";
 import { Toast } from "@/components/Toast";
 
 import { useAppStore } from "@/lib/store";
+import { formatCentral } from "@/lib/format-central";
 
 // View-model for one Home-feed card. Built server-side in page.tsx from real
 // `slots` rows (D13 — all-server feed). HomeClient renders; it never fetches.
@@ -28,28 +29,6 @@ export type FeedSlot = {
 };
 
 const STRIP_AVATAR_COLORS = ["#1A3650", "#3A7CB8", "#5A9FD4", "#7FA8C9"];
-
-// Date + time from an ISO instant in Dallas civil time. IANA zone →
-// DST-correct (CDT/CST per date), never a fixed ±offset (D13/R2). Produced
-// once at module scope. The date label carries weekday + month + day
-// ("Sat, Jul 18") so cards are unambiguous across weeks — a bare weekday
-// reads identically for every Saturday slot.
-const DAY_FMT = new Intl.DateTimeFormat("en-US", {
-  weekday: "short",
-  month: "short",
-  day: "numeric",
-  timeZone: "America/Chicago",
-});
-const TIME_FMT = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
-  hour12: true,
-  timeZone: "America/Chicago",
-});
-function formatCentral(startsAtIso: string): { dayLabel: string; timeLabel: string } {
-  const d = new Date(startsAtIso);
-  return { dayLabel: DAY_FMT.format(d), timeLabel: TIME_FMT.format(d) };
-}
 
 export default function HomeClient({
   slots,

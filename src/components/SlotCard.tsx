@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { MapPin, Check, ChevronRight, Clock } from "lucide-react";
 import PickleballIcon from "@/components/icons/PickleballIcon";
 
-type SkillLevel = "beginner" | "advanced_beginner" | "intermediate" | "advanced";
+export type SkillLevel = "beginner" | "advanced_beginner" | "intermediate" | "advanced";
 type OptedInUser = { id: string };
 
 type MembershipStatus = 'joined' | 'waitlisted' | null;
@@ -33,7 +33,9 @@ type SlotCardProps = {
   onJoinWaitlist: (slotId: string) => void;
 };
 
-const skillBadge: Record<SkillLevel, { bg: string; text: string; label: string }> = {
+// The locked D8.2 skill ramp (the SKILL_RAMP). Exported so the owner dashboard
+// reuses the exact same color-coded chip — NOT a re-implementation.
+export const skillBadge: Record<SkillLevel, { bg: string; text: string; label: string }> = {
   beginner:          { bg: "bg-skill-beg-bg",    text: "text-skill-beg-ink",    label: "Beginner" },
   advanced_beginner: { bg: "bg-skill-advbeg-bg", text: "text-skill-advbeg-ink", label: "Adv. Beginner" },
   intermediate:      { bg: "bg-skill-int-bg",    text: "text-skill-int-ink",    label: "Intermediate" },
