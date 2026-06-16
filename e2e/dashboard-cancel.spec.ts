@@ -9,8 +9,12 @@ import { execFileSync } from 'node:child_process';
  * seeded directly against the DB (docker exec psql) and torn down after — it is
  * self-contained and never touches seed.sql.
  *
- * RUN: local Supabase up + `npx playwright test e2e/dashboard-cancel.spec.ts --project=chromium`
- *      (chromium only — the fixture is shared mutable state; two projects would race).
+ * RUN: local Supabase up + `npx playwright test e2e/dashboard-cancel.spec.ts`.
+ *      The describe is hard-guarded to the chromium project (see test.skip
+ *      below): the fixture is shared mutable state, so a second project running
+ *      concurrently would race its own seed/teardown. The guard makes the
+ *      default `npm run test:e2e` (all projects) safe without relying on anyone
+ *      remembering `--project=chromium`.
  */
 
 const DB = 'supabase_db_squadup';
@@ -152,6 +156,14 @@ const liveToast = (page: Page) =>
 
 test.describe('Phase 5 D2 — owner dashboard + cancel sheet (live session)', () => {
   test.describe.configure({ mode: 'serial' });
+
+  // Hard guard: this is a live-session spec backed by a shared, mutable DB
+  // fixture. Running it under more than one project at once (the default
+  // `npm run test:e2e` fans out to chromium + webkit-iphone) would let the two
+  // runs race each other's seed/teardown. Pin it to chromium — and because this
+  // sits at the describe top level, the beforeAll seed never even fires on
+  // other projects.
+  test.skip(({ browserName }) => browserName !== 'chromium', 'live-session DB fixture — chromium project only');
 
   test.beforeAll(() => {
     seedFixture();
