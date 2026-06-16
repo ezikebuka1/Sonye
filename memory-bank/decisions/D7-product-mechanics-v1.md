@@ -27,6 +27,15 @@ V1 of Sonye implements brief-aligned matching via **manually curated, recurring 
 - When the slot fills (hits capacity of 6), the session is locked and all members are notified.
 - Locked sessions are immutable — no one joins or leaves a locked session.
 
+> **Player-leave (D16):** the "no one joins or leaves a locked session" rule
+> above is **superseded for leaves** by `D16-player-leave-mechanics.md`. A joined
+> player may leave a full (6/6, locked) game — leave-eligibility is gated by TIME
+> (`starts_at > now()`), not capacity. Rationale: the waitlist only exists at 6/6
+> and `leave_slot` calls `promote_from_waitlist`, so capacity-gating leave would
+> make backfill dead code and trap a player with a locked D9 cap. This resolves
+> the open question at line 115 ("opt out of a joined slot ... confirm during
+> implementation"). Joins into a locked session remain disallowed.
+
 ### Waitlist behavior
 - Original slot is always the priority. Users opting into a slot with available spots go directly into the slot, not the waitlist.
 - Waitlist exists only when the original slot is full (6/6).
