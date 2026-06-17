@@ -1,7 +1,10 @@
-import { Home, Users, User } from "lucide-react";
+import { Home, Users, User, LayoutDashboard } from "lucide-react";
 
 type BottomTabBarProps = {
   activeTab: "home" | "squad" | "profile";
+  // M5 rider — when true, an owner-only Dashboard entry is appended. Non-owners
+  // never see it (the dashboard route itself also re-gates on is_owner()).
+  isOwner?: boolean;
 };
 
 type Tab = {
@@ -21,7 +24,7 @@ const tabs: Tab[] = [
  * Routing is NOT wired in M1 — tabs other than the active one are inert.
  * Navigation wiring arrives in M2 once D1 (state management) is decided.
  */
-export default function BottomTabBar({ activeTab }: BottomTabBarProps) {
+export default function BottomTabBar({ activeTab, isOwner = false }: BottomTabBarProps) {
   return (
     <nav
       className="fixed bottom-0 inset-x-0 bg-card border-t border-card-border"
@@ -47,6 +50,20 @@ export default function BottomTabBar({ activeTab }: BottomTabBarProps) {
             </div>
           );
         })}
+
+        {/* M5 rider — owner-only Dashboard entry. A real link (the route
+            exists), styled to match the inert tabs; hidden for non-owners. */}
+        {isOwner && (
+          <a
+            href="/dashboard"
+            data-testid="nav-dashboard"
+            className="flex-1 flex flex-col items-center justify-center py-3 gap-0.5 text-ink-soft"
+            aria-label="Dashboard"
+          >
+            <LayoutDashboard size={20} aria-hidden="true" />
+            <span className="text-xs font-sans font-medium">Dashboard</span>
+          </a>
+        )}
       </div>
     </nav>
   );

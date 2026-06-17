@@ -92,3 +92,60 @@ export async function cancelSlotAction(
 
   return { ok: true };
 }
+
+// M5 (D16) — a JOINED player leaves one of their own games from the group
+// lobby. Mirrors cancelSlotAction's shape EXACTLY: server client (so the
+// player's auth.uid() reaches the SECURITY DEFINER leave_slot — never the
+// browser client), ONE rpc call, RAISE-message mapping. leave_slot RETURNS
+// boolean (not a table), so success = no error — there is no row to unpack.
+//
+// UI-only dispatch: the reason code (found_other_game), the note column
+// (leave_reason_note), and full-slot/locked leaving ALL already exist in the
+// live leave_slot definition — verified. No schema change. The chip code and
+// the optional note are stored SEPARATELY (p_leave_reason_code coded,
+// p_leave_reason_note free text) — NOT composed into one string like
+// cancel_slot's cancellation_reason.
+export type LeaveReasonCode =
+  | 'schedule_conflict'
+  | 'injured'
+  | 'found_other_game'
+  | 'no_longer_available'
+  | 'other';
+
+export type LeaveResult =
+  | { ok: true }
+  | { error: 'not_joined' | 'not_found' | 'invalid_reason' | 'unknown' };
+
+export async function leaveSlotAction(
+  slotId: string,
+  reasonCode: LeaveReasonCode,
+  note?: string,
+): Promise<LeaveResult> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc('leave_slot', {
+    p_slot_id: slotId,
+    p_leave_reason_code: reasonCode,
+    // Empty/whitespace note → NULL (the column is nullable; never store "").
+    p_leave_reason_note: note?.trim() || null,
+  });
+
+  if (error) {
+    const msg = error.message ?? '';
+    // Session lapsed mid-tap → the login wall (the lobby already guards anon).
+    // ('leave_slot: not authenticated')
+    if (msg.includes('not authenticated')) redirect('/auth');
+    // Already left / never joined ('leave_slot: no active membership in slot %')
+    // — treated as already-resolved by the caller (close + refresh).
+    if (msg.includes('no active membership')) return { error: 'not_joined' };
+    // Slot vanished ('leave_slot: slot % not found') — defensive.
+    if (msg.includes('not found')) return { error: 'not_found' };
+    // Reason outside the allow-list ('leave_slot: invalid or reserved leave
+    // reason: %') — the picker only offers valid codes; defensive.
+    if (msg.includes('invalid or reserved leave reason')) return { error: 'invalid_reason' };
+    // Unexpected — surfaced as a retry toast by the caller.
+    return { error: 'unknown' };
+  }
+
+  return { ok: true };
+}
