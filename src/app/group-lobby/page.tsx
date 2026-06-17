@@ -9,6 +9,7 @@ import {
 import { getAvatar, type Gender } from '@/lib/avatar';
 import { formatPhone, smsHref } from '@/lib/phone';
 import PeerReportLink from '@/components/PeerReportLink';
+import LeaveGameControl from '@/components/LeaveGameControl';
 
 // Roster must be fresh per request — never cached, never streamed
 // (no Suspense: the page renders synchronously so the full payload is
@@ -136,6 +137,18 @@ export default async function GroupLobbyPage({
     .maybeSingle();
   const self = (selfData as SelfMembership | null) ?? null;
 
+  // M5 (D16) — the real, trigger-managed counts for the LeaveSheet props. The
+  // header (slot_share_preview) NULLs fill_count below the 50% threshold and
+  // carries no waitlist_count, so the leave consequence copy reads the
+  // canonical `slots` columns directly (query change, not schema). RLS
+  // slots_select_authenticated USING (true) permits this authenticated read.
+  const { data: slotCounts } = await supabase
+    .from('slots')
+    .select('member_count, waitlist_count')
+    .eq('id', slotId)
+    .maybeSingle();
+  const counts = (slotCounts as { member_count: number; waitlist_count: number } | null) ?? null;
+
   const joined   = roster.filter((r) => r.status === 'joined');
   const waitlist = roster.filter((r) => r.status === 'waitlisted');
 
@@ -173,6 +186,15 @@ export default async function GroupLobbyPage({
   const cap = preview.capacity;
   const fillCount = joined.length;
   const isLocked = fillCount >= cap;
+
+  // M5 (D16) — the leave entry point. Gated to the viewer's OWN joined
+  // membership AND a strictly-future start (starts_at > now() — NO owner 2h
+  // grace: after start the slot belongs to the D11 attendance flow, not leave).
+  // Capacity is NOT a gate — a joined player may leave a full/locked game (D7
+  // amendment); leave-eligibility is gated by TIME only.
+  const canLeave =
+    viewer === 'joined' &&
+    new Date(preview.starts_at).getTime() > new Date().getTime();
 
   const dirHelp =
     viewer === 'waitlisted'
@@ -348,6 +370,21 @@ export default async function GroupLobbyPage({
         <div className="mt-4 text-center">
           <PeerReportLink venue={preview.venue_name} day={dayLabel} />
         </div>
+
+        {/* M5 (D16) — player-leave entry point: joined viewer, future start only */}
+        {canLeave && (
+          <LeaveGameControl
+            slot={{
+              id: slotId,
+              startsAt: preview.starts_at,
+              venueName: preview.venue_name,
+              skillLevel: preview.skill_level,
+              capacity: cap,
+              memberCount: counts?.member_count ?? fillCount,
+              waitlistCount: counts?.waitlist_count ?? waitlist.length,
+            }}
+          />
+        )}
       </div>
     </main>
   );

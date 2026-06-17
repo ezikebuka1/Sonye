@@ -33,9 +33,11 @@ const STRIP_AVATAR_COLORS = ["#1A3650", "#3A7CB8", "#5A9FD4", "#7FA8C9"];
 export default function HomeClient({
   slots,
   firstName,
+  isOwner = false,
 }: {
   slots: FeedSlot[];
   firstName: string | null; // viewer's public.users.first_name (D13 — server-fetched), null if unset
+  isOwner?: boolean; // M5 rider — gates the owner-only Dashboard nav entry
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -169,7 +171,7 @@ export default function HomeClient({
         </div>
       </div>
 
-      <BottomTabBar activeTab="home" />
+      <BottomTabBar activeTab="home" isOwner={isOwner} />
 
       {toast && (
         <Toast
