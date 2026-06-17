@@ -1,0 +1,25 @@
+-- ============================================================
+-- Banked hardening (2026-06-16) — REVOKE UPDATE ON public.slots FROM anon.
+--
+-- Defense-in-depth. RLS already blocks anon from UPDATE on slots: the only
+-- UPDATE policy is slots_update_owner (USING/WITH CHECK is_owner()), so an
+-- anon caller is denied by policy regardless of this table-level grant. This
+-- removes the residual, RLS-shadowed table-level UPDATE grant so anon's
+-- privilege surface matches its actual capability (zero direct slot writes).
+--
+-- All legitimate slot mutations flow through SECURITY DEFINER routines —
+-- join_slot / leave_slot / cancel_slot / promote_from_waitlist and the
+-- SECURITY DEFINER count trigger sync_slot_counts — each of which writes
+-- public.slots as the function owner, NOT as the caller's role, so none
+-- depend on anon holding this grant.
+--
+-- The anon attendance routes (/c/y, /c/n) call attest_attendance (SECURITY
+-- DEFINER), which updates only session_memberships.attended (never status).
+-- The slots count trigger is AFTER INSERT OR UPDATE OF status, so it does not
+-- even fire on the attendance path — anon never writes slots there either.
+--
+-- Subtractive GRANT change only: no schema / RLS policy / data change.
+-- LOCAL apply only in this dispatch; the cloud apply rides Phase 6.
+-- ============================================================
+
+REVOKE UPDATE ON public.slots FROM anon;
