@@ -323,6 +323,70 @@ test.describe('M5 (D16) — player-leave flow (live session)', () => {
     expect(playerCount).toBe(0);
   });
 
+  // ── D10-A PLAYER — joined non-owner sees roster but ZERO peer phone links ────
+  // Runs BEFORE E2E-B (which mutates the full slot). P2 is joined on the full
+  // slot alongside 5 other joined peers (Tester 4–8). Peer phone links are
+  // matched by aria-label^="Text " — the directory's sms anchors — NOT by a raw
+  // href="sms:" string match, which is confounded by the support PeerReportLink
+  // and by Next.js RSC double-emitting anchors into the flight payload.
+  test('D10A-PLAYER: a joined non-owner sees the roster (name/avatar/skill) but ZERO peer phone links', async ({ page }) => {
+    await devLogin(page, P2_PHONE);
+    await page.setViewportSize({ width: 390, height: 844 }); // mobile-first proof viewport
+    await page.goto(`/group-lobby?slotId=${SLOT.full}`);
+    await expect(page.getByText('your group')).toBeVisible();
+
+    // roster still renders for the player: a joined peer's first name, the
+    // avatars, and the slot skill pill.
+    await expect(page.getByText('Tester 4')).toBeVisible(); // a joined peer (FILL_JOINED[0])
+    await expect(page.getByText('Intermediate', { exact: true }).first()).toBeVisible(); // full slot skill pill
+    const avatarCount = await page.locator('span.w-10.h-10.rounded-full').count();
+    console.log('[D10A-PLAYER] roster avatar count =', avatarCount);
+    expect(avatarCount).toBeGreaterThanOrEqual(6); // 6 joined + 1 waitlisted = 7
+
+    // THE REDACTION: a non-owner viewer receives NULL for every peer phone, so
+    // no sms link renders.
+    const peerSms = page.locator('a[aria-label^="Text "]');
+    const peerSmsCount = await peerSms.count();
+    console.log('[D10A-PLAYER] peer phone link count a[aria-label^="Text "] =', peerSmsCount);
+    expect(peerSmsCount).toBe(0);
+
+    // The lobby also renders the support "report a no-show" link
+    // (NEXT_PUBLIC_SUPPORT_PHONE) — a literal sms: anchor that is NOT a peer
+    // phone. This is exactly the confound the aria-label-scoped locator above
+    // sidesteps. Confirm EVERY literal sms: anchor in the player's DOM is that
+    // support link (i.e. none are peer phones).
+    const literalSms = await page.locator('a[href^="sms:"]').count();
+    const supportLink = await page.getByText("someone didn't show? let us know").count();
+    console.log(`[D10A-PLAYER] literal a[href^="sms:"] count = ${literalSms} (all support links; peer sms = ${peerSmsCount})`);
+    expect(literalSms).toBe(supportLink);
+
+    // 390×844 mobile proof screenshot — the redacted player lobby.
+    const shotPath = 'test-results/d10a-player-390x844.png';
+    await page.screenshot({ path: shotPath, fullPage: true });
+    console.log('[D10A-PLAYER] screenshot:', shotPath);
+  });
+
+  // ── D10-A OWNER — owner still reaches joined members' numbers ────────────────
+  // The owner's phone-access surface (step-5 discovery) is the lobby itself:
+  // owner enters /group-lobby as viewer==='owner' and slot_roster returns the
+  // joined phones via the is_owner() branch. Proves the conditional render
+  // preserved owner access on the SAME slot the player saw redacted.
+  test('D10A-OWNER: the owner sees peer phone links on the same slot (owner access preserved)', async ({ page }) => {
+    await devLogin(page, OWNER_PHONE);
+    await page.goto(`/group-lobby?slotId=${SLOT.full}`);
+    await expect(page.getByText('your group')).toBeVisible();
+
+    const peerSms = page.locator('a[aria-label^="Text "]');
+    const peerSmsCount = await peerSms.count();
+    console.log('[D10A-OWNER] peer phone link count a[aria-label^="Text "] =', peerSmsCount);
+    expect(peerSmsCount).toBeGreaterThan(0); // owner reaches the joined members' numbers
+
+    // every owner-visible peer link is a real sms: href (no sms:undefined).
+    const ownerSmsHrefs = await page.locator('a[aria-label^="Text "][href^="sms:"]').count();
+    console.log('[D10A-OWNER] owner peer links that are sms: hrefs =', ownerSmsHrefs);
+    expect(ownerSmsHrefs).toBe(peerSmsCount);
+  });
+
   // ── E2E-A — D9 unlock via player-leave (BEFORE/AFTER guards) ─────────────────
   test('E2E-A: leaving slot A frees the D9 cap so the player can join slot B', async ({ page }) => {
     await devLogin(page, P1_PHONE);

@@ -112,8 +112,9 @@ export default async function GroupLobbyPage({
   const preview = await fetchSlotPreview(slotId);
   if (!preview) redirect('/');
 
-  // D10 roster — server NULLs phones per viewer; rows arrive in the
-  // ruled order (joined first, FIFO by created_at)
+  // D10-A roster — server returns phones ONLY to the owner caller and
+  // NULLs them for every player; rows arrive in the ruled order (joined
+  // first, FIFO by created_at)
   const { data: rosterData, error: rosterErr } = await supabase.rpc('slot_roster', {
     target_slot: slotId,
   });
@@ -196,10 +197,14 @@ export default async function GroupLobbyPage({
     viewer === 'joined' &&
     new Date(preview.starts_at).getTime() > new Date().getTime();
 
+  // D10-A: player numbers are owner-only now (slot_roster redacts them
+  // for every non-owner caller), so only the owner gets the "tap a
+  // number" directory help. Players and waitlisted get neutral copy —
+  // no promise of numbers that will never appear for them.
   const dirHelp =
-    viewer === 'waitlisted'
-      ? "numbers show once you're in the game"
-      : 'tap a number to text — parking, balls, last-minute changes';
+    viewer === 'owner'
+      ? 'tap a number to text — parking, balls, last-minute changes'
+      : "who's playing this game";
 
   return (
     <main
@@ -299,10 +304,13 @@ export default async function GroupLobbyPage({
           <div className="divide-y divide-[#CFE0F4]">
             {joined.map((row) => {
               const isSelf = row.membership_id === selfId;
-              // D10 UI double-gate: digits render only when the server
-              // sent a phone AND the row is a joined member AND it is
-              // not the viewer's own row (server already NULLs per D10)
-              const showSms = !isSelf && row.status === 'joined' && row.phone !== null;
+              // D10-A UI gate: digits render only when the server sent a
+              // phone (truthy) AND the row is a joined member AND it is not
+              // the viewer's own row. Post-D10-A slot_roster returns the
+              // phone ONLY to the owner caller (NULL for every player), so
+              // this declaratively shows numbers to the owner and hides
+              // them from players — the security boundary lives in the RPC.
+              const showSms = !isSelf && row.status === 'joined' && Boolean(row.phone);
               return (
                 <div
                   key={row.membership_id}

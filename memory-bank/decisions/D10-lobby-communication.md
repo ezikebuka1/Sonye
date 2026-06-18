@@ -1,5 +1,12 @@
 # D10 — Lobby Communication
 
+> ⚠️ SUPERSEDED IN PART by Amendment A (end of doc). Peer phone visibility is
+> removed — phone numbers are visible to the game owner only, never between
+> players. The "joined members see each other's phones" decision below (incl.
+> §The Decision ~lines 19–20, the reveal/waitlist asymmetry ~87–89, and the
+> UX-disclosure copy ~133) is no longer in effect. Coordination moves to the
+> lobby wall (Amendment B, forthcoming).
+
 **Decided:** 2026-05-21
 **Status:** ✅ Decided. Implementation in M3.1 (schema patch) and M4
 (lobby UI surface).
@@ -239,3 +246,35 @@ Watch the first month of real M4+ data:
 - If any U.S. carrier policy or regulatory change makes phone-
   number-display in PWAs friction-laden in a way that's not
   visible from current information.
+
+## Amendment A — Peer phone visibility removed (owner-only)
+2026-06-18. Amends D10's core decision and the M4 lobby UI. Urgent pre-launch
+security fix. Implemented in commits 4c3a3ba (schema) + 5b7b042 (UI).
+
+What changes. Phone numbers are no longer visible between players. slot_roster
+projects phone to the owner only (is_owner() branch); every non-owner caller —
+joined or waitlisted — receives NULL. The lobby renders the phone + sms: link
+only when a phone is present (owner only); players see first name, avatar, skill.
+
+Why. D10's containment argument (§"What this depends on for v1") rested on D9:
+one joined slot per Dallas day bounds phone exposure. M5 (player-leave) voids it
+— leave frees the D9 cap, so a user can join → read the roster → leave → rejoin
+without limit, harvesting the whole Dallas calendar. The rate limit that made the
+reveal bounded no longer holds once M5 is live (it is). Independent of the
+exploit: auto-revealing a personal number on join is bundled, irreversible
+consent and a deterrent to joining (women especially) — a density cost.
+
+Coordination replacement. Off-platform SMS is replaced by an in-app per-game
+lobby wall (canned taps + free-text) on the resurrected chat_messages table —
+Amendment B, forthcoming. Until it ships, coordination routes through the owner,
+who retains phone access.
+
+Superseded in D10. §The Decision (joined see phones); the phone half of the
+reveal/waitlist asymmetry; the M4 sms: link UI; the UX-disclosure copy.
+
+Unchanged. Roster visibility (joined + waitlisted still see the roster); the
+is_owner() owner-sees-phones branch; RLS on users (own-row-only).
+
+Process note. This doc landed after the implementation rather than before — a
+one-time deviation from decision-doc-first, recorded and accepted. Main is
+consistent as of this commit.
