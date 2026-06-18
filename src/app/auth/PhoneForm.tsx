@@ -1,7 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useActionState } from 'react';
 import { sendOtpAction } from './actions';
+import { SMS_CONSENT_LINE } from '@/lib/consent';
 
 type Props = {
   slotId:     string;
@@ -34,6 +36,20 @@ export function PhoneForm({ slotId, claimToken }: Props) {
       {error && (
         <p className="text-sm text-[#D64B4B]">{error}</p>
       )}
+
+      {/* A2P / 10DLC SMS consent — must render directly ABOVE the submit
+          action and stay visible with it in one frame (Twilio screenshot).
+          Copy is the single source of truth in src/lib/consent.ts. */}
+      <div className="flex flex-col gap-1.5">
+        <p data-testid="sms-consent" className="text-[13px] leading-relaxed text-steel">
+          {SMS_CONSENT_LINE}
+        </p>
+        <p className="text-[13px] text-steel">
+          <Link href="/terms" className="text-ink underline">Terms</Link>
+          {' · '}
+          <Link href="/privacy" className="text-ink underline">Privacy Policy</Link>
+        </p>
+      </div>
 
       <button
         type="submit"
