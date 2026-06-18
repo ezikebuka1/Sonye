@@ -225,10 +225,14 @@ COMMIT;
 
 -- ================================================================
 -- LEG 6 — ANON BLOCKED. anon INSERT denied (write grant revoked +
---          no policy for anon).
+--          no policy for anon). anon ALSO cannot delete via the RPC:
+--          although anon holds the default EXECUTE grant (matching
+--          cancel_slot/kick_member), the is_owner() gate raises before
+--          any DELETE — current_user_id() is NULL for anon, so the
+--          message id is immaterial. msg_b's id is used for realism.
 -- ================================================================
 \echo ''
-\echo '=== LEG 6: ANON BLOCKED (defense-in-depth — write grant revoked) ==='
+\echo '=== LEG 6: ANON BLOCKED (defense-in-depth — write grant revoked + RPC owner gate) ==='
 
 BEGIN;
 SELECT set_config('request.jwt.claims',
@@ -238,8 +242,12 @@ SET LOCAL ROLE anon;
 \echo 'L6-a: anon INSERT (EXPECTED: ERROR — permission denied for table chat_messages):'
 INSERT INTO public.chat_messages (slot_id, user_id, body)
 VALUES (:'s_race_id'::uuid, :'owner_auth'::uuid, 'anon: hello');
+
+\echo 'L6-b ANON CANNOT DELETE (RPC owner gate): anon owner_delete_message(msg_b)'
+\echo '     (EXPECTED: ERROR — owner only / insufficient_privilege; is_owner() false, current_user_id() NULL):'
+SELECT public.owner_delete_message(:'msg_b'::uuid) AS deleted;
 COMMIT;
-\echo 'LEG 6 COMPLETE. EXPECTED: the INSERT was denied (permission / RLS).'
+\echo 'LEG 6 COMPLETE. EXPECTED: INSERT denied (permission/RLS) AND RPC raised "owner only" (insufficient_privilege).'
 
 \echo ''
 \echo '=== ALL D10-B PROOFS COMPLETE ==='
