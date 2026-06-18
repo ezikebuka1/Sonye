@@ -2,10 +2,10 @@
 
 > ⚠️ SUPERSEDED IN PART by Amendment A (end of doc). Peer phone visibility is
 > removed — phone numbers are visible to the game owner only, never between
-> players. The "joined members see each other's phones" decision below (incl.
-> §The Decision ~lines 19–20, the reveal/waitlist asymmetry ~87–89, and the
-> UX-disclosure copy ~133) is no longer in effect. Coordination moves to the
-> lobby wall (Amendment B, forthcoming).
+> players. The "joined members see each other's phones" decision below
+> (§The Decision, the reveal/waitlist asymmetry, and the UX-disclosure copy)
+> is no longer in effect. Coordination moves to the lobby wall
+> (Amendment B, below).
 
 **Decided:** 2026-05-21
 **Status:** ✅ Decided. Implementation in M3.1 (schema patch) and M4
@@ -266,7 +266,7 @@ consent and a deterrent to joining (women especially) — a density cost.
 
 Coordination replacement. Off-platform SMS is replaced by an in-app per-game
 lobby wall (canned taps + free-text) on the resurrected chat_messages table —
-Amendment B, forthcoming. Until it ships, coordination routes through the owner,
+Amendment B, below. Until it ships, coordination routes through the owner,
 who retains phone access.
 
 Superseded in D10. §The Decision (joined see phones); the phone half of the
@@ -278,3 +278,48 @@ is_owner() owner-sees-phones branch; RLS on users (own-row-only).
 Process note. This doc landed after the implementation rather than before — a
 one-time deviation from decision-doc-first, recorded and accepted. Main is
 consistent as of this commit.
+
+## Amendment B — Lobby Wall (in-app coordination)
+2026-06-18. Replaces D10-A's interim "coordination via owner" with an in-app
+per-game wall, built on the resurrected chat_messages table.
+
+**The decision.** Coordination moves on-platform to a per-game lobby wall: canned
+presence taps ("I'm here," "On my way," "Running ~10 late") plus free-text
+messages, both written to chat_messages (a canned tap is just a fixed-body
+insert). Visible to the game's joined players and the owner.
+
+**Audience — joined-only.** SELECT gates on is_joined_member(slot_id) OR
+is_owner(); INSERT on is_joined_member(slot_id) AND user_id = current_user_id() —
+both switched off is_active_member, which had included waitlisters. Waitlisters
+can neither read nor post. Rationale: matches D10's committed-players boundary
+(waitlist is a queue, not a commitment; promotion brings them in), and prevents
+the wall becoming a backdoor for the peer-PII removed in D10-A. The owner reads
+every wall (is_owner branch) but posts only where they're a joined player;
+owner-broadcast-without-playing is a v2 add if ever needed.
+
+**Moderation — owner-delete via RPC.** No raw client DELETE (M3 R4). Moderation is
+owner_delete_message(p_message_id) — SECURITY DEFINER, checks is_owner(), drops
+the row. chat_messages is a leaf table, so the delete orphans nothing. Messages
+otherwise immutable (no UPDATE policy). Kicking a player removes their access but
+leaves their posts; owner-delete pulls a specific bad message.
+
+**Retention — persist, hide post-game.** Rows are retained, not deleted; the wall
+is surfaced only while the game is live. Deliberate: the log is a trust-and-safety
+audit trail — a next-day harassment report needs evidence a cron-deleted wall
+would have destroyed. Comments are retained, surfaced only during the active
+window, removed on account deletion (NOT "ephemeral").
+
+**Lifecycle / "over" trigger.** Read- and post-able from joined-membership through
+ends_at + 2h — anchored on ends_at (not the dashboard's starts_at + 2h) so it's
+robust to game length: a starts_at-based window would close the wall mid-game for
+any session over two hours, whereas ends_at-anchored always lands after the real
+end. The 2h pad covers the parking-lot cooldown (lost-and-found, wrap-up) and the
+realize-it-at-home lag, matches the 2h grace D15 uses, and still blocks next-day
+necro-posting. Client fetch/render and the post path both gate on
+ends_at + interval '2 hours' > now(); read data persists past it (the audit
+trail), unsurfaced. ends_at is already in the slot projections (M3.5) — no cron,
+no new field.
+
+**Defense-in-depth.** REVOKE INSERT, UPDATE, DELETE ON chat_messages FROM anon
+(grants were wide-open default-Supabase; RLS was the only gate), matching the
+slots hardening.
