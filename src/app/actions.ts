@@ -149,3 +149,91 @@ export async function leaveSlotAction(
 
   return { ok: true };
 }
+
+// D10-B — post a message to the lobby wall. Used by BOTH the free-text composer
+// AND the canned chips (each chip sends a fixed body). The wall is gated to
+// joined members + host in the UI, but this action NEVER trusts that: the RLS
+// WITH CHECK (is_joined_member AND user_id = current_user_id()) is the real
+// write boundary, and the ends_at + 2h necro-guard below rejects late posts
+// even if a caller reaches the action past the hidden UI.
+export type PostMessageResult =
+  | { ok: true }
+  | { error: 'empty' | 'too_long' | 'closed' | 'not_joined' | 'unknown' };
+
+// Mirror the DB CHECK (length(body) <= 2000) so an over-long body is a clean
+// app-level reject, not a Postgres constraint error.
+const WALL_BODY_MAX = 2000;
+const WALL_GRACE_MS = 2 * 60 * 60 * 1000; // chat closes 2h after ends_at
+
+export async function postLobbyMessageAction(
+  slotId: string,
+  body: string,
+): Promise<PostMessageResult> {
+  const supabase = await createClient();
+
+  const text = body.trim();
+  if (!text) return { error: 'empty' }; // DB CHECK length(btrim(body)) > 0
+  if (text.length > WALL_BODY_MAX) return { error: 'too_long' };
+
+  // NECRO-POST GUARD: re-fetch ends_at and reject anything past ends_at + 2h —
+  // insert NOTHING. slots_select_authenticated USING (true) permits the read.
+  const { data: slot } = await supabase
+    .from('slots')
+    .select('ends_at')
+    .eq('id', slotId)
+    .maybeSingle();
+  if (!slot) return { error: 'unknown' }; // bad/vanished slot id
+  const endsAtMs = new Date((slot as { ends_at: string }).ends_at).getTime();
+  if (Date.now() > endsAtMs + WALL_GRACE_MS) return { error: 'closed' };
+
+  // The insert needs user_id = current_user_id() for the RLS WITH CHECK.
+  const { data: uidData } = await supabase.rpc('current_user_id');
+  const uid = (uidData as string | null) ?? null;
+  if (!uid) redirect('/auth'); // session lapsed mid-post
+
+  const { error } = await supabase
+    .from('chat_messages')
+    .insert({ slot_id: slotId, user_id: uid, body: text });
+
+  if (error) {
+    // The only expected failure once the guards pass is the RLS WITH CHECK
+    // rejecting a non-joined poster (the wall hides the composer from non-
+    // members, so this is the bypass case — e.g. a waitlister or the host who
+    // is not also a joined player). 'new row violates row-level security'.
+    if ((error.message ?? '').includes('row-level security')) return { error: 'not_joined' };
+    return { error: 'unknown' };
+  }
+
+  return { ok: true };
+}
+
+// D10-B — host removes a wall message. Mirrors cancelSlotAction's shape: server
+// client (so the owner's auth.uid() reaches the SECURITY DEFINER RPC), one RPC
+// call, RAISE-message mapping. owner_delete_message is the ONLY delete path
+// (no DELETE policy on the table); its is_owner() gate is the authority — this
+// action never trusts the UI's host-only gate.
+export type RemoveMessageResult =
+  | { ok: true }
+  | { error: 'forbidden' | 'unknown' };
+
+export async function removeLobbyMessageAction(
+  messageId: string,
+): Promise<RemoveMessageResult> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.rpc('owner_delete_message', {
+    p_message_id: messageId,
+  });
+
+  if (error) {
+    const msg = error.message ?? '';
+    // Session lapsed mid-tap → the login wall.
+    if (msg.includes('not authenticated')) redirect('/auth');
+    // is_owner() false ('owner only' / insufficient_privilege) — a non-host
+    // reached the RPC; the gate rejected BEFORE any delete.
+    if (msg.includes('owner only')) return { error: 'forbidden' };
+    return { error: 'unknown' };
+  }
+
+  return { ok: true };
+}
