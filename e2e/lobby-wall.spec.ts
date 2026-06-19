@@ -52,6 +52,7 @@ const SLOT = {
   active: '510b0000-0000-4000-8000-0000000000a1', // active; full + SAM waitlisted; 2027-11-01
   remove: '510b0000-0000-4000-8000-0000000000a2', // active; host removes a seeded msg; 2027-11-02
   expired: '510b0000-0000-4000-8000-0000000000a3', // ends_at+2h in the PAST; 2020-02-02
+  ownerseat: '510b0000-0000-4000-8000-0000000000a4', // the OWNER holds a joined seat; 2027-11-03
 } as const;
 const ALL_SLOT_IDS = Object.values(SLOT);
 
@@ -108,6 +109,7 @@ function seedFixture(): void {
     { phone: CASEY_PHONE, slot: SLOT.remove, status: 'joined' },
     { phone: ROBIN_PHONE, slot: SLOT.remove, status: 'joined' },
     { phone: CASEY_PHONE, slot: SLOT.expired, status: 'joined' },
+    { phone: OWNER_PHONE, slot: SLOT.ownerseat, status: 'joined' }, // owner occupies a seat
   ];
   const seatValues = seats.map((s) => `('${s.phone}','${s.slot}','${s.status}')`).join(',\n    ');
 
@@ -117,6 +119,7 @@ function seedFixture(): void {
     { slot: SLOT.active, phone: ROBIN_PHONE, body: 'Robin: courts are open', mins: 3 },
     { slot: SLOT.active, phone: CASEY_PHONE, body: 'Casey: on my way already', mins: 2 },
     { slot: SLOT.remove, phone: ROBIN_PHONE, body: 'Robin: who has the key?', mins: 1 },
+    { slot: SLOT.ownerseat, phone: OWNER_PHONE, body: 'Owner: nets are up', mins: 1 },
   ];
   const msgValues = messages.map((m) => `('${m.slot}','${m.phone}','${m.body}',${m.mins})`).join(',\n    ');
 
@@ -139,7 +142,8 @@ INSERT INTO public.slots
 VALUES
   ${slotRow(SLOT.active, '2027-11-01', 15)},
   ${slotRow(SLOT.remove, '2027-11-02', 15)},
-  ${slotRow(SLOT.expired, '2020-02-02', 12)};
+  ${slotRow(SLOT.expired, '2020-02-02', 12)},
+  ${slotRow(SLOT.ownerseat, '2027-11-03', 15)};
 
 INSERT INTO public.session_memberships (id, user_id, slot_id, status, slot_date, created_at)
 SELECT gen_random_uuid(), u.id, v.slot::uuid, v.status,
@@ -183,9 +187,11 @@ test.describe('D10-B — lobby wall (live session)', () => {
     console.log('[fixture] seeded counts member/waitlist:\n' + counts);
     // active full + SAM waitlisted
     expect(psqlRaw(`SELECT member_count||'/'||waitlist_count FROM public.slots WHERE id='${SLOT.active}';`)).toBe('6/1');
+    expect(psqlRaw(`SELECT member_count||'/'||waitlist_count FROM public.slots WHERE id='${SLOT.ownerseat}';`)).toBe('1/0');
     expect(msgCount(SLOT.active)).toBe(2);
     expect(msgCount(SLOT.remove)).toBe(1);
     expect(msgCount(SLOT.expired)).toBe(0);
+    expect(msgCount(SLOT.ownerseat)).toBe(1);
   });
 
   test.afterAll(() => {
@@ -357,5 +363,47 @@ test.describe('D10-B — lobby wall (live session)', () => {
     const shot = 'test-results/d10b-wall-active-390x844.png';
     await page.screenshot({ path: shot, fullPage: true });
     console.log('[5] screenshot:', shot);
+  });
+
+  // ── GATE 2 — OWNER-WITH-SEAT renders BOTH composer and Remove ────────────────
+  // The composer keys off JOINED MEMBERSHIP status (viewer === 'joined'),
+  // independent of host/owner. An owner who occupies a seat has a joined
+  // membership → viewer === 'joined' → composer renders; Remove keys off
+  // is_owner() separately → also renders. (join_slot has no owner-exclusion, so
+  // an owner holding a seat is a reachable v1 state.)
+  test('GATE2 OWNER-WITH-SEAT: an owner holding a joined seat renders BOTH composer and Remove', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await devLogin(page, OWNER_PHONE);
+
+    // sanity: the owner truly holds a JOINED membership on this slot
+    const ownerStatus = psqlRaw(
+      `SELECT m.status FROM public.session_memberships m
+       JOIN public.users u ON u.id = m.user_id
+       WHERE m.slot_id = '${SLOT.ownerseat}' AND u.phone = '${OWNER_PHONE}';`,
+    );
+    console.log('[GATE2] owner membership status on ownerseat =', JSON.stringify(ownerStatus), '(expect "joined")');
+    expect(ownerStatus).toBe('joined');
+
+    await page.goto(`/group-lobby?slotId=${SLOT.ownerseat}`);
+    await expect(page.getByTestId('wall-active')).toBeVisible();
+
+    // (a) composer renders for the owner-who-joined (keys off joined membership)
+    const composer = await page.getByTestId('wall-composer-input').count();
+    const canned = await page.getByTestId('wall-canned').getByRole('button').count();
+    const send = await page.getByTestId('wall-composer-send').count();
+    console.log(`[GATE2] owner-with-seat → composer=${composer} cannedChips=${canned} send=${send} (expect 1, 3, 1)`);
+    expect(composer).toBe(1);
+    expect(canned).toBe(3);
+    expect(send).toBe(1);
+
+    // (b) Remove renders too (keys off is_owner separately)
+    await page
+      .locator('[data-testid="wall-message"]', { hasText: 'Owner: nets are up' })
+      .getByRole('button', { name: 'Message options' })
+      .click();
+    await expect(page.getByTestId('wall-msg-sheet')).toBeVisible();
+    const remove = await page.getByTestId('wall-remove').count();
+    console.log('[GATE2] owner-with-seat sheet → wall-remove =', remove, '(expect 1)');
+    expect(remove).toBe(1);
   });
 });
