@@ -10,6 +10,7 @@ import { getAvatar, type Gender } from '@/lib/avatar';
 import { formatPhone, smsHref } from '@/lib/phone';
 import PeerReportLink from '@/components/PeerReportLink';
 import LeaveGameControl from '@/components/LeaveGameControl';
+import LobbyWall, { type WallMessageVM } from '@/components/LobbyWall';
 
 // Roster must be fresh per request — never cached, never streamed
 // (no Suspense: the page renders synchronously so the full payload is
@@ -206,6 +207,73 @@ export default async function GroupLobbyPage({
       ? 'tap a number to text — parking, balls, last-minute changes'
       : "who's playing this game";
 
+  // ── D10-B lobby wall ────────────────────────────────────────────────────────
+  // Audience = joined members + host (owner); waitlisters are excluded (they do
+  // NOT get the wall). ACTIVE until ends_at + 2h; CLOSED after — and when closed
+  // we fetch NO message content, only a recap COUNT.
+  const WALL_GRACE_MS = 2 * 60 * 60 * 1000;
+  const showWall = viewer === 'joined' || viewer === 'owner';
+  const wallClosed =
+    new Date(preview.ends_at).getTime() + WALL_GRACE_MS <= new Date().getTime();
+
+  // Host-only Remove keys off is_owner(), not viewer state: an owner who JOINED
+  // their own game shows as viewer 'joined' but must still get Remove.
+  let isOwner = viewer === 'owner';
+  if (viewer === 'joined') {
+    const { data: ownerFlag } = await supabase.rpc('is_owner');
+    isOwner = Boolean(ownerFlag);
+  }
+
+  type WallRow = {
+    message_id: string;
+    body: string;
+    created_at: string;
+    author_id: string;
+    author_first_name: string | null;
+    author_gender: Gender | null;
+    is_host: boolean;
+    is_self: boolean;
+  };
+
+  const wallTimeFmt = new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'America/Chicago',
+  });
+
+  let wallMessages: WallMessageVM[] = [];
+  let wallMessageCount = 0;
+  if (showWall && wallClosed) {
+    // Closed: a COUNT only — never the bodies. RLS (is_joined_member OR
+    // is_owner) lets this viewer count the slot's messages.
+    const { count } = await supabase
+      .from('chat_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('slot_id', slotId);
+    wallMessageCount = count ?? 0;
+  } else if (showWall) {
+    // Active: slot_wall resolves each author server-side (the only path that
+    // works for a joined non-owner — see the slot_wall migration). user_id is
+    // used as the avatar shade seed and NEVER sent to the client.
+    const { data: wallData } = await supabase.rpc('slot_wall', { target_slot: slotId });
+    wallMessages = ((wallData as WallRow[] | null) ?? []).map((r) => {
+      const av = getAvatar(r.author_gender, r.author_id);
+      const fallbackName = r.author_first_name || 'Player';
+      return {
+        id: r.message_id,
+        body: r.body,
+        name: r.is_self ? 'You' : fallbackName,
+        initial: fallbackName.charAt(0).toUpperCase(),
+        avatarBg: av.bg,
+        avatarFg: av.fg,
+        time: wallTimeFmt.format(new Date(r.created_at)),
+        isSelf: r.is_self,
+        isHost: r.is_host,
+      };
+    });
+  }
+
   return (
     <main
       className="min-h-screen bg-[#E6F0FF]"
@@ -373,6 +441,23 @@ export default async function GroupLobbyPage({
             </div>
           )}
         </div>
+
+        {/* D10-B lobby wall — joined members + host, below the roster */}
+        {showWall && (
+          <LobbyWall
+            slotId={slotId}
+            closed={wallClosed}
+            capacity={cap}
+            playerCount={joined.length}
+            messages={wallMessages}
+            messageCount={wallMessageCount}
+            canPost={viewer === 'joined'}
+            canRemove={isOwner}
+            supportPhone={process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? null}
+            venueName={preview.venue_name}
+            dayLabel={dayLabel}
+          />
+        )}
 
         {/* D11 peer-report link — below the directory, muted steel */}
         <div className="mt-4 text-center">
