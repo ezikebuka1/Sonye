@@ -1,6 +1,7 @@
 -- ================================================================
 -- D10 Verification Proofs: slot_roster phone projection
--- Proofs 9, 10, 11  (per D10 -- Lobby Communication)
+-- Proofs 9, 10, 11  (per D10 -- Lobby Communication; AMENDED by
+-- D10 Amendment A -- peer phone redacted to OWNER-ONLY)
 --
 -- LOCAL VERIFICATION ONLY: Do not run against cloud database.
 -- This script creates a test owner fixture for Proof 11.
@@ -58,9 +59,12 @@ SELECT member_count, waitlist_count
 FROM   public.slots WHERE id = :'s_race_id'::uuid;
 
 -- ---------------------------------------------------------------
--- PROOF 9: joined caller sees joined phones; waitlisted rows NULL
--- Role resolved dynamically from session_memberships truth so the
--- proof is correct regardless of race outcome (Grace or Henry).
+-- PROOF 9 (D10-A): joined NON-owner caller sees NO phones.
+-- Pre-D10-A this caller saw joined phones; the redaction now NULLs
+-- every phone column for any non-owner. Role resolved dynamically
+-- from session_memberships truth so the proof is correct regardless
+-- of race outcome (Grace or Henry) -- the racer is a player, not
+-- the owner, so is_owner() is false and no phone is revealed.
 -- ---------------------------------------------------------------
 
 -- Resolve whichever of Grace/Henry ended up joined this run.
@@ -86,7 +90,7 @@ LIMIT  1
 \gset
 
 \echo ''
-\echo '=== PROOF 9: joined caller -- joined phones visible, waitlisted NULL ==='
+\echo '=== PROOF 9 (D10-A): joined NON-owner caller -- EVERY phone NULL ==='
 \echo 'Joined racer this run: ' :joined_racer_name
 
 BEGIN;
@@ -95,7 +99,7 @@ SELECT set_config('request.jwt.claims',
 SET LOCAL ROLE authenticated;
 
 \echo 'P9-A: full roster as joined racer:' :joined_racer_name
-\echo 'EXPECTED: 6 joined rows with non-NULL phone, 1 waitlisted row with NULL phone.'
+\echo 'EXPECTED (D10-A): 6 joined rows with NULL phone, 1 waitlisted row with NULL phone -- non-owner sees no phones.'
 SELECT status,
        phone,
        phone IS NOT NULL AS phone_visible
@@ -113,7 +117,7 @@ FROM   public.slot_roster(:'s_race_id'::uuid);
 COMMIT;
 
 \echo 'PROOF 9 COMPLETE.'
-\echo 'EXPECTED: joined_with_phone=6, joined_no_phone=0, waitlisted_null=1, waitlisted_exposed=0'
+\echo 'EXPECTED (D10-A inverted): joined_with_phone=0, joined_no_phone=6, waitlisted_null=1, waitlisted_exposed=0'
 
 -- ---------------------------------------------------------------
 -- PROOF 10: waitlisted caller sees roster; ALL phone columns NULL
@@ -170,7 +174,7 @@ SELECT status,
 FROM   public.slot_roster(:'s_race_id'::uuid)
 ORDER BY status DESC, phone;
 
-\echo 'P11-C: count check (mirrors P9 -- owner and joined caller see identical phone set):'
+\echo 'P11-C: count check (owner sees the joined phone set; post-D10-A the owner is the ONLY caller that does -- contrast P9):'
 SELECT
     count(*) FILTER (WHERE status = 'joined'     AND phone IS NOT NULL) AS joined_with_phone,
     count(*) FILTER (WHERE status = 'joined'     AND phone IS NULL)     AS joined_no_phone,
@@ -185,5 +189,5 @@ COMMIT;
 
 \echo ''
 \echo '=== ALL D10 PROOFS COMPLETE ==='
-\echo 'Key invariant: phone visible iff (is_joined_member OR is_owner) AND row.status=joined.'
-\echo 'Waitlisted callers: phone NULL on every row. Owner: same phone set as a joined caller.'
+\echo 'Key invariant (D10-A): phone visible iff is_owner() AND row.status=joined.'
+\echo 'Non-owner callers (joined OR waitlisted): phone NULL on every row. Owner: the ONLY caller who sees phones.'
