@@ -95,8 +95,10 @@ export async function verifyOtpAction(
     dest = '/';
   }
 
+  // NOTE: never log the phone (or any PII) here — this runs on every OTP verify
+  // and would persist plaintext numbers in Vercel runtime logs / log drains.
   console.log(
-    `[D2 router] phone=${phone} isNewUser=${isNewUser} hasSlot=${hasSlotContext} hasClaim=${hasClaimToken} → Route → ${flow}`,
+    `[D2 router] isNewUser=${isNewUser} hasSlot=${hasSlotContext} hasClaim=${hasClaimToken} → Route → ${flow}`,
   );
 
   redirect(dest);
