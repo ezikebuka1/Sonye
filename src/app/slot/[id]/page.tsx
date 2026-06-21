@@ -1,5 +1,4 @@
 import { cache } from 'react';
-import { headers } from 'next/headers';
 import type { Metadata } from 'next';
 import {
   fetchSlotPreview,
@@ -27,10 +26,9 @@ export async function generateMetadata({
   const { ogShortDay } = formatDallas(preview.starts_at, preview.ends_at);
   const ds = deriveState(preview, id);
 
-  const headersList = await headers();
-  const host  = headersList.get('host') ?? 'localhost:3000';
-  const proto = headersList.get('x-forwarded-proto') ?? 'http';
-  const baseUrl = `${proto}://${host}`;
+  // Absolute base for the OG image URL. Derive from env so prod share previews
+  // resolve against the real host; the localhost fallback is dev-only.
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
 
   let title: string;
   let description: string;
