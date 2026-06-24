@@ -20,6 +20,7 @@ export default async function JoinPage({
   if (joinErr) {
     const msg = joinErr.message ?? '';
     if (msg.includes('is cancelled')) redirect('/?toast=cancelled');
+    if (msg.includes('already started')) redirect('/?toast=started'); // D19
     if (msg.includes('D9 violation')) redirect('/?toast=d9');
     redirect('/');
   }

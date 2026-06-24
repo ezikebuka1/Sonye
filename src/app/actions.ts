@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/server';
 // server-side, so the caller's awaited value is undefined on those paths.
 export type JoinResult =
   | { status: 'waitlisted' }
-  | { error: 'collision' | 'cancelled' };
+  | { error: 'collision' | 'cancelled' | 'started' };
 
 // Flow 2′ — returning user joining from the Home feed. D13 (all-server):
 // join_slot is the SOLE authority for joined-vs-waitlisted AND for the D9
@@ -27,6 +27,9 @@ export async function joinSlotAction(slotId: string): Promise<JoinResult> {
     if (msg.includes('D9 violation')) return { error: 'collision' };
     // Owner cancelled the slot between render and tap → card locks + toast.
     if (msg.includes('is cancelled')) return { error: 'cancelled' };
+    // D19: the game already started/ended between render and tap → card locks
+    // in place with the "Already started" footer + error toast (like cancelled).
+    if (msg.includes('already started')) return { error: 'started' };
     // Shouldn't reach the feed (a joined/waitlisted slot renders In lobby /
     // On the waitlist, not Join). If it does, treat as no-op → route to lobby.
     if (msg.includes('already active in slot')) redirect(`/group-lobby?slotId=${slotId}`);

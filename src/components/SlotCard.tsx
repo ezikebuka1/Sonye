@@ -29,6 +29,10 @@ type SlotCardProps = {
   // Dispatch 2 (D13): join_slot RAISEd "is cancelled" for this card — the CTA
   // is replaced IN PLACE by a non-interactive, greyed "Cancelled" label.
   cancelled?: boolean;
+  // D19: join_slot RAISEd "has already started" for this card — the CTA is
+  // replaced IN PLACE by a non-interactive "Already started" footer (full
+  // contrast, Clock icon; terminal like cancelled, but a distinct "past" look).
+  started?: boolean;
   onJoin: (slotId: string) => void;
   onJoinWaitlist: (slotId: string) => void;
 };
@@ -111,6 +115,7 @@ export default function SlotCard({
   genderCategory,
   pending = false,
   cancelled = false,
+  started = false,
   onJoin,
   onJoinWaitlist,
 }: SlotCardProps) {
@@ -167,10 +172,18 @@ export default function SlotCard({
           "Joining…" state, then the open/full join buttons. */}
       {cancelled ? (
         <div
-          className="w-full bg-[#EEF2F8] text-ink-soft rounded-xl py-2.5 font-sans font-medium text-[15px] flex items-center justify-center cursor-not-allowed opacity-80 select-none"
+          className="w-full bg-[#EEF2F8] text-ink-soft rounded-xl py-2.5 font-sans font-medium text-[15px] flex items-center justify-center cursor-not-allowed select-none"
           aria-label={`Cancelled — ${dayLabel} ${timeLabel}`}
         >
           Cancelled
+        </div>
+      ) : started ? (
+        <div
+          className="w-full bg-inset text-ink-soft rounded-xl py-2.5 font-sans font-medium text-[15px] flex items-center justify-center gap-1.5 cursor-not-allowed select-none"
+          aria-label={`Already started — ${dayLabel} ${timeLabel}`}
+        >
+          <Clock size={16} aria-hidden="true" />
+          Already started
         </div>
       ) : membershipStatus === 'joined' ? (
         <a

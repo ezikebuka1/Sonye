@@ -47,9 +47,11 @@ export default function HomeClient({
 
   // Per-card join state (Dispatch 2, D13). `pendingId` = the one card whose
   // join_slot Server Action is in flight (others unaffected); `cancelledIds` =
-  // cards join_slot reported as cancelled, locked in place this session.
+  // cards join_slot reported as cancelled, locked in place this session;
+  // `startedIds` = cards join_slot reported as already started (D19), same lock.
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [cancelledIds, setCancelledIds] = useState<Set<string>>(() => new Set());
+  const [startedIds, setStartedIds] = useState<Set<string>>(() => new Set());
   const [, startTransition] = useTransition();
 
   // Read ?toast= params from Server Action redirects (join / onboarding) and
@@ -66,6 +68,7 @@ export default function HomeClient({
       waitlisted: { message: "On the waitlist — we'll text you", variant: "success" },
       welcomed:   { message: "you're all set — find your game", variant: "success" },
       cancelled:  { message: "That game was cancelled", variant: "error" },
+      started:    { message: "Game already started", variant: "error" },
       d9:         { message: "You're already in a game today. Leave that one or complete it to join another.", variant: "error" },
     };
 
@@ -110,6 +113,14 @@ export default function HomeClient({
                 variant: "error",
               });
               setCancelledIds((prev) => new Set(prev).add(slotId));
+            } else if (result.error === "started") {
+              // D19: started/ended between render and tap → lock the card in
+              // place with the "Already started" footer (mirrors cancelled).
+              useAppStore.getState().showToast({
+                message: "Game already started",
+                variant: "error",
+              });
+              setStartedIds((prev) => new Set(prev).add(slotId));
             }
           }
         } finally {
@@ -163,6 +174,7 @@ export default function HomeClient({
                 genderCategory={slot.genderCategory}
                 pending={pendingId === slot.id}
                 cancelled={cancelledIds.has(slot.id)}
+                started={startedIds.has(slot.id)}
                 onJoin={handleJoin}
                 onJoinWaitlist={handleJoin}
               />

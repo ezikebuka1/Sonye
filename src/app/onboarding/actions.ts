@@ -63,6 +63,12 @@ export async function submitOnboardingAction(
     if (msg.includes('is cancelled')) {
       redirect('/?toast=cancelled');
     }
+    // D19: a started/ended game — without this, a first-time user hitting a
+    // started game would get the false-success 'welcomed' toast (the same trap
+    // the cancelled path already avoids).
+    if (msg.includes('already started')) {
+      redirect('/?toast=started');
+    }
     if (msg.includes('D9 violation')) {
       redirect('/?toast=d9');
     }
