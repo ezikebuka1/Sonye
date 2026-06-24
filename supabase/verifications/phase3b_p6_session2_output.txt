@@ -3,37 +3,37 @@ SESSION 2 (Henry, racer): start
 Timestamp:
               now              
 -------------------------------
- 2026-05-21 13:06:13.353718+00
+ 2026-06-24 13:28:47.763623+00
 (1 row)
 
-Time: 0.657 ms
-Time: 1.443 ms
-Time: 0.430 ms
+Time: 0.405 ms
+Time: 0.563 ms
+Time: 0.158 ms
 Henry racing for last seat -- should BLOCK on Grace lock, then get waitlisted
 BEGIN
-Time: 0.135 ms
+Time: 0.057 ms
                                  set_config                                 
 ----------------------------------------------------------------------------
- {"sub" : "8cb5781f-7448-479a-9565-5d9b8d689680", "role" : "authenticated"}
+ {"sub" : "d598407b-d672-4724-bf8d-93e318f4b82d", "role" : "authenticated"}
 (1 row)
 
-Time: 0.304 ms
+Time: 0.185 ms
 SET
-Time: 0.304 ms
+Time: 0.190 ms
 Henry calls join_slot (EXPECTED: blocks ~4-5s, returns waitlisted):
             membership_id             | resulting_status 
 --------------------------------------+------------------
- ae5edd24-5781-41d2-bf2a-0a66c655f97a | waitlisted
+ 3ed193cc-95de-48c8-ae7f-76300c0ae4ec | waitlisted
 (1 row)
 
-Time: 4091.339 ms (00:04.091)
+Time: 3548.715 ms (00:03.549)
 COMMIT
-Time: 1.649 ms
+Time: 2.006 ms
 Timestamp after commit:
               now              
 -------------------------------
- 2026-05-21 13:06:17.451872+00
+ 2026-06-24 13:28:51.317652+00
 (1 row)
 
-Time: 0.120 ms
+Time: 0.137 ms
 SESSION 2 COMPLETE

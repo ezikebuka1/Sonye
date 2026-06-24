@@ -23,15 +23,32 @@ VALUES ('+15550000002', 'Bob', 'intermediate', 'player', gen_random_uuid())
 RETURNING id AS bob_id, auth_user_id AS bob_auth_id
 \gset
 
+-- Player C: Carol -- fresh player (no prior joins) driving the D19 past-game
+-- guard legs, so GUARD-A/GUARD-B never collide with D9 / double-active.
+INSERT INTO public.users (phone, first_name, skill_level, role, auth_user_id)
+VALUES ('+15550000003', 'Carol', 'intermediate', 'player', gen_random_uuid())
+RETURNING id AS carol_id, auth_user_id AS carol_auth_id
+\gset
+
 -- Capture owner id (seeded by migration Part 11)
 SELECT id AS owner_id FROM public.users WHERE role = 'owner' LIMIT 1
 \gset
 
--- Slot S1: Cole Park, sport, 2026-06-13 18:00 CDT (23:00 UTC)
+-- Capture the sport id once (avoids re-stating the sport literal below).
+SELECT id AS sport_id FROM public.sports LIMIT 1
+\gset
+
+-- NOTE (D19): the D9 / timezone slots below are dated 2027-06-13. They were
+-- 2026-06-13 when authored (2026-05-21), but have since aged into the PAST
+-- relative to now() -- and the new D19 guard rejects starts_at <= now(). The
+-- year is bumped to keep them FUTURE so P4/P5 verify identically (same Dallas
+-- day, same tz-crossing) AND GUARD-C can prove D9 still fires on a future slot.
+
+-- Slot S1: Cole Park, sport, 2027-06-13 18:00 CDT (23:00 UTC)
 INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
 VALUES (
     'cole-park', 'pickleball', :'owner_id'::uuid,
-    '2026-06-13 18:00:00-05:00', '2026-06-13 20:00:00-05:00', 6, 'intermediate'
+    '2027-06-13 18:00:00-05:00', '2027-06-13 20:00:00-05:00', 6, 'intermediate'
 )
 RETURNING id AS s1_id
 \gset
@@ -40,7 +57,7 @@ RETURNING id AS s1_id
 INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
 VALUES (
     'cole-park', 'pickleball', :'owner_id'::uuid,
-    '2026-06-13 21:00:00-05:00', '2026-06-13 23:00:00-05:00', 6, 'intermediate'
+    '2027-06-13 21:00:00-05:00', '2027-06-13 23:00:00-05:00', 6, 'intermediate'
 )
 RETURNING id AS s2_id
 \gset
@@ -49,9 +66,27 @@ RETURNING id AS s2_id
 INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
 VALUES (
     'cole-park', 'pickleball', :'owner_id'::uuid,
-    '2026-06-13 23:30:00-05:00', '2026-06-14 01:00:00-05:00', 6, 'intermediate'
+    '2027-06-13 23:30:00-05:00', '2027-06-14 01:00:00-05:00', 6, 'intermediate'
 )
 RETURNING id AS stz_id
+\gset
+
+-- Slot S_past (D19): started 1 hour ago, NOT cancelled -- exercises the guard.
+INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
+VALUES (
+    'cole-park', :'sport_id', :'owner_id'::uuid,
+    now() - interval '1 hour', now() + interval '1 hour', 6, 'intermediate'
+)
+RETURNING id AS spast_id
+\gset
+
+-- Slot S_future (D19): starts in 2 days -- guard must NOT fire (still joinable).
+INSERT INTO public.slots (venue_id, sport_id, created_by, starts_at, ends_at, capacity, skill_level)
+VALUES (
+    'cole-park', :'sport_id', :'owner_id'::uuid,
+    now() + interval '2 days', now() + interval '2 days' + interval '2 hours', 6, 'intermediate'
+)
+RETURNING id AS sfuture_id
 \gset
 
 \echo 'Seeded IDs captured via gset:'
@@ -60,10 +95,14 @@ SELECT
     :'alice_auth_id' AS alice_auth_id,
     :'bob_id'        AS bob_id,
     :'bob_auth_id'   AS bob_auth_id,
+    :'carol_id'      AS carol_id,
+    :'carol_auth_id' AS carol_auth_id,
     :'owner_id'      AS owner_id,
     :'s1_id'         AS s1_id,
     :'s2_id'         AS s2_id,
-    :'stz_id'        AS stz_id;
+    :'stz_id'        AS stz_id,
+    :'spast_id'      AS spast_id,
+    :'sfuture_id'    AS sfuture_id;
 
 -- ================================================================
 \echo ''
@@ -82,7 +121,12 @@ SELECT count(*) AS slots_anon_count     FROM public.slots;
 SELECT count(*) AS sm_anon_count        FROM public.session_memberships;
 SELECT count(*) AS chat_anon_count      FROM public.chat_messages;
 
-\echo 'P1-B: claim_lookups random UUID (EXPECTED: 1 row, is_valid = false):'
+\echo 'P1-B: claim_lookups random UUID:'
+\echo '  PRE-EXISTING (NOT D19): D17 grant_matrix_lockdown put claim_lookups in Bucket C'
+\echo '  (internal/definer-only) and revoked anon EXECUTE, so this leg now raises'
+\echo '  "permission denied". No app code calls it as anon (signup reaches it via a'
+\echo '  definer fn). The old EXPECTED (is_valid=false) is stale; re-greening this leg is'
+\echo '  a D17 follow-up, tracked separately. Left here so the diff stays D19-surgical.'
 SELECT is_valid FROM public.claim_lookups(gen_random_uuid());
 
 \echo 'P1-C: slot_share_preview S1 empty slot (EXPECTED: venue_name=Cole Park, fill_count=NULL, fill_ratio_shown=false):'
@@ -166,7 +210,7 @@ SELECT set_config('request.jwt.claims',
 SELECT membership_id, resulting_status FROM public.join_slot(:'s1_id'::uuid);
 COMMIT;
 
-\echo 'P4-B: Alice attempts S2 same Dallas day 2026-06-13 (EXPECTED: D9 violation error SQLSTATE 23505):'
+\echo 'P4-B: Alice attempts S2 same Dallas day 2027-06-13 (EXPECTED: D9 violation error SQLSTATE 23505):'
 BEGIN;
 SET LOCAL ROLE authenticated;
 SELECT set_config('request.jwt.claims',
@@ -177,13 +221,13 @@ ROLLBACK;
 
 \echo 'P4-C: Index backstop -- direct INSERT as service role (EXPECTED: unique constraint sm_d9_one_joined_per_day):'
 INSERT INTO public.session_memberships (user_id, slot_id, status, slot_date)
-VALUES (:'alice_id'::uuid, :'s2_id'::uuid, 'joined', '2026-06-13');
+VALUES (:'alice_id'::uuid, :'s2_id'::uuid, 'joined', '2027-06-13');
 
-\echo 'P4-D: Verify Alice has exactly 1 joined row on 2026-06-13 (EXPECTED: 1):'
+\echo 'P4-D: Verify Alice has exactly 1 joined row on 2027-06-13 (EXPECTED: 1):'
 SELECT count(*) AS joined_count
 FROM public.session_memberships
 WHERE user_id = :'alice_id'::uuid
-  AND slot_date = '2026-06-13'
+  AND slot_date = '2027-06-13'
   AND status = 'joined';
 
 \echo 'PROOF 4 COMPLETE. Expected: S1=joined, S2=D9 error, index violation, joined_count=1'
@@ -193,9 +237,9 @@ WHERE user_id = :'alice_id'::uuid
 \echo '=== PROOF 5: Timezone red-flag (R2 -- Dallas civil date, not UTC) ==='
 -- ================================================================
 -- Verifies: slot_date stored by join_slot uses America/Chicago, NOT UTC.
--- S_tz starts_at: 2026-06-13 23:30 CDT = 2026-06-14 04:30 UTC
--- Correct slot_date: 2026-06-13 (Saturday Dallas)
--- Wrong   slot_date: 2026-06-14 (Sunday UTC) -- D9 false-pass bug
+-- S_tz starts_at: 2027-06-13 23:30 CDT = 2027-06-14 04:30 UTC
+-- Correct slot_date: 2027-06-13 (Saturday Dallas)
+-- Wrong   slot_date: 2027-06-14 (Sunday UTC) -- D9 false-pass bug
 
 \echo 'P5-A: Bob joins late-night slot S_tz (EXPECTED: resulting_status = joined):'
 BEGIN;
@@ -206,7 +250,7 @@ SELECT set_config('request.jwt.claims',
 SELECT membership_id, resulting_status FROM public.join_slot(:'stz_id'::uuid);
 COMMIT;
 
-\echo 'P5-B: slot_date stored for Bob on S_tz (EXPECTED: 2026-06-13 NOT 2026-06-14):'
+\echo 'P5-B: slot_date stored for Bob on S_tz (EXPECTED: 2027-06-13 NOT 2027-06-14):'
 SELECT slot_date
 FROM public.session_memberships
 WHERE user_id = :'bob_id'::uuid AND slot_id = :'stz_id'::uuid;
@@ -218,7 +262,7 @@ SELECT
     (starts_at AT TIME ZONE 'America/Chicago')         AS dallas_wallclock,
     starts_at                                          AS utc_instant
 FROM public.slots WHERE id = :'stz_id'::uuid;
-\echo 'EXPECTED: dallas_date=2026-06-13, utc_date=2026-06-14 (must differ)'
+\echo 'EXPECTED: dallas_date=2027-06-13, utc_date=2027-06-14 (must differ)'
 
 \echo 'P5-D: December CST sanity check (no INSERT -- literal only):'
 SELECT
@@ -228,6 +272,49 @@ SELECT
 
 \echo ''
 \echo 'PROOF 5 COMPLETE.'
+
+-- ================================================================
+\echo ''
+\echo '=== PROOF 6: D19 past-game guard (started/ended game is terminal) ==='
+-- ================================================================
+-- Verifies: join_slot rejects a join when starts_at <= now(), placed AFTER the
+-- cancelled check and BEFORE (orthogonal to) the D9 civil-date logic.
+-- VERBOSITY verbose so the SQLSTATE prefixes the ERROR line in raw output.
+-- NOTE: object_not_in_prerequisite_state is SQLSTATE 55000 (the same code the
+-- cancelled guard raises). The dispatch said 22023; 22023 is actually
+-- invalid_parameter_value -- the real code for that condition is 55000.
+\set VERBOSITY verbose
+
+\echo 'GUARD-A: Carol joins S_past (started 1h ago) (EXPECTED: ERROR 55000 object_not_in_prerequisite_state, message contains "has already started"):'
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims',
+    json_build_object('sub', :'carol_auth_id', 'role', 'authenticated')::text,
+    true);
+SELECT membership_id, resulting_status FROM public.join_slot(:'spast_id'::uuid);
+ROLLBACK;
+
+\echo 'GUARD-B: same Carol joins S_future (starts in 2 days) (EXPECTED: resulting_status = joined -- guard does NOT over-reach the happy path):'
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims',
+    json_build_object('sub', :'carol_auth_id', 'role', 'authenticated')::text,
+    true);
+SELECT membership_id, resulting_status FROM public.join_slot(:'sfuture_id'::uuid);
+ROLLBACK;
+
+\echo 'GUARD-C: Alice (committed join on future S1 in P4-A) attempts future S2 same Dallas day (EXPECTED: ERROR 23505 D9 violation, NOT the started error -- guard is orthogonal to D9, and does not fire on a future slot):'
+BEGIN;
+SET LOCAL ROLE authenticated;
+SELECT set_config('request.jwt.claims',
+    json_build_object('sub', :'alice_auth_id', 'role', 'authenticated')::text,
+    true);
+SELECT membership_id, resulting_status FROM public.join_slot(:'s2_id'::uuid);
+ROLLBACK;
+
+\set VERBOSITY default
+\echo ''
+\echo 'PROOF 6 COMPLETE. Expected: GUARD-A=ERROR 55000 has-already-started, GUARD-B=joined, GUARD-C=ERROR 23505 D9 (not started).'
 
 -- ================================================================
 \echo ''
