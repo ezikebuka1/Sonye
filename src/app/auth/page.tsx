@@ -71,10 +71,19 @@ export default async function AuthPage({
         </>
       ) : (
         <>
+          {/* Public intro — gives a cold visitor / carrier reviewer immediate
+              context for what Sonye is, replacing the bare phone prompt (A2P
+              reviewability). Additive context only: the consent line, policy
+              links, and Send-code submit live untouched in PhoneForm below.
+              Gated on !bannerText — a share-link visitor already has the
+              "You're joining …" banner for context. */}
           {!bannerText && (
-            <p className="text-sm text-[#5E80A3] mb-6 text-center w-full">
-              enter your phone number to log in or sign up
-            </p>
+            <div className="w-full mb-6 text-center">
+              <h1 className="text-2xl font-bold text-[#14304D]">Sonye</h1>
+              <p className="mt-2 text-sm text-[#5E80A3]">
+                Curated recurring pickleball games in Dallas. Enter your number to log in or join a game.
+              </p>
+            </div>
           )}
           <PhoneForm slotId={slotId} claimToken={claimToken} />
         </>
