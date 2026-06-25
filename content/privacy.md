@@ -56,6 +56,15 @@ The limited sharing that does happen is as follows:
 - **With other players in a game you join.** Other joined players can see your first name, your skill level, and any messages you post to that game's lobby wall. **They cannot see your phone number.** Waitlisted players can see who is in a game, but cannot see phone numbers and cannot see or post to the lobby wall.
 - **For legal reasons.** We may disclose information if required to by law, or to protect the rights, safety, or property of Sonye, our users, or others.
 
+## Text messages (SMS)
+
+When you provide your phone number and continue at sign-in, you agree to receive recurring automated text messages from Sonye. We send only two kinds of message: (1) one-time login passcodes when you sign in, and (2) post-game attendance confirmations with a yes/no link after a game. We do not send marketing texts.
+
+- **Message frequency.** Message frequency varies and depends on how often you sign in and play.
+- **Message and data rates.** Message and data rates may apply, depending on your mobile plan and carrier.
+- **How to opt out.** Reply **STOP** to any Sonye text to stop receiving messages. You will receive one confirmation message, then no further texts. Reply **HELP** for help, or contact us at ezikebuka1@gmail.com.
+- **We never share your SMS opt-in.** We do not share or sell your mobile number, SMS opt-in data, or consent to any third party for marketing — not at any time. Your number is shared only with our messaging provider (Twilio) to deliver these texts.
+
 ## How long we keep your information
 
 We keep your account information — your phone number, name, skill level, optional gender, game activity, and consent records — for as long as your account is active and until you ask us to delete it.
