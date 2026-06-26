@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import HomeClient, { type FeedSlot } from "./HomeClient";
+import PublicFeed from "./PublicFeed";
 
 // D13: the Home feed is per-request (live auth + slot/membership state) —
 // never cached, never streamed. Mirrors /group-lobby's force-dynamic.
@@ -24,13 +24,13 @@ type MembershipRow = { slot_id: string; status: "joined" | "waitlisted" };
 export default async function HomePage() {
   const supabase = await createClient();
 
-  // Server-side session (D13: all-server). Anon → the login wall. Mirrors
-  // /group-lobby's `!user → redirect('/auth?slotId=')`, minus the slot
-  // context Home lacks — never flash a broken authed layout to a visitor.
+  // Server-side session (D13: all-server). Anon → the public feed (the
+  // logged-out front door at /, D20 + the 2026-06-26 amendments) instead of
+  // the old login-wall redirect — never flash a broken authed layout to a visitor.
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/auth");
+  if (!user) return <PublicFeed />;
 
   // Eligible slots: future starts_at + not cancelled, chronological.
   // `starts_at > now()` compares two absolute instants (both timestamptz) —
