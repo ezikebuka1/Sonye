@@ -37,6 +37,12 @@ export function PhoneForm({ slotId, claimToken }: Props) {
         <p className="text-sm text-[#D64B4B]">{error}</p>
       )}
 
+      {/* Trust line — plain-English reassurance directly above the consent
+          disclosure (answers phone-number anxiety). Darker small-text token. */}
+      <p className="text-[13px] text-[#4A6E92]">
+        No password. We&apos;ll text you a 6-digit code.
+      </p>
+
       {/* A2P / 10DLC SMS consent — must render directly ABOVE the submit
           action and stay visible with it in one frame (Twilio screenshot).
           Copy is the single source of truth in src/lib/consent.ts. */}
@@ -54,10 +60,15 @@ export function PhoneForm({ slotId, claimToken }: Props) {
       <button
         type="submit"
         disabled={isPending}
-        className="bg-[#EE5E00] hover:brightness-95 disabled:opacity-60 text-white font-semibold rounded-xl py-3 px-6 transition-colors"
+        className="bg-coral hover:brightness-95 disabled:opacity-60 text-white font-semibold rounded-xl py-3 px-6 transition-colors"
       >
         {isPending ? 'Sending…' : 'Send code'}
       </button>
+
+      {/* Reassurance — directly below the Send-code action. */}
+      <p className="text-[13px] text-[#4A6E92] text-center">
+        Your number stays private and is never shared.
+      </p>
     </form>
   );
 }
