@@ -208,7 +208,7 @@ export default function SlotCard({
         <button
           type="button"
           disabled
-          className={`w-full rounded-xl py-2.5 font-sans font-medium text-[15px] cursor-not-allowed opacity-70 ${
+          className={`w-full rounded-xl py-2.5 min-h-[44px] flex items-center justify-center font-sans font-medium text-[15px] cursor-not-allowed opacity-70 ${
             isFull ? "bg-sky text-ink" : "bg-coral text-white"
           }`}
           aria-label="Joining…"
@@ -220,7 +220,7 @@ export default function SlotCard({
         <button
           type="button"
           onClick={() => onJoinWaitlist(slotId)}
-          className="w-full bg-sky text-ink rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:brightness-95 active:brightness-90"
+          className="w-full bg-sky text-ink rounded-xl py-2.5 min-h-[44px] flex items-center justify-center font-sans font-medium text-[15px] transition-colors hover:brightness-95 active:brightness-90"
           aria-label={`Join waitlist for ${dayLabel} ${timeLabel}`}
         >
           Join waitlist
@@ -229,7 +229,7 @@ export default function SlotCard({
         <button
           type="button"
           onClick={() => onJoin(slotId)}
-          className="w-full bg-coral text-white rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:brightness-95 active:brightness-90"
+          className="w-full bg-coral text-white rounded-xl py-2.5 min-h-[44px] flex items-center justify-center font-sans font-medium text-[15px] transition-colors hover:brightness-95 active:brightness-90"
           aria-label={`Join game on ${dayLabel} ${timeLabel}`}
         >
           Join game

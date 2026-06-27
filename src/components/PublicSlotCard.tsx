@@ -136,7 +136,7 @@ export default function PublicSlotCard({
       <div>
         <a
           href={`/auth?slotId=${slotId}`}
-          className="w-full bg-coral text-white rounded-xl py-2.5 font-sans font-medium text-[15px] transition-colors hover:brightness-95 active:brightness-90 flex items-center justify-center"
+          className="w-full bg-coral text-white rounded-xl py-2.5 min-h-[44px] font-sans font-medium text-[15px] transition-colors hover:brightness-95 active:brightness-90 flex items-center justify-center"
           aria-label={`Join this game — ${dayLabel} ${timeLabel} — phone sign-in required`}
         >
           Join this game
