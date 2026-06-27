@@ -14,8 +14,8 @@ import PublicSlotCard from "@/components/PublicSlotCard";
 // time labels are derived SERVER-SIDE here via formatCentral (RULING #1), same
 // as HomeClient, and passed pre-derived into PublicSlotCard.
 
-// Row shape from get_public_feed (D20). neighborhood is in the projection but
-// PublicSlotCard does not consume it (its interface has no neighborhood prop).
+// Row shape from get_public_feed (D20). neighborhood is in the projection and
+// is now consumed by PublicSlotCard (Row 3 → "venue · neighborhood", §B).
 type PublicFeedRow = {
   slot_id: string;
   venue_name: string;
@@ -84,6 +84,7 @@ export default async function PublicFeed() {
                   dayLabel={dayLabel}
                   timeLabel={timeLabel}
                   venueName={row.venue_name}
+                  neighborhood={row.neighborhood}
                   capacity={row.capacity}
                   fillCount={row.fill_count}
                   fillShown={row.fill_shown}

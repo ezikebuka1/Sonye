@@ -34,6 +34,10 @@ type PublicSlotCardProps = {
   dayLabel: string;
   timeLabel: string;
   venueName: string;
+  // D-amendments §B: the venue's neighborhood (e.g. "Lakewood"), rendered as a
+  // lighter-weight suffix after the venue in Row 3 → "Cole Park · Lakewood".
+  // get_public_feed can return null → the suffix is omitted when absent.
+  neighborhood: string | null;
   capacity: number;
   // D20 50% fill mask: the RPC returns member_count ONLY at ≥50% of capacity,
   // else NULL (anon never receives a sub-threshold count — "silence beats a
@@ -57,6 +61,7 @@ export default function PublicSlotCard({
   dayLabel,
   timeLabel,
   venueName,
+  neighborhood,
   capacity,
   fillCount,
   fillShown,
@@ -100,10 +105,18 @@ export default function PublicSlotCard({
         {dayLabel} · {timeLabel}
       </p>
 
-      {/* Row 3: venue inset. SHARED — identical to SlotCard. */}
+      {/* Row 3: venue · neighborhood (D-amendments §B). PublicSlotCard-ONLY —
+          SlotCard has no neighborhood, so this Row intentionally diverges from
+          it: the venue takes font-medium and the neighborhood a lighter
+          font-normal suffix ("Cole Park · Lakewood"). Both stay text-ink-soft
+          (a11y — no new low-contrast token); the suffix is omitted when the RPC
+          returns a null neighborhood. */}
       <div className="bg-inset rounded-xl px-3 py-2 flex items-center gap-1.5">
         <MapPin size={13} className="text-ink-soft shrink-0" aria-hidden="true" />
-        <span className="font-sans text-ink-soft text-sm">{venueName}</span>
+        <span className="font-sans text-ink-soft text-sm">
+          <span className="font-medium">{venueName}</span>
+          {neighborhood ? <span className="font-normal"> · {neighborhood}</span> : null}
+        </span>
       </div>
 
       {/* Row 4: capacity meter (≥50% only — the 50% rule). Intentional diff:
