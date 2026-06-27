@@ -96,7 +96,7 @@ export default function PublicSlotCard({
           typography spec. Identical literal to SlotCard:149 — duplicated by
           RULING #2 discipline, NOT a shared constant (the D20 isolation
           boundary), so the swap is applied in each file independently. */}
-      <p className="font-serif text-ink text-lg font-semibold leading-tight">
+      <p className="font-serif text-ink text-lg font-semibold leading-tight tabular-nums">
         {dayLabel} · {timeLabel}
       </p>
 
