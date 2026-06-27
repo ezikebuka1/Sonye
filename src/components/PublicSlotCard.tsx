@@ -92,10 +92,11 @@ export default function PublicSlotCard({
         </div>
       </div>
 
-      {/* Row 2: day · time (THE HERO). SHARED with SlotCard:149 — same class by
-          reference (RULING #2). NOTE flagged at the hard stop: SlotCard ships
-          font-sans here, not the design doc's Baloo/font-serif. */}
-      <p className="font-sans text-ink text-lg font-semibold leading-tight">
+      {/* Row 2: day · time (THE HERO). Now font-serif (Baloo 2) per the
+          typography spec. Identical literal to SlotCard:149 — duplicated by
+          RULING #2 discipline, NOT a shared constant (the D20 isolation
+          boundary), so the swap is applied in each file independently. */}
+      <p className="font-serif text-ink text-lg font-semibold leading-tight">
         {dayLabel} · {timeLabel}
       </p>
 

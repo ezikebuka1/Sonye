@@ -146,7 +146,7 @@ export default function SlotCard({
       </div>
 
       {/* Row 2: day · time */}
-      <p className="font-sans text-ink text-lg font-semibold leading-tight">
+      <p className="font-serif text-ink text-lg font-semibold leading-tight">
         {dayLabel} · {timeLabel}
       </p>
 
