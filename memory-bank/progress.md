@@ -2,10 +2,10 @@
 
 Compact milestone ledger. Full detail lives in git history + `activeContext.md`.
 
-**Status: v1 is build-complete.** Everything required for launch is built, verified,
-and pushed to `origin/main`. What remains is launch-day cutover (a Twilio Verify
-dashboard swap), one paper-trail closeout, and a recommended attorney review — no
-remaining feature work. See "Remaining for launch" below.
+**Status: v1 is build-complete and auth is LIVE on Twilio Verify** (cutover done +
+verified 2026-06-30). Everything required for launch is built, verified, and pushed to
+`origin/main`. The only thing left before public launch is a recommended (non-blocking)
+attorney review — no remaining feature work. See "Remaining for launch" below.
 
 ## Done ✅
 
@@ -69,15 +69,19 @@ remaining feature work. See "Remaining for launch" below.
 - **D19** — `join_slot` past-game guard (SQLSTATE 55000, "Already started" terminal state).
 - **D17** — grant-matrix lockdown (anon/authenticated EXECUTE buckets).
 
+### Launch cutover
+- **Twilio Verify cutover — DONE ✅ (2026-06-30).** Login OTP swapped Messaging → Verify
+  in the Supabase Cloud dashboard (zero code). Owner bind (Path A) + cold signup (Path D)
+  both verified against the live cloud DB via raw output; local dev unaffected. Cloud
+  pruned to a clean owner-only state. See `cutover.md` §1.
+
 ## Remaining for launch ⏳ (no feature work)
 
-1. **Twilio Verify cutover** — swap Messaging SID → Verify Service SID in the Supabase
-   Cloud dashboard (Auth → Providers → Phone). 5-minute config change, ZERO code. See
-   `cutover.md` §1. (Replaces the dead A2P 10DLC campaign — Verify needs no campaign.)
-2. **D21 safety-persistence amendment** — recorded (this cycle): verified that the
-   Privacy Policy accurately discloses lobby-message retention-for-safety. Gate satisfied.
-3. **Attorney review** (recommended, not strictly blocking) — a licensed Texas attorney
+1. **Attorney review** (recommended, not strictly blocking) — a licensed Texas attorney
    reviews the release (Terms §7) + arbitration (§12) language before public launch.
+
+_(Done since: the Twilio Verify cutover — verified 2026-06-30, see "Launch cutover" above
+— and the D21 safety-persistence gate, which was already satisfied.)_
 
 ## Deferred to v1.1+
 

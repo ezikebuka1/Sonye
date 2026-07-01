@@ -4,7 +4,7 @@ Snapshot of *now* — kept lean. History lives in git; load-bearing rules live i
 
 ## Current focus
 
-**v1 is BUILD-COMPLETE and pushed to origin/main. Pre-launch.** No remaining feature work. Remaining before launch: (1) Twilio Verify cutover — swap Messaging SID → Verify Service SID in the Supabase Cloud dashboard (cutover.md §1, ZERO code); (2) recommended Texas attorney review of Terms §7 release + §12 arbitration. Attendance SMS + its cron stay DORMANT (v1.1, its own A2P campaign). Trust progress.md + this file.
+**v1 is BUILD-COMPLETE and pushed to origin/main. Auth is LIVE on Twilio Verify — cutover done + verified 2026-06-30.** No remaining feature work. **Remaining before public launch: only the recommended Texas attorney review of Terms §7 release + §12 arbitration (not strictly blocking).** Going live is now a business call, not a technical one. Attendance SMS + its cron stay DORMANT (v1.1, its own A2P campaign). Trust progress.md + this file.
 
 ## Recently shipped (on origin/main)
 
@@ -146,7 +146,7 @@ Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ · Phase 3A ✅ · Phase 3B ✅ · Pha
 - **Slot fields:** `sport_id = 'pickleball'` (fixed in v1) · `capacity ∈ {4, 6}` · `gender_category ∈ {open, women, men}` · `skill_level ∈ {beginner, advanced_beginner, intermediate, advanced}`.
 - **Venues (3):** `cole-park` (Lakewood) · `churchill-park` (Preston Hollow) · `lake-highlands-north` (Lake Highlands). `venues_select_authenticated` lets authed sessions read the picker.
 - **Local auth:** `config.toml` test-OTP — `+15555550101 = "123456"` is the dev owner; a second number exists for a non-owner test. A dummy Twilio provider is enabled so GoTrue loads. Dev owner: `public.users` role `owner`, `auth_user_id` bound at first login.
-- **Cloud owner row:** carries Ebuka's REAL number since 2026-06-03 (not the original `+10000000000` placeholder — number lives in the cloud DB only, keep it out of the repo), `auth_user_id` NULL, `claim_token` set — binds via D2 Flow 3 at first real login. Loud tripwire; never mutate.
+- **Cloud owner row:** carries Ebuka's REAL number since 2026-06-03 (number lives in the cloud DB only, keep it out of the repo). **BOUND as of 2026-06-30** — `auth_user_id` set (via D2 Flow 3 Path A on first real login under Verify), `claim_token` nulled post-bind. Loud tripwire; never mutate.
 - **Cloud schema is current with local** (all 5 migrations incl. `slot_roster` ORDER BY applied 2026-06-12 via `db push`); cloud data tables still empty pre-launch.
 
 ## Deployment guardrail

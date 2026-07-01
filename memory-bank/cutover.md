@@ -4,12 +4,23 @@
 go-live (and nothing that happens before) lives here, so cutover isn't
 reconstructed from scattered notes.
 
-**Status:** pre-launch. Items are gated as noted. The big one (auth) is now a
-config swap, not a build — see §1.
+**Status:** auth cutover **DONE + verified 2026-06-30** (see §1). The only thing left
+before public launch is the recommended attorney review (§6). No remaining feature work.
 
 ---
 
-## §1 — Twilio Verify swap (login OTP) — REQUIRED at launch
+## §1 — Twilio Verify swap (login OTP) — ✅ DONE (2026-06-30)
+
+**Status: COMPLETE — 2026-06-30.** Provider swapped Messaging → Verify in the Supabase
+Cloud dashboard — zero code, exactly as recon predicted. Both smoke-test legs verified
+against the live cloud DB via raw output:
+- **Returning owner login (Path A):** owner row `auth_user_id` flipped NULL → bound and
+  linked to a real `auth.users` row — proves the `+`-normalization round-trips under Verify.
+- **Net-new cold signup (Path D):** fresh number → new `role='player'` row, bound to its
+  new auth UID on the spot, onboarding fields persisted.
+Local dev confirmed unaffected (test-OTP short-circuit). Post-validation cleanup: test
+player + its orphaned Auth identity removed; owner's vestigial `claim_token` nulled. Cloud
+state: one owner row (bound, token-free) ↔ one Auth identity. (Historical steps below.)
 
 **What:** switch login OTP delivery from Twilio **Messaging** → Twilio **Verify**.
 
@@ -92,9 +103,8 @@ The post-game attendance confirmation feature stays **dormant** for v1.
 ## §6 — Pre-launch gates (NOT cutover, but must be done before §1)
 
 Tracked elsewhere; listed here so launch isn't triggered with these open:
-- **Public feed + merged `/auth`** shipped (the front door — `get_public_feed` RPC
-  is built + pushed; the `PublicSlotCard` + `page.tsx` routing UI is the remaining
-  build).
+- **Public feed + merged `/auth`** shipped + pushed (the front door — `get_public_feed`
+  RPC, `PublicSlotCard`, and the `page.tsx` routing split are all live on `main`).
 - **Legal docs published** (Privacy + Terms) — gated on the lobby-wall UI deploy and
   the safety-persistence amendment, per their own tracking.
 - **Licensed Texas attorney review** of the release/arbitration language (recommended
