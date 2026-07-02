@@ -34,7 +34,6 @@ export type WallMessageVM = {
   avatarFg: string;
   time: string; // pre-formatted Central time, e.g. "6:14 PM"
   isSelf: boolean;
-  isHost: boolean;
 };
 
 type LobbyWallProps = {
@@ -55,14 +54,6 @@ function SelfBadge() {
   return (
     <span className="flex-shrink-0 rounded-full bg-[#E6F0FF] px-1.5 py-0.5 text-[10px] font-semibold text-[#5E80A3]">
       you
-    </span>
-  );
-}
-
-function HostTag() {
-  return (
-    <span className="flex-shrink-0 rounded-full bg-[#DCEBFF] px-1.5 py-0.5 text-[10px] font-semibold text-[#15457B]">
-      host
     </span>
   );
 }
@@ -299,7 +290,6 @@ export default function LobbyWall(props: LobbyWallProps) {
                       {m.name}
                     </span>
                     {m.isSelf && <SelfBadge />}
-                    {m.isHost && <HostTag />}
                     <span className="ml-auto flex-shrink-0 text-[11px] text-[#9DB8D2] [font-variant-numeric:tabular-nums]">
                       {m.time}
                     </span>

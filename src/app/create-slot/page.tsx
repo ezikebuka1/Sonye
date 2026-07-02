@@ -10,6 +10,7 @@
 // Out of scope: cancel-slot, owner dashboard, player-facing surfaces.
 
 import { createClient } from '@/lib/supabase/server';
+import { formatCentral } from '@/lib/format-central';
 import { redirect } from 'next/navigation';
 
 // ─── Server Actions ──────────────────────────────────────────────────────────
@@ -105,7 +106,9 @@ export default async function CreateSlotPage({
     );
   }
 
-  // Post-create confirmation view.
+  // Post-create confirmation view — human summary composed from the just-created
+  // row (starts_at + venue), formatted via the shared format-central conventions
+  // so it reads identically to the feed/dashboard cards. No new query.
   if (params.created) {
     const { data: slot } = await supabase
       .from('slots')
@@ -113,24 +116,52 @@ export default async function CreateSlotPage({
       .eq('id', params.created)
       .single();
 
+    // venues(name) is a to-one join — normalize the object/array shape Supabase
+    // may hand back so we can read the name safely.
+    const row = slot as {
+      starts_at: string;
+      venues: { name: string } | { name: string }[] | null;
+    } | null;
+    const venue = Array.isArray(row?.venues) ? row?.venues[0] : row?.venues;
+    const venueName = venue?.name ?? 'your venue';
+    const when = row?.starts_at ? formatCentral(row.starts_at) : null;
+
     return (
-      <main className="p-8 font-mono max-w-lg">
-        <h1 className="text-xl font-bold text-[#14304D] mb-4">Slot created</h1>
-        <pre className="bg-[#E6F0FF] border border-[#CFE0F4] rounded-2xl p-4 text-sm overflow-auto">
-          {JSON.stringify(slot, null, 2)}
-        </pre>
-        <a
-          href="/create-slot"
-          className="inline-block mt-4 text-[#EE5E00] underline"
-        >
-          Create another
-        </a>
+      <main className="p-8 max-w-lg">
+        <div className="rounded-2xl border border-[#CFE0F4] bg-white p-6">
+          <h1 className="text-xl font-bold text-[#14304D]">Slot created</h1>
+          <p className="mt-2 text-[15px] leading-snug text-[#14304D]">
+            {when ? `${when.dayLabel} · ${when.timeLabel} at ${venueName}` : `Your game at ${venueName}`}
+            <span className="mt-0.5 block text-[#5E80A3]">— it&apos;s live on the feed.</span>
+          </p>
+
+          <div className="mt-6 flex flex-col gap-3">
+            <a
+              href="/dashboard"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-[#CFE0F4] px-6 text-[15px] font-semibold text-[#14304D] transition-colors hover:bg-[#E6F0FF]"
+            >
+              Done
+            </a>
+            <a
+              href="/create-slot"
+              className="text-center text-sm text-[#5E80A3] underline underline-offset-2 transition-colors hover:text-[#14304D]"
+            >
+              Create another
+            </a>
+          </div>
+        </div>
       </main>
     );
   }
 
   return (
     <main className="p-8 max-w-lg">
+      <a
+        href="/dashboard"
+        className="mb-4 inline-block text-sm text-[#5E80A3] transition-colors hover:text-[#14304D]"
+      >
+        ← Dashboard
+      </a>
       <h1 className="text-2xl font-bold text-[#14304D] mb-6">Create Slot</h1>
 
       {params.err && (

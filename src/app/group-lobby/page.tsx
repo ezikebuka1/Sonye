@@ -269,7 +269,6 @@ export default async function GroupLobbyPage({
         avatarFg: av.fg,
         time: wallTimeFmt.format(new Date(r.created_at)),
         isSelf: r.is_self,
-        isHost: r.is_host,
       };
     });
   }
