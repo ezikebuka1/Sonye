@@ -22,12 +22,12 @@ type OwnerSlotRow = {
 export default async function DashboardPage() {
   const supabase = await createClient();
 
-  // Auth gate — send unauthenticated visitors to the dev login (mirrors
+  // Auth gate — send unauthenticated visitors to the login wall (mirrors
   // create-slot/page.tsx exactly).
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/dev-login");
+  if (!user) redirect("/auth");
 
   // Owner gate (UI layer — RLS is the real boundary).
   const { data: isOwner } = await supabase.rpc("is_owner");

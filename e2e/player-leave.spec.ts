@@ -308,18 +308,23 @@ test.describe('M5 (D16) — player-leave flow (live session)', () => {
     expect(absentCount).toBe(0);
   });
 
-  // ── NAV — owner-only /dashboard nav entry rider ──────────────────────────────
-  test('NAV: owner sees the Dashboard nav entry; a player does not', async ({ page }) => {
+  // ── NAV — owner-dashboard entry consolidated onto /profile (old rider gone) ──
+  test('NAV: owner sees the Owner dashboard row on /profile and no nav rider on /; a player sees no row', async ({ page }) => {
     await devLogin(page, OWNER_PHONE);
+    await page.goto('/profile');
+    await expect(page.getByTestId('profile-owner-dashboard')).toBeVisible();
+    await expect(page.getByTestId('profile-owner-dashboard')).toHaveAttribute('href', '/dashboard');
+    console.log('[NAV] owner: profile-owner-dashboard visible, href=/dashboard. PASS');
+
     await page.goto('/');
-    await expect(page.getByTestId('nav-dashboard')).toBeVisible();
-    await expect(page.getByTestId('nav-dashboard')).toHaveAttribute('href', '/dashboard');
-    console.log('[NAV] owner: nav-dashboard visible, href=/dashboard. PASS');
+    const riderCount = await page.getByTestId('nav-dashboard').count();
+    console.log('[NAV] owner on /: nav-dashboard count =', riderCount);
+    expect(riderCount).toBe(0);
 
     await devLogin(page, P1_PHONE);
-    await page.goto('/');
-    const playerCount = await page.getByTestId('nav-dashboard').count();
-    console.log('[NAV] player: nav-dashboard count =', playerCount);
+    await page.goto('/profile');
+    const playerCount = await page.getByTestId('profile-owner-dashboard').count();
+    console.log('[NAV] player: profile-owner-dashboard count =', playerCount);
     expect(playerCount).toBe(0);
   });
 

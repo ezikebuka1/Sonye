@@ -72,9 +72,9 @@ export default async function CreateSlotPage({
   const supabase = await createClient();
   const params   = await searchParams;
 
-  // Auth gate — send unauthenticated visitors to the dev login.
+  // Auth gate — send unauthenticated visitors to the login wall.
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/dev-login');
+  if (!user) redirect('/auth');
 
   // Owner gate (UI layer — RLS is the real boundary).
   const { data: isOwner } = await supabase.rpc('is_owner');

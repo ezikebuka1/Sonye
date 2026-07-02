@@ -56,12 +56,6 @@ export default async function HomePage() {
   const { data: uidData } = await supabase.rpc("current_user_id");
   const uid = (uidData as string | null) ?? null;
 
-  // Owner flag for the owner-only Dashboard nav entry (M5 rider). Same
-  // is_owner() RPC the dashboard + create-slot gate on (UI layer; RLS is the
-  // real boundary). Non-owners never see the link.
-  const { data: ownerFlag } = await supabase.rpc("is_owner");
-  const isOwner = ownerFlag === true;
-
   // The viewer's own profile, for the greeting + onboarding banner (D13 —
   // all-server, no client Supabase). Self-pin on `id` (= current_user_id):
   // the explicit filter is REQUIRED because the owner satisfies is_owner(),
@@ -106,7 +100,7 @@ export default async function HomePage() {
 
   return (
     <Suspense>
-      <HomeClient slots={slots} firstName={firstName} isOwner={isOwner} />
+      <HomeClient slots={slots} firstName={firstName} />
     </Suspense>
   );
 }
