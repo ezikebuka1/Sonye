@@ -74,6 +74,11 @@ attorney review — no remaining feature work. See "Remaining for launch" below.
   in the Supabase Cloud dashboard (zero code). Owner bind (Path A) + cold signup (Path D)
   both verified against the live cloud DB via raw output; local dev unaffected. Cloud
   pruned to a clean owner-only state. See `cutover.md` §1.
+- **Cloud schema parity audit + push — DONE ✅ (2026-07-01).** Pre-launch security audit
+  found cloud stuck at the June-13 schema (5 of 15 migrations). The 10 pending (D10-A/B,
+  D14, D17, D18, D19, D20) were applied via `supabase db push` and re-audited to full
+  parity: 21 functions, D17 grant matrix exact, chat policies on `is_joined_member`,
+  D19 guard + D10-A phone redaction confirmed in deployed function bodies.
 
 ## Remaining for launch ⏳ (no feature work)
 

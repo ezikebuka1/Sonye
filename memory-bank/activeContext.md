@@ -147,7 +147,7 @@ Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ · Phase 3A ✅ · Phase 3B ✅ · Pha
 - **Venues (3):** `cole-park` (Lakewood) · `churchill-park` (Preston Hollow) · `lake-highlands-north` (Lake Highlands). `venues_select_authenticated` lets authed sessions read the picker.
 - **Local auth:** `config.toml` test-OTP — `+15555550101 = "123456"` is the dev owner; a second number exists for a non-owner test. A dummy Twilio provider is enabled so GoTrue loads. Dev owner: `public.users` role `owner`, `auth_user_id` bound at first login.
 - **Cloud owner row:** carries Ebuka's REAL number since 2026-06-03 (number lives in the cloud DB only, keep it out of the repo). **BOUND as of 2026-06-30** — `auth_user_id` set (via D2 Flow 3 Path A on first real login under Verify), `claim_token` nulled post-bind. Loud tripwire; never mutate.
-- **Cloud schema is current with local** (all 5 migrations incl. `slot_roster` ORDER BY applied 2026-06-12 via `db push`); cloud data tables still empty pre-launch.
+- **Cloud schema is current with local — re-verified 2026-07-01 by full parity audit.** A pre-launch security audit caught cloud stuck at the June-13 state (5 of 15 migrations); the 10 pending (D10-A/B, D14, D17, D18, D19, D20) were applied via `supabase db push` and re-audited to full parity: 21 functions, D17 grant matrix exact, chat policies on `is_joined_member`, D19 guard + D10-A redaction confirmed in deployed bodies. Cloud data tables still empty pre-launch. **Lesson: `git push` ships the frontend only — schema ships ONLY via `supabase db push`; run a parity audit before any launch gate.**
 
 ## Deployment guardrail
 
