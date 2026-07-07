@@ -27,6 +27,14 @@ Tracked visual/code drift and test-fidelity items. Closed items kept for provena
     permission denied; the test expectation is stale, not the code.
 - **P2 table-grant lockdown** — 5 RLS-shadowed tables could take explicit grants for
   defense-in-depth. Not exploitable today (RLS covers them); a hardening nicety.
+- **e2e/home-feed.spec.ts:169** — stale pre-D20 assertion ("anon GET / redirects to the
+  auth wall"); since D20, anon / renders the public feed BY DESIGN. Fails on clean main
+  (stash-verified 2026-07-01). Fix: invert to assert the feed renders for anon. Blocks 4
+  downstream serial tests.
+- **e2e/dashboard-cancel.spec.ts V2** — fixture joins 14 tester phones (+15550000001…011,
+  +15550100001…003) never present in seed.sql (baseline = D20 demo users); "2/0" vs "0/0"
+  on any fresh reset (stash-verified 2026-07-01). Fix: fixture self-seeds its tester users.
+  Blocks V3–V6.
 
 ## Notes
 

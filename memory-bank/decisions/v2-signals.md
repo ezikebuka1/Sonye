@@ -170,6 +170,7 @@ via a saved query and spins up slots by hand.
 Open v2 questions: no-claim timeout / fallback; organizer trust +
 venue vetting for user-claimed courts; threshold tuning from real
 data; interaction with eventual Play-Now matching.
+Additional revisit signal (2026-07-02): organic "can I host one?" asks from players.
 
 ## Phone-reveal timing & opt-out — declined for v1 (2026-06-11)
 

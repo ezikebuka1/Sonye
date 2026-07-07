@@ -253,6 +253,16 @@ users — it is manufactured social proof.
 
 (Captured 2026-04-25 from real-user feedback during M1 pause.)
 
+## Host-Neutral Player Surfaces (v1 principle)
+No player-facing surface attributes a game to its creator. Cards, the public feed,
+the lobby roster, and the wall render the owner (when joined) as an ordinary player —
+name, avatar, skill; no "hosted by," no host badge (the D10-B wall's host pill was
+removed 2026-07-02). Rationale: player-as-voucher beats owner-as-promoter (above);
+games should read as the group's, not one operator's. The DB keeps created_by;
+surfaces never render it. Any future host-attribution proposal needs an explicit
+decision. Player-hosted games stay a v2 direction (v2-signals: axis 4 + Cell
+Division). (Captured 2026-07-02, owner request during pre-launch polish.)
+
 ## The Goal (concrete)
 
 Design, build, and deliver a fully functional, reliable v1.

@@ -42,3 +42,11 @@ Group lobby (D10), the viewing player's own joined membership: a demoted red "Le
 
 ## Action
 `leaveSlotAction` mirrors `cancelSlotAction`: server client, one `.rpc('leave_slot', {p_slot_id, p_leave_reason_code, p_leave_reason_note})`, RETURNS boolean (success = no error), RAISE-message → typed `LeaveResult`, `router.refresh()` after (source of truth — reflects the left membership + any promotion). No optimistic mutation.
+
+## As-built annotation — nav rider location (2026-07-02)
+§"Entry point + rider" specced the /dashboard rider as "an owner-gated global-header
+nav link." As BUILT (M5), no global header existed; the rider shipped as an owner-only
+entry in BottomTabBar.tsx (isOwner prop, "M5 rider" comment). Removed 2026-07-01 by
+the profile dispatch, which consolidated the owner-dashboard entry onto /profile (the
+only entry point outside the route itself). Spec text above left as written —
+historical record; this note reconciles doc to tree.

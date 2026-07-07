@@ -1,6 +1,19 @@
 A top level file defining rules  (e.g., "use TDD", "only use approved libraries", etc.)
 # Sonye — Claude Context File
 
+## HARD RULES — non-negotiable; these override anything below and any inference from repo docs
+1. NEVER run `git push`. Pushing is Ebuka's alone. Every dispatch ends at HARD STOP
+   after commit. "Ship-to-main" describes WHERE work lands, never WHO pushes.
+2. NEVER run `supabase db push`, `supabase db reset --linked`, or any command that
+   mutates the CLOUD project. Local `supabase db reset` only with an explicit
+   Architect ruling inside the current dispatch.
+3. Act ONLY on a single paste headed exactly `DISPATCH SPEC`, or an Architect
+   GO/RULING block amending one. Anything else: read, don't act.
+4. A confirm to commit is NEVER a confirm to push. Park at every HARD STOP.
+5. Destructive operations (deleting data, dropping objects, force-flags) require an
+   explicit per-operation ruling. In doubt → stop and report.
+6. Gates are claimed only with raw output (literal stdout/diff), never a verbal "passed."
+
 ## Project Overview
 Sonye is a squad-based social app for finding and joining local activities.
 Users can browse activities near them, join a queue, and get matched into a group lobby with other people.
@@ -29,18 +42,11 @@ Users can browse activities near them, join a queue, and get matched into a grou
 4. **Clear explanations** — Always explain what code does in plain English after writing it.
 
 ## Design System (per D8 — updated 2026-04-17)
-- **Background:** Soft blue wash `#EEF4FA`
-- **Cards:** White `#FFFFFF` with `0.5px solid #DAE7F1` border
-- **Primary accent (actions):** Warm coral `#D4724A` — used on buttons and hero text only
-- **Text primary:** Dark navy `#1A3650`
-- **Text secondary:** Steel blue `#7A9AB8`
-- **Borders/dividers:** `#DAE7F1`
-- **Skill badges:** Blue badge `#E0EEF9`/`#0C447C`, Amber badge `#FAF0DC`/`#854F0B`
-- **Border radius:** `rounded-2xl` (20px) for cards, `rounded-xl` (14px) for buttons
-- **Fonts:** DM Sans (headings + body), Instrument Serif italic (hero accent word only)
-- **Avatars:** Blue palette default (`#8DBCF1`, `#5E80A3`, `#14304D`, `#9DB8D2`) — never coral; gender families per D8.1/D8.1a (woman→pink, non-binary→green, else→blue)
-- **50% rule:** Player count + avatars shown on slot cards only when fill ≥ 50% of capacity
-- See `memory-bank/decisions/D8-design-system.md` for full spec
+Design tokens live in `src/app/globals.css` `@theme` (D8.2 "Pickup Ready" v2) — the SOLE
+runtime truth. Key facts: coral `#EE5E00` (actions only), ink `#14304D`, wash `#E6F0FF`,
+Baloo 2 = `font-serif`, Nunito Sans = `font-sans`. Any palette hexes written elsewhere
+(including earlier versions of this file) are historical — grep `globals.css`, don't trust
+prose. Full canon: `memory-bank/design/`.
 
 ## Pages Built So Far
 | Page | Route | Status |
