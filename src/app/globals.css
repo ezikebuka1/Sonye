@@ -28,13 +28,17 @@
   --color-ink: #14304D;
   --color-steel: #5E80A3;
   --color-ink-soft: #5E80A3;      /* alias → steel */
+  --color-steel-aa: #4A6B8C;      /* D22: WCAG-AA secondary text at BODY sizes (steel fails 4.5:1
+                                     small; keep steel for large/decorative). Landing-only for now
+                                     — see drift-backlog "App-wide AA gap". */
   --color-muted: #9DB8D2;
   --color-sky: #8DBCF1;
 
   /* action + status */
   --color-cta: #EE5E00;
   --color-coral: #EE5E00;         /* alias → cta */
-  --color-coral-dark: #EE5E00;    /* alias → cta; hover now via brightness util */
+  --color-coral-dark: #D95500;    /* D22: coral hover/active (retargeted to its intended darker
+                                     value — had 0 live usages, cards hover via brightness util). */
   --color-decorative: #FF6A00;
   --color-yellow: #FFC63D;
   --color-error: #D64B4B;

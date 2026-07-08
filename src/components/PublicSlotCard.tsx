@@ -29,7 +29,7 @@ type GenderCategory = "open" | "women" | "men";
 type PublicSlotCardProps = {
   slotId: string;
   skillLevel: SkillLevel;
-  // RULING #1: derived server-side in PublicFeed via formatCentral(starts_at),
+  // RULING #1: derived server-side in PublicFeedList via formatCentral(starts_at),
   // exactly as HomeClient does — so the hero reads "Sat, Jul 18 · 8:00 AM".
   dayLabel: string;
   timeLabel: string;
