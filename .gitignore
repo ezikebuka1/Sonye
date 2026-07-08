@@ -158,3 +158,11 @@ supabase/.branches/
 # Generated / planning docs (not part of the app)
 docs/
 memory-bank/Archive/
+
+# Local dispatch artifacts (machine-specific; never committed)
+#   exports/     — diff/doc exports (STANDING RULE: exports go to ~/squadup/exports/)
+#   screenshots/ — Playwright verification captures
+# NOTE: files/ and "untitled folder/" are intentionally NOT ignored — Ebuka
+# triages those manually.
+exports/
+screenshots/

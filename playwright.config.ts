@@ -5,7 +5,14 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // Pinned to 1 UNCONDITIONALLY (2026-07-08). The live-session specs share a
+  // single local Supabase DB and reuse throwaway phones across files
+  // (+15555550102 / +15555550199 / +15555550198). Parallel workers let two
+  // files seed/teardown that shared state at the same time → duplicate-key +
+  // FK-teardown collisions. Serial execution makes each file seed → run →
+  // tear down before the next starts; the bare `npx playwright test` is now
+  // THE documented invocation (no --workers flag, no per-file dance).
+  workers: 1,
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:3000',

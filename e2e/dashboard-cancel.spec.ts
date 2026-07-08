@@ -9,7 +9,9 @@ import { execFileSync } from 'node:child_process';
  * seeded directly against the DB (docker exec psql) and torn down after — it is
  * self-contained and never touches seed.sql.
  *
- * RUN: local Supabase up + `npx playwright test e2e/dashboard-cancel.spec.ts`.
+ * RUN: local Supabase up + `npx playwright test` (the bare battery is the
+ *      documented invocation now that `workers: 1` is pinned; still runs alone
+ *      via `npx playwright test e2e/dashboard-cancel.spec.ts`).
  *      The describe is hard-guarded to the chromium project (see test.skip
  *      below): the fixture is shared mutable state, so a second project running
  *      concurrently would race its own seed/teardown. The guard makes the
@@ -23,6 +25,22 @@ const DB = 'supabase_db_squadup';
 // in config.toml but NO public.users row until the fixture seeds one.
 const OWNER_PHONE = '+15555550101';
 const PLAYER_PHONE = '+15555550102';
+
+// Roster-filler phones. These are joined/waitlisted seats referenced by the
+// membership seed below via `JOIN public.users u ON u.phone = v.phone` — so they
+// MUST exist as public.users rows or the JOIN silently drops them and every
+// count comes out 0 (the "2/0 vs 0/0" V2 drift). The fixture now seeds them as
+// public.users rows and tears them down. They NEVER dev-login (no auth binds),
+// so they are pure roster fillers, shaped like seed.sql's users.
+const FILLER_PHONES = [
+  '+15550000001', '+15550000002', '+15550000003', '+15550000004', '+15550000005',
+  '+15550000006', '+15550000007', '+15550000008', '+15550000009', '+15550000010',
+  '+15550000011', '+15550100001', '+15550100002', '+15550100003',
+];
+
+// Everything the fixture creates AND deletes (NOT the owner). PLAYER dev-logins;
+// the fillers do not.
+const THROWAWAY_PHONES = [PLAYER_PHONE, ...FILLER_PHONES];
 
 // The v1 sport id, assembled from fragments so this source file contains no
 // literal that trips a naive content-scanning hook; the runtime value is the
@@ -58,9 +76,30 @@ function psqlRows(query: string): string[][] {
   return out.length === 0 ? [] : out.split('\n').map((l) => l.split('|'));
 }
 
+// Idempotent teardown — memberships first (FK ON DELETE RESTRICT), then slots,
+// then the throwaway public.users rows, then the auth.users rows the dev-logins
+// minted. auth.users.phone is stored WITHOUT the leading '+', and a HARD-CODED
+// guard ensures the dev owner (+15555550101) can NEVER be in the deletion set.
+// Deleting auth.users is what makes the battery rerun-stable without a reset.
+function teardownSql(): string {
+  const ids = ALL_SLOT_IDS.map((id) => `'${id}'`).join(',');
+  const phones = THROWAWAY_PHONES.map((p) => `'${p}'`).join(',');
+  const authPhones = THROWAWAY_PHONES.map((p) => `'${p.replace('+', '')}'`).join(',');
+  return `
+DELETE FROM public.session_memberships WHERE slot_id IN (${ids});
+DELETE FROM public.session_memberships
+  WHERE user_id IN (SELECT id FROM public.users WHERE phone IN (${phones}));
+DELETE FROM public.slots WHERE id IN (${ids});
+DELETE FROM public.users WHERE phone IN (${phones});
+DELETE FROM auth.users WHERE phone IN (${authPhones}) AND phone <> '15555550101';
+`;
+}
+
 function seedFixture(): void {
   const owner = `(SELECT id FROM public.users WHERE phone = '${OWNER_PHONE}')`;
-  const ids = ALL_SLOT_IDS.map((id) => `'${id}'`).join(',');
+  const fillerRows = FILLER_PHONES
+    .map((p, i) => `('${p}','Filler${i + 1}','beginner','player')`)
+    .join(',\n    ');
 
   // joined/waitlisted seats. Distinct players; each joined player appears on
   // exactly one slot of FIX_DATE (sm_d9_one_joined_per_day is UNIQUE on
@@ -96,16 +135,14 @@ function seedFixture(): void {
 
   const sql = `
 BEGIN;
--- idempotent teardown of any prior fixture state
-DELETE FROM public.session_memberships WHERE slot_id IN (${ids});
-DELETE FROM public.slots WHERE id IN (${ids});
-DELETE FROM public.session_memberships
-  WHERE user_id IN (SELECT id FROM public.users WHERE phone = '${PLAYER_PHONE}');
-DELETE FROM public.users WHERE phone = '${PLAYER_PHONE}';
+${teardownSql()}
 
--- the player row: auth_user_id NULL → binds at /dev-login via signup_claim Path A
-INSERT INTO public.users (phone, first_name, skill_level, role)
-VALUES ('${PLAYER_PHONE}', 'Test Player', 'beginner', 'player');
+-- the throwaway user rows: PLAYER (auth_user_id NULL → binds at /dev-login via
+-- signup_claim Path A) + the roster fillers (never log in). The fillers MUST
+-- exist here or the seat JOIN below drops them and the counts come out 0.
+INSERT INTO public.users (phone, first_name, skill_level, role) VALUES
+  ('${PLAYER_PHONE}', 'Test Player', 'beginner', 'player'),
+  ${fillerRows};
 
 -- the slots (all owned by the dev owner)
 INSERT INTO public.slots
@@ -131,14 +168,7 @@ COMMIT;
 }
 
 function teardownFixture(): void {
-  const ids = ALL_SLOT_IDS.map((id) => `'${id}'`).join(',');
-  psqlExec(`
-DELETE FROM public.session_memberships WHERE slot_id IN (${ids});
-DELETE FROM public.slots WHERE id IN (${ids});
-DELETE FROM public.session_memberships
-  WHERE user_id IN (SELECT id FROM public.users WHERE phone = '${PLAYER_PHONE}');
-DELETE FROM public.users WHERE phone = '${PLAYER_PHONE}';
-`);
+  psqlExec(teardownSql());
 }
 
 // ── dev-login: establish a real RLS session for the given phone ──────────────

@@ -9,7 +9,9 @@ import { execFileSync } from 'node:child_process';
  * the DB (docker exec psql) and torn down after — self-contained, never touches
  * seed.sql, and never deletes the permanent dev-owner row.
  *
- * RUN: local Supabase up + `npx playwright test e2e/player-leave.spec.ts`.
+ * RUN: local Supabase up + `npx playwright test` (bare battery — `workers: 1`
+ *      pinned in playwright.config; still runs alone via
+ *      `npx playwright test e2e/player-leave.spec.ts`).
  *      Hard-guarded to the chromium project (shared mutable DB fixture).
  *
  * Coverage:
@@ -84,15 +86,21 @@ function memberState(slotId: string, phone: string): string[] {
   );
 }
 
+// memberships first (FK), then slots, then the throwaway public.users rows, then
+// the auth.users rows the dev-logins minted (auth.users.phone has NO leading '+';
+// a hard-coded guard keeps the dev owner +15555550101 out of the deletion set).
+// Clearing auth.users is what makes the battery rerun-stable without a reset.
 function teardownSql(): string {
   const ids = ALL_SLOT_IDS.map((id) => `'${id}'`).join(',');
   const phones = THROWAWAY_PHONES.map((p) => `'${p}'`).join(',');
+  const authPhones = THROWAWAY_PHONES.map((p) => `'${p.replace('+', '')}'`).join(',');
   return `
 DELETE FROM public.session_memberships WHERE slot_id IN (${ids});
 DELETE FROM public.session_memberships
   WHERE user_id IN (SELECT id FROM public.users WHERE phone IN (${phones}));
 DELETE FROM public.slots WHERE id IN (${ids});
 DELETE FROM public.users WHERE phone IN (${phones});
+DELETE FROM auth.users WHERE phone IN (${authPhones}) AND phone <> '15555550101';
 `;
 }
 

@@ -19,7 +19,9 @@ import { execFileSync } from 'node:child_process';
  * self-contained DB fixture seeded with `docker exec psql`, torn down after —
  * it never touches seed.sql.
  *
- * RUN: local Supabase up + `npx playwright test e2e/home-feed.spec.ts`. The
+ * RUN: local Supabase up + `npx playwright test` (the bare battery is the
+ *      documented invocation now that `workers: 1` is pinned; still runs alone
+ *      via `npx playwright test e2e/home-feed.spec.ts`). The
  *      describe is hard-guarded to the chromium project (see test.skip below):
  *      the fixture is shared mutable state, so running it under a second project
  *      concurrently would race its own seed/teardown. The guard makes the
@@ -36,9 +38,11 @@ const DB = 'supabase_db_squadup';
 //
 // Deliberately DISJOINT from dashboard-cancel.spec.ts (which owns +15555550102,
 // the +1555000000x / +1555010000x seat ranges, and the 51070000-… slot ids).
-// Under playwright.config's `fullyParallel`, the two spec files run on separate
-// workers at the same time; disjoint rows let both fixtures seed and tear down
-// concurrently without racing on shared state.
+// `workers: 1` is now pinned in playwright.config, so spec files run SERIALLY —
+// each seeds → runs → tears down before the next starts, which is what keeps the
+// throwaway phones this file SHARES with lobby-wall/player-leave (+15555550199 /
+// +15555550198) from colliding across files. Disjoint slot-ids/seat-ranges are
+// kept as defense-in-depth against an interrupted run.
 const OWNER_PHONE  = '+15555550101'; // dev owner — slot creator only (read-only ref)
 const NAMED_PHONE  = '+15555550199'; // "Marcus" — greeting-with-name + the waitlister
 const NONAME_PHONE = '+15555550198'; // empty first_name — fallback greeting + banner
@@ -70,15 +74,20 @@ function psqlRaw(query: string): string {
 
 // Idempotent teardown — also runs at the top of seed so a crashed prior run
 // can't leave half-state. memberships first (FK ON DELETE RESTRICT), then the
-// slot, then the player rows.
+// slot, then the player rows, then the auth.users rows the dev-logins minted
+// (auth.users.phone has NO leading '+'; a hard-coded guard keeps the dev owner
+// +15555550101 out of the deletion set). Clearing auth.users is what makes the
+// battery rerun-stable without a DB reset.
 function teardownSql(): string {
   const phones = ALL_PLAYER_PHONES.map((p) => `'${p}'`).join(',');
+  const authPhones = ALL_PLAYER_PHONES.map((p) => `'${p.replace('+', '')}'`).join(',');
   return `
 DELETE FROM public.session_memberships WHERE slot_id = '${FULL_SLOT}';
 DELETE FROM public.session_memberships
   WHERE user_id IN (SELECT id FROM public.users WHERE phone IN (${phones}));
 DELETE FROM public.slots WHERE id = '${FULL_SLOT}';
 DELETE FROM public.users WHERE phone IN (${phones});
+DELETE FROM auth.users WHERE phone IN (${authPhones}) AND phone <> '15555550101';
 `;
 }
 
@@ -165,10 +174,20 @@ test.describe('Live Home feed — auth wall, greeting/banner, waitlist', () => {
     teardownFixture();
   });
 
-  // ── the auth wall (anon → /auth) ───────────────────────────────────────────
-  test('anon GET / redirects to the auth wall', async ({ page }) => {
+  // ── the D22 public landing (anon → renders in place, NO redirect) ──────────
+  // Inverted from the pre-D20 "anon / → /auth" assertion: since D20 the anon
+  // front door renders at /, and since D22 it is the marketing landing that
+  // wraps the live feed. Asserts the landing renders (manifesto heading + the
+  // "This week in Dallas" section) and that / does NOT redirect.
+  test('anon GET / renders the D22 public landing (no redirect)', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveURL((url) => url.pathname === '/auth');
+    await expect(page).toHaveURL((url) => url.pathname === '/');
+    await expect(
+      page.getByRole('heading', { name: 'Join a squad, without the group chat.' }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'This week in Dallas' }),
+    ).toBeVisible();
   });
 
   test('anon GET /onboarding redirects to the auth wall', async ({ page }) => {

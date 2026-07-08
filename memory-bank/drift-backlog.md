@@ -19,6 +19,23 @@ Tracked visual/code drift and test-fidelity items. Closed items kept for provena
   field. FIXED: shown as "{venue} · {neighborhood}" (defensive render — omitted when null;
   prop typed `string | null`). Public-feed only; authed SlotCard untouched.
 
+## ✅ Closed (2026-07-08 — e2e repair + test-infra hardening, one commit)
+
+- **e2e/home-feed.spec.ts anon-`/` assertion** — was the stale pre-D20 "anon / → /auth"
+  expectation. FIXED: inverted to assert the D22 landing renders (manifesto heading
+  "Join a squad, without the group chat." + the "This week in Dallas" section; URL stays
+  `/`, no redirect). Its 4 downstream serial tests unblocked — all green.
+- **e2e/dashboard-cancel.spec.ts V2 ("2/0" vs "0/0")** — the fixture referenced 14 filler
+  tester phones in its membership seed but never inserted them as `public.users`, so the
+  seat JOIN dropped them and counts came out 0. FIXED: the fixture now self-seeds the 14
+  fillers as `public.users` rows (no auth binds) and tears them down. V2–V6 green.
+- **Harness hazard — parallel phone collision** — `workers: 1` pinned unconditionally in
+  playwright.config; the bare `npx playwright test` is now the documented invocation.
+- **Harness hazard — auth.users teardown gap** — every fixtured spec's teardown now deletes
+  its throwaway `auth.users` rows (hard-coded guard excludes the dev owner), so the battery
+  reruns green with NO db reset. Proven by a back-to-back bare run (auth.users stays at
+  1 = owner only).
+
 ## 🔧 Open (non-blocking)
 
 - **Test-fidelity pair** (clean up together, not bugs):
@@ -31,15 +48,6 @@ Tracked visual/code drift and test-fidelity items. Closed items kept for provena
   at body sizes and is used for body-size secondary text on shipped surfaces (feed cards,
   lobby, profile). D22 introduces `steel-aa #4A6B8C` for the landing; migrating existing
   surfaces is a deliberate visual pass — do not drive-by fix.
-- **e2e/home-feed.spec.ts:169** — stale pre-D20 assertion ("anon GET / redirects to the
-  auth wall"); since D20, anon / renders the public feed BY DESIGN. Fails on clean main
-  (stash-verified 2026-07-01). Fix: invert to assert the anon landing renders (manifesto
-  present + This week in Dallas section) per D22. Blocks 4
-  downstream serial tests.
-- **e2e/dashboard-cancel.spec.ts V2** — fixture joins 14 tester phones (+15550000001…011,
-  +15550100001…003) never present in seed.sql (baseline = D20 demo users); "2/0" vs "0/0"
-  on any fresh reset (stash-verified 2026-07-01). Fix: fixture self-seeds its tester users.
-  Blocks V3–V6.
 
 ## Notes
 
