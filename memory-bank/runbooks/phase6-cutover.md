@@ -1,5 +1,14 @@
 # Sonye — Phase 6 Cloud Cutover Runbook
 
+> **HISTORICAL — superseded; merged by pointer into `cutover.md`.** This is the pre-launch
+> **A2P-approval** cutover plan: it assumes the Twilio **Messaging** / 10DLC campaign path
+> (Step 3) and waiting on campaign approval. That path is **dead** — the campaign hit a
+> structural rejection (30923) and login OTP moved to **Twilio Verify** (no A2P campaign),
+> cut over and verified **2026-06-30**. The live, canonical launch-day checklist is
+> **`memory-bank/cutover.md`** (Verify swap §1, A2P halt §2, attendance-deferred §3–§4, owner
+> binding §5, pre-launch gates §6). Current live state: `activeContext.md` + `progress.md`.
+> The steps below are preserved for provenance only — **do not execute them.**
+
 Purpose: the ordered go-live sequence, executed once Twilio A2P is approved. Nothing here runs until that approval lands. Critical-path note: Step 0 (build the D11 dispatcher) is a prerequisite build, not a cutover action — it's your task during the Twilio wait. Steps 1+ are the actual cutover.
 
 ## Step 0 — BUILD: D11 SMS dispatcher (prerequisite, do during the Twilio wait)

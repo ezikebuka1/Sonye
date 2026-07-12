@@ -210,3 +210,33 @@ join.
 Trigger: 2nd sport added + rows need uniform icon alignment → wrap the sport icon
 in a page-blue tile (#E6F0FF), never orange (reserve orange for actions). V1 ships
 the bare paddle on white (single-sport, no alignment problem). See D8.3.
+
+## Inspiration addendum (2026-07 — 222 / Timeleft / Partiful / GoodRec review)
+
+New icebox entries:
+- **Player profiles with light stats** — tap a roster name → member-since, games
+  played, preferred venues. (The projectbrief's deferred tap-a-name idea, now
+  externally validated by GoodRec's "Who's Playing" profiles.) Trigger: players
+  asking "who is this?" in lobbies.
+- **Post-game feedback loop** — GoodRec runs star ratings on game and host;
+  Sonye's shape is lighter and host-neutral: one thumbs question riding the v1.1
+  attendance SMS ("How was the game?"). Trigger: first quality complaints or
+  no-show disputes.
+- **Venue detail richness** — facility notes, parking, court count, map link;
+  strengthens the existing clickable-venue → maps signal. Trigger: "where
+  exactly?" questions recurring in game chat.
+- **Game photo albums** — GoodRec pipes match photos to social channels; Sonye's
+  realness-compatible shape is owner/player photos attached to past games.
+  Trigger: the photo habit sticking + players asking for the shots.
+- **Leagues / recurring-crew formalization** — GoodRec's leagues are the
+  marketplace cousin of Cell Division; recorded here as external validation of
+  that entry. Trigger: unchanged (Cell Division's own).
+- **Monetization — explicit v1 non-goal** — GoodRec charges ~$15/game with
+  staffed hosts; Sonye v1 is free at public courts by brand promise. Revisit
+  trigger: paid or indoor venues entering the pool (court fees to pass through).
+
+Recorded divergences (seen and rejected, not missed):
+- **Staffed hosts** — GoodRec assigns a host who runs each game; anti-canon under
+  Host-Neutral Player Surfaces. Rejected for v1+.
+- **Host ratings** — rating a host requires surfacing one; same canon conflict.
+  Rejected.

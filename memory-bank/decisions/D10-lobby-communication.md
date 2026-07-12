@@ -323,3 +323,12 @@ no new field.
 **Defense-in-depth.** REVOKE INSERT, UPDATE, DELETE ON chat_messages FROM anon
 (grants were wide-open default-Supabase; RLS was the only gate), matching the
 slots hardening.
+
+### As-built note — host pill removed (2026-07-02, Host-Neutral canon; append)
+The wall shipped a "host" pill: `slot_wall()` returns `is_host` (author = the slot's
+`created_by`), and the LobbyWall UI rendered a `HostTag` on the owner's own messages. That
+pill was **removed 2026-07-02** under the Host-Neutral Player Surfaces canon — `isHost` was
+stripped from the `group-lobby/page.tsx` client mapping, so the flag never reaches the browser
+payload. The `slot_wall` RPC is **unchanged** (it still returns `is_host`; the field survives
+only in the server-only `WallRow` type, TS-erased at runtime). Author identity on the wall now
+renders as plain name + avatar, with no host distinction.

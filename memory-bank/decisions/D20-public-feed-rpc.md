@@ -47,3 +47,10 @@ Data layer ONLY. The PublicSlotCard component and the page.tsx routing split (if
 HomeClient else → PublicFeed) are a SEPARATE dispatch — SlotCard is NOT touched (it's coupled to
 Phase-4 membership state + D19 terminal states; a render-only PublicSlotCard isolates the public
 surface).
+
+## As-built note (2026-07, append)
+The `PublicFeed` server component named above was **deleted in 2026-07** when the D22 landing
+shipped. Its feed pathway was extracted to `src/components/PublicFeedList.tsx` (the async anon
+`get_public_feed` fetch + `PublicSlotCard` mapping), and the empty-state copy became a **prop**
+so the landing passes its own D22 string. This RPC and the data-layer decision are unchanged —
+only the consuming component was renamed/relocated (D22 doc carries the full ruling).

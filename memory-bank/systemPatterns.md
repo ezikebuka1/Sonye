@@ -2,7 +2,9 @@
 
 ## Architecture
 - Next.js App Router — each page lives in `src/app/[page-name]/page.tsx`
-- Backend: Supabase (Postgres + RLS) — local Dockerized instance for dev, cloud project for production. All membership mutations go through explicit Postgres transaction functions (M3 discipline); reads via gated read functions (`slot_share_preview` is the only anon-callable one).
+- Backend: Supabase (Postgres + RLS) — local Dockerized instance for dev, cloud project for production. All membership mutations go through explicit Postgres transaction functions (M3 discipline); reads via gated read functions (anon-callable surface is exactly three,
+per D17/D18/D20: `slot_share_preview`, `attest_attendance`, `get_public_feed` —
+everything else is authenticated or internal).
 - Auth: Supabase Auth (phone OTP) via `@supabase/ssr`; server-side post-verify routing as Server Actions (D2 Amendment B)
 - Mobile-first — design for 390px width first, scale up
 
@@ -24,6 +26,8 @@ Canonical source: the D8.2 decision doc in `memory-bank/decisions/`. Project-kno
 
 **50% fill rule:** slot cards/previews show fill count only when opt-ins ≥ 50% of capacity (`fill_ratio_shown`). Below that, no count.
 
+**D22 token amendments (2026-07):** two tokens were added/retargeted for the landing — `--color-steel-aa #4A6B8C` (WCAG-AA-safe secondary text at body sizes; the existing steel `#5E80A3` stays for large/decorative use) and `--color-coral-dark` retargeted to `#D95500`. Reminder: the `@theme` block in `src/app/globals.css` is the SOLE runtime truth for tokens — any hex written in these docs is historical; grep `globals.css`, don't trust prose.
+
 ## File Naming
 - Pages: `page.tsx`
 - Components: `PascalCase.tsx` (e.g., `ActivityCard.tsx`)
@@ -34,7 +38,8 @@ Canonical source: `memory-bank/decisions/D7-product-mechanics-v1.md` + amendment
 
 ### Slot Lifecycle
 1. Owner manually publishes a slot (sport, skill level, venue, day, time, capacity 4 or 6). Owner-only: `slots_insert_owner` RLS gate.
-2. Users see published slots; anon users see the detail page via `slot_share_preview` only.
+2. Users see published slots; anon users see the landing feed at `/`
+   (`get_public_feed`, D20/D22) and slot detail pages via `slot_share_preview`.
 3. User taps Join → auth wall → membership via `join_slot` (the sole write path).
 4. At capacity, session locks. Locked sessions immutable for joined members.
 
@@ -84,6 +89,21 @@ Committed migrations always carry loud placeholders (`+10000000000`, NULL `auth_
 
 ### Secrets Discipline (effective 2026-06-08, post-incident)
 No cloud keys in any committed file, ever — including verify scripts (the incident's root cause). Verify scripts run against local Docker using the public local-default JWTs only. Cloud keys live in Ebuka's password manager and the Supabase dashboard. Never click GitHub's "allow secret" URL — purge and rotate instead. If history rewrite is needed: `git-filter-repo --replace-text`, verify with three greps (log -p, tracked files, --all), rotate the key, then `git push --force-with-lease`.
+
+### Two-Commit Discipline
+A decision and the code that realizes it land as two separate commits: the numbered decision doc commits on its own, then the code + tests + `activeContext.md` update commit second. This keeps the decision record reviewable independently of the diff, and puts the "why" on `main` ahead of the "how" — a later reader can read the ruling without reverse-engineering it out of the implementation.
+
+### Exports Directory (`~/squadup/exports/`)
+Generated review artifacts — exported diffs, doc snapshots — go to `~/squadup/exports/`, never the Desktop and never into a commit (the directory is `.gitignore`'d). It keeps the working tree clean and gives the Architect one predictable place to read review material without it leaking into the tree.
+
+### Diff-File Review Gate
+Before any commit, the working diff is exported to a file under `~/squadup/exports/` and the Architect reads it line-by-line — the gate is the diff text itself, not a verbal "it passes." When amendments are requested, the follow-up is checked by diffing the revised diff against the original (a diff-of-diffs), so exactly what moved between review rounds is visible and nothing slips in unreviewed. The dispatch parks at a HARD STOP here until the Architect confirms.
+
+### Binary-Asset Review (generator + served-200)
+Binary assets (favicon, PNGs, the OG image) can't be read as a text diff, so they're reviewed two other ways: through their committed, deterministic generator script (reproducible offline, byte-identical on rerun — the script is the reviewable artifact, not the bytes) and through served-200 gates (a production `next start`, then a GET of each asset route returning 200 with the expected content-type and size). Together the script and the served proof stand in for a visual diff.
+
+### Pinned Serial Battery
+The Playwright e2e battery runs with `workers: 1` pinned unconditionally: the live-session specs share one mutable local Postgres and reuse overlapping throwaway phone numbers, so parallel test files collided on `users_phone_key`. Serial makes the bare `npx playwright test` the one documented invocation (no `--workers` flag, no per-file choreography). See `techContext.md` → Gotchas for the harness details and the auth-users teardown hardening that keeps back-to-back reruns green.
 
 ## Known Gotchas
 

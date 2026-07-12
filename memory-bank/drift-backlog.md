@@ -48,6 +48,20 @@ Tracked visual/code drift and test-fidelity items. Closed items kept for provena
   at body sizes and is used for body-size secondary text on shipped surfaces (feed cards,
   lobby, profile). D22 introduces `steel-aa #4A6B8C` for the landing; migrating existing
   surfaces is a deliberate visual pass — do not drive-by fix.
+- **npm-audit baseline (recorded 2026-07-12; post-launch triage):** `npm audit` reports
+  **5 vulnerabilities — 1 low, 3 moderate, 1 high**, all in framework/tooling deps, none
+  reachable in the shipped bundle:
+  - `next` — **high** (App Router advisory cluster: Server-Components DoS, cache-poisoning,
+    middleware/proxy bypass, image-optimization DoS, SSRF).
+  - `postcss` <8.5.10 — moderate (XSS via unescaped `</style>` in stringify), pulled by `next`.
+  - `brace-expansion` 5.0.2–5.0.5 — moderate (ReDoS), via `@typescript-eslint`.
+  - `js-yaml` 4.0.0–4.1.1 — moderate (quadratic DoS on merge keys).
+  - `@babel/core` <=7.29.0 — low (arbitrary file read via `sourceMappingURL`).
+  These are a **pre-existing baseline unrelated to the brand-asset deps** — the `to-ico` stack
+  (17 vulns, incl. the deprecated `request` chain) was removed pre-commit at `acfea8f` by
+  swapping to `png-to-ico` (adds zero vulns). Triage is **post-launch**; the only real fix is a
+  `next` framework bump behind its own dispatch. **`npm audit fix --force` is NEVER to be run**
+  (it force-installs `next@16.2.10`, outside the stated dependency range).
 
 ## Notes
 

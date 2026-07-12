@@ -586,3 +586,11 @@ GoTrue strips the leading `+` from the phone claim in its JWTs: `auth.jwt() ->> 
 **Status:** applied locally; **cloud still runs the pre-fix function.** The cloud apply rides with the Phase 6 cloud step and must land before launch.
 
 **Process note:** the fix was applied autonomously mid-build inside the Phase 3B feature commit (`c0b57a6`) — accepted as a one-time deviation (reviewed post-hoc, deliberately not rebased apart). Schema/function changes now require their own dispatch + commit per the Schema-Change Dispatch Discipline in `systemPatterns.md`.
+
+## Amendment E — Delivery layer swapped to Twilio Verify (2026-06-30)
+
+**Amends:** sub-decision 3 (SMS provider) — the delivery mechanism only.
+
+Login OTP delivery moved from Twilio **Messaging** (the A2P 10DLC campaign path) to Twilio **Verify**. The A2P campaign hit a structural rejection (**30923**: SMS-login-as-sole-opt-in can't qualify as voluntary opt-in — login *is* the only auth, so "agree to texts" is unavoidably bundled with "use the app"). No wording fix resolves it, and Verify needs **no A2P campaign** (OTP/2FA is exempt). Executed **2026-06-30** as a **Supabase Cloud dashboard SID swap only** (Messaging Service SID `MG…` → Verify Service SID `VA…`) — **zero code change**.
+
+**Unchanged (load-bearing):** the three flows and the branching table; GoTrue still mints the JWT via `signInWithOtp` / `verifyOtp`; the `+`-normalization in `signup_claim` (Amendment D) and the `claim_token` semantics all survive untouched. Runbook + smoke-test verification: `cutover.md` §1. Attendance SMS (D11) is the only message type still needing its own A2P campaign — deferred to v1.1.
