@@ -4,7 +4,7 @@ import { Home, User } from "lucide-react";
 type TabKey = "home" | "profile";
 
 type BottomTabBarProps = {
-  activeTab: TabKey;
+  activeTab?: TabKey; // omit to highlight nothing (e.g. the owner dashboard, which is not a tab)
 };
 
 type Tab = {

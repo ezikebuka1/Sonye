@@ -68,6 +68,26 @@ export default async function DashboardPage() {
 
   const rows = (slotData ?? []) as unknown as OwnerSlotRow[];
 
+  // Owner-as-player: does the owner hold an ACTIVE (joined/waitlisted) membership
+  // in any of these slots? This drives the dashboard's Join vs "In lobby"
+  // affordance. It reads the owner's OWN session_memberships
+  // (user_id = ownerId = current_user_id()), which RLS permits
+  // (user_id = current_user_id() OR is_owner) — mirrors the lobby's
+  // self-membership query. NO schema/RPC change; join_slot stays the sole write.
+  const slotIds = rows.map((r) => r.id);
+  const membershipBySlot = new Map<string, "joined" | "waitlisted">();
+  if (ownerId && slotIds.length > 0) {
+    const { data: memData } = await supabase
+      .from("session_memberships")
+      .select("slot_id, status")
+      .eq("user_id", ownerId)
+      .in("slot_id", slotIds)
+      .in("status", ["joined", "waitlisted"]);
+    for (const m of (memData ?? []) as { slot_id: string; status: "joined" | "waitlisted" }[]) {
+      membershipBySlot.set(m.slot_id, m.status);
+    }
+  }
+
   const slots: OwnerSlot[] = rows.map((r) => ({
     id: r.id,
     startsAt: r.starts_at,
@@ -76,6 +96,7 @@ export default async function DashboardPage() {
     capacity: r.capacity,
     memberCount: r.member_count,
     waitlistCount: r.waitlist_count,
+    membershipStatus: membershipBySlot.get(r.id) ?? null,
   }));
 
   return <DashboardClient slots={slots} />;

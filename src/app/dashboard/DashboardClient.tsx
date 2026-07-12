@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Clock, Check, Users, Plus } from "lucide-react";
+import { Calendar, Clock, Check, Users, Plus, ArrowRight } from "lucide-react";
 
-import { cancelSlotAction } from "../actions";
+import { cancelSlotAction, joinSlotAction } from "../actions";
+import BottomTabBar from "@/components/BottomTabBar";
 import CancelSheet from "@/components/CancelSheet";
 import { skillBadge, type SkillLevel } from "@/components/SlotCard";
 import { formatCentral } from "@/lib/format-central";
@@ -23,6 +24,7 @@ export type OwnerSlot = {
   capacity: number;
   memberCount: number; // slots.member_count (joined count)
   waitlistCount: number; // slots.waitlist_count
+  membershipStatus: "joined" | "waitlisted" | null; // the OWNER's own active row, else null (owner-as-player)
 };
 
 // Coral OUTLINE link to the create-slot flow (header + empty-state CTA).
@@ -48,6 +50,8 @@ export default function DashboardClient({ slots }: { slots: OwnerSlot[] }) {
   // HomeClient's pendingId + startTransition — NOT the Zustand mock store).
   const [openSlotId, setOpenSlotId] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  // The one card whose owner-join is in flight (mirrors HomeClient's pendingId).
+  const [joinPendingId, setJoinPendingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   const openSlot = openSlotId ? slots.find((s) => s.id === openSlotId) ?? null : null;
@@ -84,6 +88,50 @@ export default function DashboardClient({ slots }: { slots: OwnerSlot[] }) {
     });
   }
 
+  // Owner-as-player join — reuses the SAME server action Home uses (no forked
+  // join logic). A 'joined' outcome redirect()s server-side to the lobby ("the
+  // lobby is the confirmation", Fork 1), so `result` is undefined and the
+  // framework navigates — nothing to do here. Waitlisted/error stay on the
+  // dashboard with Home's verbatim toast copy + a refresh so the row re-renders
+  // ("In lobby →" once active; a cancelled slot drops off the owner query).
+  function handleJoin(slotId: string) {
+    if (joinPendingId) return; // one join in flight at a time
+    setJoinPendingId(slotId);
+    startTransition(async () => {
+      try {
+        const result = await joinSlotAction(slotId);
+        if (!result) return; // 'joined' → server redirect to the lobby
+        if ("status" in result && result.status === "waitlisted") {
+          useAppStore.getState().showToast({
+            message: "On the waitlist — we'll text you",
+            variant: "success",
+          });
+        } else if ("error" in result) {
+          if (result.error === "collision") {
+            useAppStore.getState().showToast({
+              message:
+                "You're already in a game today. Leave that one or complete it to join another.",
+              variant: "error",
+            });
+          } else if (result.error === "cancelled") {
+            useAppStore.getState().showToast({
+              message: "That game was cancelled",
+              variant: "error",
+            });
+          } else if (result.error === "started") {
+            useAppStore.getState().showToast({
+              message: "Game already started",
+              variant: "error",
+            });
+          }
+        }
+        router.refresh(); // re-render the row (waitlisted → In lobby; cancelled drops off)
+      } finally {
+        setJoinPendingId(null);
+      }
+    });
+  }
+
   return (
     <main className="min-h-screen bg-wash pb-24">
       <div className="max-w-[390px] mx-auto px-5 pt-6 space-y-5">
@@ -110,6 +158,11 @@ export default function DashboardClient({ slots }: { slots: OwnerSlot[] }) {
               const badge = skillBadge[slot.skillLevel];
               const isFull = slot.memberCount >= slot.capacity;
               const showDemand = isFull && slot.waitlistCount > 0;
+              // Owner-as-player affordance (Fork 2): offer Join ONLY when the
+              // owner is not already active AND the slot has room — an owner
+              // never waitlists their own game.
+              const isActive = slot.membershipStatus !== null;
+              const canJoin = !isActive && !isFull;
 
               return (
                 <article
@@ -117,11 +170,15 @@ export default function DashboardClient({ slots }: { slots: OwnerSlot[] }) {
                   data-slot-id={slot.id}
                   className="bg-card rounded-2xl border border-[0.5px] border-card-border p-4 space-y-3"
                 >
-                  {/* Top row: venue (single line) + skill chip */}
+                  {/* Top row: venue (single line, links to the group lobby) + skill chip */}
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-sans font-semibold text-ink truncate">
+                    <a
+                      href={`/group-lobby?slotId=${slot.id}`}
+                      data-testid={`dashboard-lobby-header-${slot.id}`}
+                      className="min-w-0 truncate font-sans font-semibold text-ink hover:underline"
+                    >
                       {slot.venueName}
-                    </span>
+                    </a>
                     <span
                       className={`${badge.bg} ${badge.text} shrink-0 rounded-full px-2.5 py-1 text-xs font-medium`}
                     >
@@ -195,8 +252,32 @@ export default function DashboardClient({ slots }: { slots: OwnerSlot[] }) {
                     </div>
                   )}
 
-                  {/* Cancel — a quiet red text link (the weight lives in the sheet) */}
-                  <div className="flex justify-end">
+                  {/* Action row: owner-as-player Join / lobby link (left) +
+                      Cancel (right). Join shows only when the owner is not
+                      active AND the slot is not full (Fork 2); otherwise the
+                      slot surfaces its lobby link in that slot. Cancel — a quiet
+                      red text link — is unchanged (the weight lives in the sheet). */}
+                  <div className="flex items-center justify-between gap-3 pt-1">
+                    {canJoin ? (
+                      <button
+                        type="button"
+                        data-testid={`join-from-dashboard-${slot.id}`}
+                        onClick={() => handleJoin(slot.id)}
+                        disabled={joinPendingId === slot.id}
+                        className="flex min-h-[44px] items-center justify-center rounded-xl bg-coral px-4 font-sans text-[15px] font-medium text-white transition-colors hover:brightness-95 active:brightness-90 disabled:opacity-70"
+                      >
+                        {joinPendingId === slot.id ? "Joining…" : "Join this game"}
+                      </button>
+                    ) : (
+                      <a
+                        href={`/group-lobby?slotId=${slot.id}`}
+                        data-testid={`dashboard-lobby-link-${slot.id}`}
+                        className="flex min-h-[44px] items-center gap-1 font-sans text-sm font-medium text-steel hover:underline"
+                      >
+                        {isActive ? "In lobby" : "View lobby"}
+                        <ArrowRight size={15} aria-hidden="true" />
+                      </a>
+                    )}
                     <button
                       type="button"
                       data-testid={`cancel-link-${slot.id}`}
@@ -212,6 +293,10 @@ export default function DashboardClient({ slots }: { slots: OwnerSlot[] }) {
           </div>
         )}
       </div>
+
+      {/* Dashboard is reached via Profile → Owner dashboard; it is not itself a
+          tab, so the bar renders with no active tab (Home + Profile links live). */}
+      <BottomTabBar />
 
       {openSlot && (
         <CancelSheet
