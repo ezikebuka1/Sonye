@@ -15,8 +15,9 @@ const baloo2 = Baloo_2({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://sonye.app"),
   title: "Sonye",
-  description: "Find your squad for casual sports in Dallas",
+  description: "Curated pickleball games with reliable groups, at Dallas public courts.",
 };
 
 export default function RootLayout({

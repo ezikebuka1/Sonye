@@ -31,6 +31,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
     "husky": "^9.1.7",
+    "opentype.js": "^2.0.0",
+    "png-to-ico": "^3.0.2",
     "tailwindcss": "^4.2.2",
     "typescript": "^5"
   }
