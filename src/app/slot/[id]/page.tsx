@@ -94,7 +94,6 @@ export default async function SlotDetailPage({
   const timeRange = formatTimeRange(startLabel, endLabel);
   const ds      = deriveState(preview, id);
   const skill   = SKILL_DISPLAY[preview.skill_level];
-  const initial = preview.owner_first_name.charAt(0).toUpperCase();
 
   const genderTag =
     preview.gender_category === 'women' ? 'Women' :
@@ -183,22 +182,10 @@ export default async function SlotDetailPage({
           )}
         </div>
 
-        {/* Owner line */}
-        <div className="mt-5 px-6 flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[13px] font-semibold flex-shrink-0"
-            style={{ backgroundColor: '#1A3650', fontFamily: 'var(--font-nunito)' }}
-          >
-            {initial}
-          </div>
-          <span
-            className="text-[#5E80A3] text-[13px]"
-            style={{ fontFamily: 'var(--font-nunito)' }}
-          >
-            Organized by{' '}
-            <span className="text-[#14304D] font-medium">{preview.owner_first_name}</span>
-          </span>
-        </div>
+        {/* Owner line REMOVED 2026-07 — host-neutral canon (amendment waiver):
+            the public /slot page no longer surfaces the organizer's name/initial.
+            owner_first_name stays in the SlotPreview type / slot_share_preview
+            projection (server-only, is_host pattern), just not rendered. */}
 
         {/* State card */}
         <div className="mt-6 mx-6 rounded-2xl overflow-hidden border border-[#CFE0F4]">

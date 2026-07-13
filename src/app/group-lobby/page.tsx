@@ -11,6 +11,10 @@ import { formatPhone, smsHref } from '@/lib/phone';
 import PeerReportLink from '@/components/PeerReportLink';
 import LeaveGameControl from '@/components/LeaveGameControl';
 import LobbyWall, { type WallMessageVM } from '@/components/LobbyWall';
+import InviteControl from '@/components/InviteControl';
+import { spotsClause } from '@/lib/spots-clause';
+import { slotQrSvg } from '@/lib/qr';
+import { formatCentral } from '@/lib/format-central';
 
 // Roster must be fresh per request — never cached, never streamed
 // (no Suspense: the page renders synchronously so the full payload is
@@ -273,6 +277,30 @@ export default async function GroupLobbyPage({
     });
   }
 
+  // ── Invite a friend (v1 final feature) — composed server-side, rendered below
+  // the roster / above the wall. Eligibility is explicit even though it is
+  // currently ALWAYS true: everyone who reaches the lobby is the owner or an
+  // active member (non-members were redirected to /slot above). The gate
+  // self-documents and guards any future lobby-access change.
+  const canInvite = viewer === 'owner' || self !== null;
+  const inviteBase = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
+  const inviteUrl = `${inviteBase}/slot/${slotId}`; // the receiving end — /slot unfurl already exists
+  const inviteQrSvg = slotQrSvg(inviteUrl);
+  const { dayLabel: inviteDay, timeLabel: inviteTime } = formatCentral(preview.starts_at); // composed-string authority (Ruling 2)
+  const inviteMemberCount = counts?.member_count ?? fillCount;
+  const inviteSport = preview.sport_name.toLowerCase();
+  // OUTBOUND text is MASKED via spotsClause (>=50% AND not full → clause, else null).
+  const inviteClause = spotsClause(inviteMemberCount, cap);
+  const inviteShareText = inviteClause
+    ? `I'm playing ${inviteSport} ${inviteDay} · ${inviteTime} at ${preview.venue_name} — ${inviteClause}. Join us:`
+    : `I'm playing ${inviteSport} ${inviteDay} · ${inviteTime} at ${preview.venue_name}. Join us:`;
+  // Subtitle is MEMBER-FACING and always true — the raw count (the member already
+  // sees the roster), distinct from the masked share text above.
+  const inviteSpotsRaw = cap - inviteMemberCount;
+  const inviteSubtitle = isLocked
+    ? `Game locked at ${cap} · share for next time`
+    : `${inviteSpotsRaw} spot${inviteSpotsRaw === 1 ? '' : 's'} left · link or QR, no app needed`;
+
   return (
     <main
       className="min-h-screen bg-[#E6F0FF]"
@@ -440,6 +468,17 @@ export default async function GroupLobbyPage({
             </div>
           )}
         </div>
+
+        {/* Invite a friend — below the roster card, above the wall (Ruling 3:
+            header → date → your group → Invite → wall) */}
+        {canInvite && (
+          <InviteControl
+            qrSvg={inviteQrSvg}
+            url={inviteUrl}
+            shareText={inviteShareText}
+            subtitle={inviteSubtitle}
+          />
+        )}
 
         {/* D10-B lobby wall — joined members + host, below the roster */}
         {showWall && (
