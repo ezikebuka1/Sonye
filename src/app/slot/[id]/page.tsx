@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import type { Metadata } from 'next';
+import { MapPin, ArrowUpRight } from 'lucide-react';
 import {
   fetchSlotPreview,
   formatDallas,
@@ -7,6 +8,7 @@ import {
   deriveState,
   SKILL_DISPLAY,
 } from '@/lib/slot-preview';
+import { courtMapsUrl } from '@/lib/maps-url';
 import JoinDisclosure from '@/components/JoinDisclosure';
 
 // Deduplicate the fetch between generateMetadata and the page render
@@ -137,22 +139,49 @@ export default async function SlotDetailPage({
           </p>
         </div>
 
-        {/* Venue line */}
-        <div className="mt-5 mx-6 bg-white border border-[#CFE0F4] rounded-2xl px-4 py-3 flex items-center gap-2">
-          <span
-            className="text-[#14304D] text-[14px] font-medium"
-            style={{ fontFamily: 'var(--font-nunito)' }}
+        {/* Venue line — tappable to Google Maps when the venue has court
+            coordinates (D24); plain card row when coords are null. */}
+        {preview.venue_lat !== null && preview.venue_lng !== null ? (
+          <a
+            href={courtMapsUrl(preview.venue_lat, preview.venue_lng)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open ${preview.venue_name} in Google Maps (opens in a new tab)`}
+            className="mt-5 mx-6 bg-white border border-[#CFE0F4] rounded-2xl px-4 py-3 flex items-center gap-2 no-underline"
           >
-            {preview.venue_name}
-          </span>
-          <span className="text-[#CFE0F4]">·</span>
-          <span
-            className="text-[#5E80A3] text-[13px]"
-            style={{ fontFamily: 'var(--font-nunito)' }}
-          >
-            {preview.neighborhood}, Dallas
-          </span>
-        </div>
+            <MapPin size={16} color="#4A6B8C" className="flex-shrink-0" aria-hidden="true" />
+            <span
+              className="text-[#14304D] text-[14px] font-medium underline decoration-[#4A6B8C] underline-offset-2"
+              style={{ fontFamily: 'var(--font-nunito)' }}
+            >
+              {preview.venue_name}
+            </span>
+            <span className="text-[#CFE0F4]">·</span>
+            <span
+              className="text-[#5E80A3] text-[13px]"
+              style={{ fontFamily: 'var(--font-nunito)' }}
+            >
+              {preview.neighborhood}, Dallas
+            </span>
+            <ArrowUpRight size={14} color="#4A6B8C" className="flex-shrink-0 ml-auto" aria-hidden="true" />
+          </a>
+        ) : (
+          <div className="mt-5 mx-6 bg-white border border-[#CFE0F4] rounded-2xl px-4 py-3 flex items-center gap-2">
+            <span
+              className="text-[#14304D] text-[14px] font-medium"
+              style={{ fontFamily: 'var(--font-nunito)' }}
+            >
+              {preview.venue_name}
+            </span>
+            <span className="text-[#CFE0F4]">·</span>
+            <span
+              className="text-[#5E80A3] text-[13px]"
+              style={{ fontFamily: 'var(--font-nunito)' }}
+            >
+              {preview.neighborhood}, Dallas
+            </span>
+          </div>
+        )}
 
         {/* Park-honesty subline — free public court reality (language-honesty sweep) */}
         <p

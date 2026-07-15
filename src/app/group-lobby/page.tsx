@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { ArrowUpRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import {
   fetchSlotPreview,
@@ -7,6 +8,7 @@ import {
   type SkillLevel,
 } from '@/lib/slot-preview';
 import { getAvatar, type Gender } from '@/lib/avatar';
+import { courtMapsUrl } from '@/lib/maps-url';
 import { formatPhone, smsHref } from '@/lib/phone';
 import PeerReportLink from '@/components/PeerReportLink';
 import LeaveGameControl from '@/components/LeaveGameControl';
@@ -341,12 +343,27 @@ export default async function GroupLobbyPage({
           )}
         </div>
 
-        {/* Venue — the ONLY Baloo on screen */}
+        {/* Venue — the ONLY Baloo on screen. Tappable to Google Maps when the
+            venue has court coordinates (D24); the h1 landmark + its ink Baloo
+            styling stay unchanged, only the content becomes an anchor. */}
         <h1
           className="mt-3 text-[#14304D] text-[30px] font-bold leading-tight"
           style={{ fontFamily: 'var(--font-baloo2)' }}
         >
-          {preview.venue_name}
+          {preview.venue_lat !== null && preview.venue_lng !== null ? (
+            <a
+              href={courtMapsUrl(preview.venue_lat, preview.venue_lng)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Open ${preview.venue_name} in Google Maps (opens in a new tab)`}
+              className="inline-flex items-center gap-1.5 text-[#14304D] no-underline"
+            >
+              {preview.venue_name}
+              <ArrowUpRight size={19} color="#4A6B8C" className="flex-shrink-0" aria-hidden="true" />
+            </a>
+          ) : (
+            preview.venue_name
+          )}
         </h1>
         <p className="mt-1 text-[#5E80A3] text-[13px]">
           {dayLabel} · {timeRange}

@@ -21,6 +21,8 @@ export type SlotPreview = {
   fill_count: number | null;
   fill_ratio_shown: boolean;
   skill_level: SkillLevel;
+  venue_lat: number | null;
+  venue_lng: number | null;
 };
 
 export type SlotState = 'CANCELLED' | 'FORMING' | 'FILLING' | 'FULL';
