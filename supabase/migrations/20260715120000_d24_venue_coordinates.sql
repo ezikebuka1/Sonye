@@ -24,10 +24,12 @@ UPDATE public.venues SET lat=32.885735, lng=-96.730095 WHERE id='lake-highlands-
 
 -- Step 4: Extend slot_share_preview — append venue_lat, venue_lng as the LAST
 -- two RETURNS TABLE columns and v.lat, v.lng after s.skill_level in the SELECT.
--- Body is otherwise byte-identical to the current post-D12 definition
--- (20260604050433_m3_4_slot_skill_level.sql, confirmed against live
--- pg_get_functiondef). DROP is required: PostgreSQL forbids CREATE OR REPLACE
--- when RETURNS TABLE columns change (the established m3_4 pattern).
+-- Body is otherwise the current post-D12 definition (per m3_4, confirmed
+-- against live pg_get_functiondef); only venue_lat, venue_lng are appended.
+-- Uses DROP + CREATE (matching m3_4, the repo precedent for a return-shape
+-- change on this function): reliably installs the new 14-col shape
+-- regardless of CREATE OR REPLACE's trailing-column rules. Grants are
+-- re-asserted below because DROP resets them.
 DROP FUNCTION IF EXISTS public.slot_share_preview(uuid);
 CREATE FUNCTION public.slot_share_preview(target_slot uuid)
 RETURNS TABLE (

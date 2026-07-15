@@ -62,6 +62,15 @@ Tracked visual/code drift and test-fidelity items. Closed items kept for provena
   swapping to `png-to-ico` (adds zero vulns). Triage is **post-launch**; the only real fix is a
   `next` framework bump behind its own dispatch. **`npm audit fix --force` is NEVER to be run**
   (it force-installs `next@16.2.10`, outside the stated dependency range).
+- **m3_4 migration comment is factually wrong (found via D24, 2026-07-15):**
+  `20260604050433_m3_4_slot_skill_level.sql` states `"DROP is required: PostgreSQL forbids
+  CREATE OR REPLACE when RETURNS TABLE columns change"`. **Empirically false** — Postgres allows
+  `CREATE OR REPLACE` to *append* trailing `RETURNS TABLE` columns (proven against the local DB
+  this session; it only forbids *changing/removing* existing columns). The `DROP + CREATE`
+  mechanism itself is correct and is the repo standard for this function, so the migration is
+  fine — only the *rationale* in the comment is wrong. D24's copy of the same line was corrected
+  under the D24 migration ruling; **m3_4 is an applied migration (immutable), so its comment
+  stays** — documentation-only, no code/behaviour impact, no dispatch.
 
 ## Notes
 
