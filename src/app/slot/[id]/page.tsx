@@ -154,6 +154,14 @@ export default async function SlotDetailPage({
           </span>
         </div>
 
+        {/* Park-honesty subline — free public court reality (language-honesty sweep) */}
+        <p
+          className="mt-2 mx-6 text-[#5E80A3] text-[13px]"
+          style={{ fontFamily: 'var(--font-nunito)' }}
+        >
+          Free public court — walk-up, park rules apply.
+        </p>
+
         {/* Pills row */}
         <div className="mt-4 px-6 flex flex-wrap gap-2">
           <span

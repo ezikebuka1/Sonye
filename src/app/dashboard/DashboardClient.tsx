@@ -35,7 +35,7 @@ function NewSlotButton() {
       className="flex shrink-0 items-center gap-1.5 rounded-xl border border-coral px-3 py-2 font-sans text-sm font-medium text-coral transition-colors hover:bg-coral/5"
     >
       <Plus size={16} aria-hidden="true" />
-      New slot
+      New game
     </a>
   );
 }
@@ -247,7 +247,7 @@ export default function DashboardClient({ slots }: { slots: OwnerSlot[] }) {
                         className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-coral py-2.5 font-sans font-medium text-[15px] text-white transition-colors hover:brightness-95 active:brightness-90"
                       >
                         <Plus size={16} aria-hidden="true" />
-                        Open another slot
+                        Open another game
                       </a>
                     </div>
                   )}

@@ -183,7 +183,7 @@ export default function PublicLanding() {
             <span className="text-coral">{ROTATOR_TAIL}</span>
           </h1>
           <p className="mt-3 font-sans text-[15px] leading-relaxed text-steel-aa">
-            Curated games at free Dallas courts. Pick a slot, verify your phone,
+            Curated games at free Dallas courts. Pick a game, verify your phone,
             and you&rsquo;re in.
           </p>
         </section>

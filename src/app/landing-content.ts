@@ -20,7 +20,7 @@ export const GAMES_CTA = "See this week's games";
 
 export const MANIFESTO = {
   head: "Join a squad, without the group chat.",
-  body: "Every game is at a free public court, capped at six players, and tagged by skill — so you always know what you're walking into. Join a slot, verify your phone, and show up. The squad is already waiting.",
+  body: "Every game is at a free public court, capped at six players, and tagged by skill — so you always know what you're walking into. Join a game, verify your phone, and show up. The squad is already waiting.",
 } as const;
 
 // How-it-works — 3 rows (each pairs with a photo thumb from the manifest).
@@ -28,7 +28,7 @@ export const STEPS = [
   {
     n: "1",
     title: "Pick a game",
-    body: "Browse open slots at Dallas courts and tap the one that fits your day and your level.",
+    body: "Browse open games at Dallas courts and tap the one that fits your day and your level.",
   },
   {
     n: "2",
@@ -73,10 +73,10 @@ export const FAQ = [
 
 export const CLOSING = {
   head: "Your next game is a tap away.",
-  body: "Find a slot, verify your phone, and meet your Dallas squad this week.",
+  body: "Find a game, verify your phone, and meet your Dallas squad this week.",
 } as const;
 
 // Games-section empty state (D22 string). Passed as a prop to PublicFeedList so
 // the reusable list carries no hard-coded copy.
 export const GAMES_EMPTY_COPY =
-  "No open games right now — new slots post a few days ahead. Check back for Cole, Churchill, and Lake Highlands games.";
+  "No open games right now — new games post a few days ahead. Check back for Cole, Churchill, and Lake Highlands games.";

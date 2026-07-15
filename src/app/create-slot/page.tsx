@@ -129,7 +129,7 @@ export default async function CreateSlotPage({
     return (
       <main className="p-8 max-w-lg">
         <div className="rounded-2xl border border-[#CFE0F4] bg-white p-6">
-          <h1 className="text-xl font-bold text-[#14304D]">Slot created</h1>
+          <h1 className="text-xl font-bold text-[#14304D]">Game created</h1>
           <p className="mt-2 text-[15px] leading-snug text-[#14304D]">
             {when ? `${when.dayLabel} · ${when.timeLabel} at ${venueName}` : `Your game at ${venueName}`}
             <span className="mt-0.5 block text-[#5E80A3]">— it&apos;s live on the feed.</span>
@@ -162,7 +162,7 @@ export default async function CreateSlotPage({
       >
         ← Dashboard
       </a>
-      <h1 className="text-2xl font-bold text-[#14304D] mb-6">Create Slot</h1>
+      <h1 className="text-2xl font-bold text-[#14304D] mb-6">Create Game</h1>
 
       {params.err && (
         <p className="mb-4 text-[#D64B4B] text-sm">
@@ -265,7 +265,7 @@ export default async function CreateSlotPage({
           type="submit"
           className="mt-2 bg-[#EE5E00] hover:brightness-95 text-white font-semibold rounded-xl py-3 px-6 transition-colors"
         >
-          Create Slot
+          Create Game
         </button>
       </form>
     </main>
