@@ -10,6 +10,7 @@ import {
 } from '@/lib/slot-preview';
 import { courtMapsUrl } from '@/lib/maps-url';
 import JoinDisclosure from '@/components/JoinDisclosure';
+import SiteFooter from '@/components/SiteFooter';
 
 // Deduplicate the fetch between generateMetadata and the page render
 const getCachedPreview = cache((id: string) => fetchSlotPreview(id));
@@ -347,15 +348,8 @@ export default async function SlotDetailPage({
           ))}
         </div>
 
-        {/* Page footer */}
-        <div className="px-6 pb-8 text-center">
-          <p
-            className="text-[#9DB8D2] text-[11px]"
-            style={{ fontFamily: 'var(--font-nunito)' }}
-          >
-            Recurring pickleball games in Dallas · sonye.app
-          </p>
-        </div>
+        {/* Page footer — shared site footer (Instagram + policy links). */}
+        <SiteFooter />
 
       </div>
     </main>

@@ -11,6 +11,7 @@ import { getAvatar, type Gender } from '@/lib/avatar';
 import { courtMapsUrl } from '@/lib/maps-url';
 import { formatPhone, smsHref } from '@/lib/phone';
 import PeerReportLink from '@/components/PeerReportLink';
+import SiteFooter from '@/components/SiteFooter';
 import LeaveGameControl from '@/components/LeaveGameControl';
 import LobbyWall, { type WallMessageVM } from '@/components/LobbyWall';
 import InviteControl from '@/components/InviteControl';
@@ -23,10 +24,11 @@ import { formatCentral } from '@/lib/format-central';
 // provable in one response).
 export const dynamic = 'force-dynamic';
 
-// Canonical D8.2 ramp — LOCAL map per ruling G8 (SKILL_DISPLAY in
-// slot-preview.ts is old-D8 and OG-consumed/quarantined; consolidation
-// banked for the OG re-skin dispatch). NOT copied from the
-// OnboardingForm chip map, which carries the banked tier-shift bug.
+// Canonical D8.2 ramp — LOCAL map per ruling G8. The OG card
+// (opengraph-image.tsx) no longer consumes SKILL_DISPLAY either — it now carries
+// its own local D8.2 skill map. slot-preview.ts's SKILL_DISPLAY stays old-D8
+// pending the separate /slot-pill migration. NOT copied from the OnboardingForm
+// chip map, which carries the banked tier-shift bug.
 const SKILL_RAMP: Record<SkillLevel, { bg: string; ink: string; label: string }> = {
   beginner:          { bg: '#DCEBFF', ink: '#15457B', label: 'Beginner' },
   advanced_beginner: { bg: '#FFF1CC', ink: '#8A5A00', label: 'Adv. Beginner' },
@@ -534,6 +536,8 @@ export default async function GroupLobbyPage({
           />
         )}
       </div>
+
+      <SiteFooter />
     </main>
   );
 }

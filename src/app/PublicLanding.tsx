@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PublicFeedList from "@/components/PublicFeedList";
+import SiteFooter from "@/components/SiteFooter";
 import LandingMotion from "./LandingMotion";
 import {
   ROTATOR,
@@ -354,24 +355,8 @@ export default function PublicLanding() {
           </div>
         </section>
 
-        {/* Footer — public policy links. */}
-        <footer className="mt-10 text-center font-sans text-xs text-steel-aa">
-          <Link
-            href="/privacy"
-            className="rounded underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-          >
-            Privacy
-          </Link>
-          <span className="mx-2" aria-hidden="true">
-            ·
-          </span>
-          <Link
-            href="/terms"
-            className="rounded underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-          >
-            Terms
-          </Link>
-        </footer>
+        {/* Footer — shared site footer (Instagram + policy links). */}
+        <SiteFooter />
       </div>
 
       <LandingMotion />
