@@ -7,10 +7,11 @@ export const runtime = 'nodejs';
 export const contentType = 'image/png';
 export const size = { width: 1200, height: 630 };
 
-// D8.2 skill ramp — LOCAL to the OG card. Blast-radius ruling: the OG no longer
-// imports SKILL_DISPLAY from slot-preview.ts, so re-skinning the card here does
-// NOT re-skin the /slot page pill. slot-preview's SKILL_DISPLAY stays old-D8
-// until the separate /slot-pill migration.
+// D8.2 skill ramp — LOCAL to the OG card, per the blast-radius ruling: this
+// card owns its ramp, so re-skinning it here cannot re-skin the /slot page
+// pill or the lobby, which each carry their own identical copy. The /slot-pill
+// migration this comment used to defer to is DONE — slot-preview's old-D8
+// SKILL_DISPLAY is deleted.
 const SKILL_MAP: Record<string, { bg: string; ink: string; label: string }> = {
   beginner:          { bg: '#DCEBFF', ink: '#15457B', label: 'Beginner' },
   advanced_beginner: { bg: '#FFF1CC', ink: '#8A5A00', label: 'Adv. Beginner' },
@@ -78,9 +79,14 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
   const ds = deriveState(preview, id);
   const skill = SKILL_MAP[preview.skill_level];
 
-  const cancelled = ds.state === 'CANCELLED';
-  const heroInk = cancelled ? '#5E80A3' : '#14304D';
-  const venueColor = cancelled ? '#5E80A3' : '#4A6B8C';
+  // The two terminal states share one treatment: muted steel hero, no action
+  // row. The status chip needs no branch — it renders ds.statusCopy, so each
+  // state carries its own words in ("This game was cancelled" / "Already
+  // started"). For the four non-terminal states this is byte-identical to the
+  // `cancelled` boolean it replaces.
+  const muted = ds.state === 'CANCELLED' || ds.state === 'STARTED';
+  const heroInk = muted ? '#5E80A3' : '#14304D';
+  const venueColor = muted ? '#5E80A3' : '#4A6B8C';
 
   // Short weekday in Dallas civil time (never the server default TZ).
   const shortDay = new Date(preview.starts_at).toLocaleDateString('en-US', {
@@ -141,8 +147,9 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
             </span>
           </div>
 
-          {/* ACTION ROW — fixed left slot + right CTA; omitted entirely for CANCELLED */}
-          {!cancelled && (
+          {/* ACTION ROW — fixed left slot + right CTA; omitted entirely for the
+              terminal states (CANCELLED, STARTED) */}
+          {!muted && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 {ds.state === 'FORMING' ? (
@@ -179,7 +186,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
           )}
         </div>
 
-        {/* FOOTER BAND — ink, full-width, all four states */}
+        {/* FOOTER BAND — ink, full-width, all five states */}
         <div style={{ display: 'flex', width: '100%', backgroundColor: '#14304D', padding: '22px 72px', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <span style={{ fontFamily: 'NunitoSans', fontWeight: 400, fontSize: 22, color: '#FFFFFF' }}>

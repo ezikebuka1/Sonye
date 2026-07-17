@@ -49,6 +49,19 @@
   --color-skill-advbeg-bg: #FFF1CC; --color-skill-advbeg-ink: #8A5A00;
   --color-skill-int-bg: #D8EFDF;   --color-skill-int-ink: #246B42;
   --color-skill-adv-bg: #D7E0EC;   --color-skill-adv-ink: #14304D;
+
+  /* motion — ADDITIVE ONLY. Nothing Tailwind ships is overridden: in
+     particular --default-transition-duration (150ms) and
+     --default-transition-timing-function stay untouched, because every
+     transition utility compiles to var(--tw-duration, var(--default-transition-
+     duration)) and retiming that key would silently re-time all 34 live
+     transition sites. New names cannot collide — a v4 theme namespace is only
+     wiped by an explicit `--ease-*: initial` reset sentinel, which we never
+     write. */
+  --ease-sonye-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-micro: 240ms;
+  --duration-reveal: 320ms;
+  --duration-stagger: 70ms;
 }
 
 /* D8 is explicitly light-only — no dark mode override */
@@ -57,4 +70,67 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* ── Motion ───────────────────────────────────────────────────────────────
+   Entrance choreography only — transform and opacity, never layout, so the
+   cards animate at zero CLS. Pure CSS by design: the server HTML already IS
+   the final state, so there is no JS gate and no flash of unstyled content
+   the way the landing's .reveal needs one (that island hides its finals in
+   CSS and reveals them from JS; these do not).
+
+   Keyframe names carry the sonye- prefix set by PublicLanding's
+   sonye-kenburns / sonye-sway. The prefix is doing real work: @keyframes
+   names are GLOBAL, ignoring the <style> tag they were injected from, so the
+   namespace is shared app-wide. sonye-rise / sonye-pip are unused names. */
+
+@keyframes sonye-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes sonye-pip {
+  from { opacity: 0; transform: scale(0.6); }
+  to   { opacity: 1; transform: none; }
+}
+
+.sonye-reveal {
+  animation: sonye-rise var(--duration-reveal) var(--ease-sonye-out) both;
+}
+
+/* Stagger steps — 1-3x the stagger token. Applied alongside .sonye-reveal
+   (or .sonye-pip-in), never on their own. */
+.sonye-d1 { animation-delay: calc(1 * var(--duration-stagger)); }
+.sonye-d2 { animation-delay: calc(2 * var(--duration-stagger)); }
+.sonye-d3 { animation-delay: calc(3 * var(--duration-stagger)); }
+
+.sonye-pip-in {
+  animation: sonye-pip var(--duration-micro) var(--ease-sonye-out) both;
+}
+
+/* App-wide reduced-motion backstop. Reaches every animated surface in the app
+   without editing any of them — including the sheets and the toast, which
+   ship their transitions inline and are otherwise unguarded.
+
+   Deliberately narrow: it sets ONLY duration/iteration/scroll-behavior. It
+   must never set opacity or transform on the universal selector, because
+   #landing-root.landing-js .reveal ships at opacity:0 and depends on the
+   landing's own scoped guard to force it back — a universal opacity rule here
+   would strand the landing invisible.
+
+   PublicLanding's belt-and-braces block stays: it out-specifies this one
+   (#id.class .class beats *), both express the same intent, and it is the only
+   guard that re-evaluates live when the OS setting is toggled mid-session
+   (LandingMotion reads matchMedia once and never subscribes to 'change'). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
 }

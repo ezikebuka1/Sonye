@@ -26,11 +26,12 @@ import { formatCentral } from '@/lib/format-central';
 // provable in one response).
 export const dynamic = 'force-dynamic';
 
-// Canonical D8.2 ramp — LOCAL map per ruling G8. The OG card
-// (opengraph-image.tsx) no longer consumes SKILL_DISPLAY either — it now carries
-// its own local D8.2 skill map. slot-preview.ts's SKILL_DISPLAY stays old-D8
-// pending the separate /slot-pill migration. NOT copied from the OnboardingForm
-// chip map, which carries the banked tier-shift bug.
+// Canonical D8.2 ramp — LOCAL map per ruling G8. Each of the three surfaces
+// that needs the ramp carries its own copy (here, the OG card's SKILL_MAP, and
+// the /slot page's SKILL_RAMP) so that re-skinning one never re-skins the
+// others. The /slot-pill migration is DONE: slot-preview.ts's old-D8
+// SKILL_DISPLAY was its last consumer and is deleted. NOT copied from the
+// OnboardingForm chip map, which carries the banked tier-shift bug.
 const SKILL_RAMP: Record<SkillLevel, { bg: string; ink: string; label: string }> = {
   beginner:          { bg: '#DCEBFF', ink: '#15457B', label: 'Beginner' },
   advanced_beginner: { bg: '#FFF1CC', ink: '#8A5A00', label: 'Adv. Beginner' },

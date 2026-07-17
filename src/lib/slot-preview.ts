@@ -25,11 +25,10 @@ export type SlotPreview = {
   venue_lng: number | null;
 };
 
-export type SlotState = 'CANCELLED' | 'FORMING' | 'FILLING' | 'FULL';
+export type SlotState = 'CANCELLED' | 'STARTED' | 'FORMING' | 'FILLING' | 'FULL';
 
 export type DerivedState = {
   state: SlotState;
-  footerBg: string;
   pipsFilled: number;
   pipsEmpty: number;
   spotsLeft: number | null;
@@ -93,7 +92,6 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
   if (preview.is_cancelled) {
     return {
       state: 'CANCELLED',
-      footerBg: '#5E80A3',
       pipsFilled: 0,
       pipsEmpty: 0,
       spotsLeft: null,
@@ -105,10 +103,33 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
     };
   }
 
+  // Past-game guard. Mirrors join_slot's own cascade — cancelled is checked
+  // first, then started — and its predicate exactly, including the inclusive
+  // `<=` (20260624120000_join_slot_past_game_guard.sql:42-53). A slot that is
+  // both cancelled and started reads as CANCELLED on both surfaces, because
+  // that is the error join_slot would raise.
+  //
+  // starts_at is a timestamptz projected uncast by slot_share_preview, so it
+  // serializes with an offset and parses to an unambiguous absolute instant.
+  // Date.now() is the server clock here: deriveState is only ever called from
+  // server files, and /slot/[id] renders per request.
+  if (new Date(preview.starts_at).getTime() <= Date.now()) {
+    return {
+      state: 'STARTED',
+      pipsFilled: 0,
+      pipsEmpty: 0,
+      spotsLeft: null,
+      ctaLabel: null,
+      ctaHref: null,
+      statusCopy: 'Already started',
+      bodyCopy: null,
+      smsCopy: null,
+    };
+  }
+
   if (!preview.fill_ratio_shown) {
     return {
       state: 'FORMING',
-      footerBg: '#14304D',
       pipsFilled: 0,
       pipsEmpty: 0,
       spotsLeft: null,
@@ -125,7 +146,6 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
     const spots = preview.capacity - filled;
     return {
       state: 'FILLING',
-      footerBg: '#FF6A00',
       pipsFilled: filled,
       pipsEmpty: spots,
       spotsLeft: spots,
@@ -139,7 +159,6 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
 
   return {
     state: 'FULL',
-    footerBg: '#5E80A3',
     pipsFilled: preview.capacity,
     pipsEmpty: 0,
     spotsLeft: 0,
@@ -150,12 +169,3 @@ export function deriveState(preview: SlotPreview, slotId: string): DerivedState 
     smsCopy: "We'll text you if a spot opens",
   };
 }
-
-// ── Skill level display map ───────────────────────────────────────────────────
-
-export const SKILL_DISPLAY: Record<SkillLevel, { bg: string; ink: string; label: string }> = {
-  beginner:          { bg: '#E0EEF9', ink: '#0C447C', label: 'Beginner' },
-  advanced_beginner: { bg: '#FAF0DC', ink: '#854F0B', label: 'Adv. Beginner' },
-  intermediate:      { bg: '#E8F5E9', ink: '#27500A', label: 'Intermediate' },
-  advanced:          { bg: '#FBEAF0', ink: '#72243E', label: 'Advanced' },
-};
