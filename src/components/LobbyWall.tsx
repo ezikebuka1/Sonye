@@ -23,6 +23,9 @@ import { useAppStore } from "@/lib/store";
 //   • host Remove            → text-error  (#D64B4B exists — the established
 //                              destructive red, same as LeaveSheet/cancel)
 //   • coral (bg-coral)       → ONLY the Send button
+//   • canned chips + composer input → bg-inset, NOT bg-white: the wall's
+//     <section> is now a white card (CARD 3), so a white chip/field on it would
+//     lose its figure/ground. Do not "restore" these to bg-white.
 // Everything else rides existing neutral tokens / D8.2 hexes already on screen.
 
 export type WallMessageVM = {
@@ -217,8 +220,8 @@ export default function LobbyWall(props: LobbyWallProps) {
         )
       : null;
     return (
-      <section className="mt-6" data-testid="wall-closed">
-        <div className="rounded-2xl border border-[#CFE0F4] bg-white px-5 py-6 text-center">
+      <section className="mt-4" data-testid="wall-closed">
+        <div className="rounded-2xl border-[1.5px] border-card-border bg-white px-5 py-6 text-center">
           <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#E6F0FF] text-[#5E80A3]">
             <Lock size={18} aria-hidden="true" />
           </div>
@@ -253,30 +256,38 @@ export default function LobbyWall(props: LobbyWallProps) {
   }
 
   // ── ACTIVE ────────────────────────────────────────────────────────────────
+  // CARD 3 · CHAT. This <section> IS the card (white · 1.5px #CFE0F4 ·
+  // rounded-2xl · padding), matching the game + group cards in page.tsx.
+  // It is an ancestor of WallMessageSheet's position:fixed sheet, which
+  // renders in-place with no portal — so this wrapper must stay free of
+  // transform / filter / drop-shadow / blur / backdrop-blur / isolate /
+  // will-change / contain / z-index / opacity<1, any of which would make the
+  // card the sheet's containing block and clip it out of view.
   return (
-    <section className="mt-6" data-testid="wall-active">
+    <section
+      className="mt-4 rounded-2xl border-[1.5px] border-card-border bg-white px-4 py-4"
+      data-testid="wall-active"
+    >
       <h2 className="text-[16px] font-bold text-[#14304D]">Game chat</h2>
       <p className="mt-1 flex items-center gap-1 text-[12px] text-[#5E80A3]">
         <Lock size={11} aria-hidden="true" />
         Only the {props.capacity} of you · closes 2h after
       </p>
 
-      {/* Message list */}
-      <div
-        data-testid="wall-list"
-        className="mt-3 overflow-hidden rounded-2xl border border-[#CFE0F4] bg-white"
-      >
+      {/* Message list — the old white sub-card shell is dissolved; the chat
+          card IS the surface. Rows sit on it directly, wash dividers. */}
+      <div data-testid="wall-list" className="mt-3 border-t border-wash">
         {props.messages.length === 0 ? (
-          <p className="px-4 py-5 text-center text-[13px] text-[#9DB8D2]">
+          <p className="py-5 text-center text-[13px] text-[#9DB8D2]">
             No messages yet{props.canPost ? " — say you’re on your way 👋" : ""}
           </p>
         ) : (
-          <div className="divide-y divide-[#CFE0F4]">
+          <div className="divide-y divide-wash">
             {props.messages.map((m) => (
               <div
                 key={m.id}
                 data-testid="wall-message"
-                className="flex items-start gap-3 px-4 py-3"
+                className="flex items-start gap-3 py-3"
               >
                 <span
                   className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-[13px] font-semibold"
@@ -324,7 +335,7 @@ export default function LobbyWall(props: LobbyWallProps) {
                 data-testid={`wall-canned-${c.key}`}
                 disabled={isPending}
                 onClick={() => post(c.body, false)}
-                className="flex items-center gap-1.5 rounded-full border border-[#CFE0F4] bg-white px-3 py-1.5 text-[13px] font-medium text-[#14304D] disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-full border border-[#CFE0F4] bg-inset px-3 py-1.5 text-[13px] font-medium text-[#14304D] disabled:opacity-50"
               >
                 <Check size={13} className="text-success" aria-hidden="true" />
                 {c.label}
@@ -346,7 +357,7 @@ export default function LobbyWall(props: LobbyWallProps) {
               placeholder="Message the group…"
               maxLength={2000}
               data-testid="wall-composer-input"
-              className="min-w-0 flex-1 rounded-xl border border-[#CFE0F4] bg-white px-3 py-2.5 text-[14px] text-[#14304D] placeholder:text-[#9DB8D2] focus:border-[#B7D2EE] focus:outline-none"
+              className="min-w-0 flex-1 rounded-xl border border-[#CFE0F4] bg-inset px-3 py-2.5 text-[14px] text-[#14304D] placeholder:text-[#9DB8D2] focus:border-[#B7D2EE] focus:outline-none"
             />
             <button
               type="button"

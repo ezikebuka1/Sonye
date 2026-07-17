@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -9,6 +10,7 @@ import {
 } from '@/lib/slot-preview';
 import { getAvatar, type Gender } from '@/lib/avatar';
 import { courtMapsUrl } from '@/lib/maps-url';
+import { venuePhoto } from '@/lib/venue-photos';
 import { formatPhone, smsHref } from '@/lib/phone';
 import PeerReportLink from '@/components/PeerReportLink';
 import SiteFooter from '@/components/SiteFooter';
@@ -96,10 +98,45 @@ function Avatar({ row }: { row: RosterRow }) {
   );
 }
 
+// bg-inset, not bg-white: the roster rows are now unified on the group card's
+// white surface (the old bg-[#E6F0FF] self-row tint is gone), so this pill is
+// the ONLY "that's you" signal left — a white pill on a white card would read
+// as border alone. The tint moves from the row to the pill.
 function SelfChip({ label }: { label: string }) {
   return (
-    <span className="flex-shrink-0 text-[11px] font-semibold text-[#5E80A3] bg-white border border-[#CFE0F4] rounded-full px-2 py-0.5">
+    <span className="flex-shrink-0 text-[11px] font-semibold text-[#5E80A3] bg-inset border border-[#CFE0F4] rounded-full px-2 py-0.5">
       {label}
+    </span>
+  );
+}
+
+// Capacity pips — filled = joined members, empty = open spots.
+//
+// CORAL SANCTION: coral is otherwise actions-only (CLAUDE.md / D8.2). The pips
+// are the OG share card's capacity language brought onto the lobby — sanctioned
+// by the OG-card ruling and extended here by Ebuka's sketch approval. They are
+// the only non-action coral on this surface; do not read them as precedent for
+// coral anywhere else.
+//
+// #9DB4CC is deliberate and off-palette: it is the exact empty-pip ring the OG
+// card uses (opengraph-image.tsx), and parity was ruled required. It has no
+// @theme token yet — nearest is --color-muted #9DB8D2, which is NOT the same
+// hex. Banked for a future tokens pass as --color-pip-ring.
+//
+// aria-hidden: the adjacent "N/M" text already states this for screen readers.
+function CapacityPips({ filled, total }: { filled: number; total: number }) {
+  return (
+    <span className="flex items-center gap-1" aria-hidden="true">
+      {Array.from({ length: total }, (_, i) => (
+        <span
+          key={i}
+          className={
+            i < filled
+              ? 'w-3 h-3 rounded-full bg-coral'
+              : 'w-3 h-3 rounded-full bg-white ring-2 ring-inset ring-[#9DB4CC]'
+          }
+        />
+      ))}
     </span>
   );
 }
@@ -189,6 +226,10 @@ export default async function GroupLobbyPage({
   const { dayLabel, startLabel, endLabel } = formatDallas(preview.starts_at, preview.ends_at);
   const timeRange = formatTimeRange(startLabel, endLabel);
   const skill = SKILL_RAMP[preview.skill_level];
+  // Keyed by venue NAME — no venue id/slug reaches this render site (see
+  // venue-photos.ts). Venues without a photo (Churchill / LHN) → undefined →
+  // the game card renders with no image block.
+  const photo = venuePhoto(preview.venue_name);
   const genderTag =
     preview.gender_category === 'women' ? 'Women' :
     preview.gender_category === 'men'   ? 'Men'   : null;
@@ -345,11 +386,35 @@ export default async function GroupLobbyPage({
           )}
         </div>
 
+        {/* ── CARD 1 · GAME ───────────────────────────────────────────────
+            Card primitive: white · 1.5px #CFE0F4 · rounded-2xl · padding.
+            NO transform/filter/drop-shadow/blur/isolate/will-change/contain
+            on any card wrapper — the invite/wall-msg/leave sheets are
+            position:fixed and render in-place, so any of those would make a
+            card their containing block and clip them out of view. */}
+        <section className="mt-3 bg-white border-[1.5px] border-card-border rounded-2xl overflow-hidden">
+          {photo && (
+            // relative is required by next/image fill and is safe here: plain
+            // `relative` (no z-index, no transform) creates no containing block
+            // for fixed descendants, and this card holds no sheets.
+            <div className="relative w-full h-40">
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                priority
+                sizes="(max-width: 390px) calc(100vw - 40px), 350px"
+                className="object-cover"
+                style={{ objectPosition: '50% 55%' }}
+              />
+            </div>
+          )}
+          <div className="px-4 py-4">
         {/* Venue — the ONLY Baloo on screen. Tappable to Google Maps when the
             venue has court coordinates (D24); the h1 landmark + its ink Baloo
             styling stay unchanged, only the content becomes an anchor. */}
         <h1
-          className="mt-3 text-[#14304D] text-[30px] font-bold leading-tight"
+          className="text-[#14304D] text-[30px] font-bold leading-tight"
           style={{ fontFamily: 'var(--font-baloo2)' }}
         >
           {preview.venue_lat !== null && preview.venue_lng !== null ? (
@@ -385,10 +450,15 @@ export default async function GroupLobbyPage({
             </span>
           )}
         </div>
+          </div>
+        </section>
+        {/* ── end CARD 1 ─────────────────────────────────────────────────── */}
 
-        {/* Waitlist banner — waitlisted viewer only */}
+        {/* Waitlist banner — waitlisted viewer only. Stays on the wash between
+            the cards: it's an alert about the viewer, not part of the game or
+            the group. */}
         {viewer === 'waitlisted' && (
-          <div className="mt-5 bg-[#FFF1CC] border-l-[3px] border-[#FFC63D] rounded-r-xl px-4 py-3">
+          <div className="mt-4 bg-[#FFF1CC] border-l-[3px] border-[#FFC63D] rounded-r-xl px-4 py-3">
             <p className="text-[#8A5A00] text-[14px] font-semibold">
               {`you're ${ordinal(waitlistPos)} in line`}
             </p>
@@ -398,24 +468,34 @@ export default async function GroupLobbyPage({
           </div>
         )}
 
-        {/* Group header */}
-        <div className="mt-6 flex items-center justify-between">
-          <h2 className="text-[#14304D] text-[16px] font-bold">your group</h2>
-          <span className="flex items-center gap-1 text-[#5E80A3] text-[13px] font-semibold [font-variant-numeric:tabular-nums]">
-            {`${fillCount}/${cap}`}
-            {isLocked && (
-              <>
-                <span>· locked</span>
-                <PadlockIcon />
-              </>
-            )}
-          </span>
-        </div>
-        <p className="mt-1 text-[#5E80A3] text-[12px]">{dirHelp}</p>
+        {/* ── CARD 2 · GROUP ──────────────────────────────────────────────
+            Holds the group header + pips, the roster, and the invite CTA.
+            Ancestor of InviteControl's position:fixed sheet — keep this
+            wrapper free of transform/filter/isolate/z-index (see CARD 1). */}
+        <section className="mt-4 bg-white border-[1.5px] border-card-border rounded-2xl px-4 py-4">
+          {/* Group header */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <h2 className="text-[#14304D] text-[16px] font-bold">your group</h2>
+              <CapacityPips filled={fillCount} total={cap} />
+            </div>
+            <span className="flex flex-shrink-0 items-center gap-1 text-[#5E80A3] text-[13px] font-semibold [font-variant-numeric:tabular-nums]">
+              {`${fillCount}/${cap}`}
+              {isLocked && (
+                <>
+                  <span>· locked</span>
+                  <PadlockIcon />
+                </>
+              )}
+            </span>
+          </div>
+          <p className="mt-1 text-[#5E80A3] text-[12px]">{dirHelp}</p>
 
-        {/* Directory — single card, hairline dividers */}
-        <div className="mt-3 bg-white border border-[#CFE0F4] rounded-2xl overflow-hidden">
-          <div className="divide-y divide-[#CFE0F4]">
+        {/* Directory — rows unified on the card's white surface (no per-row
+            tint; SelfChip carries "that's you"), wash dividers. The old white
+            sub-card shell is dissolved: the group card IS the surface. */}
+        <div className="mt-3 border-t border-wash">
+          <div className="divide-y divide-wash">
             {joined.map((row) => {
               const isSelf = row.membership_id === selfId;
               // D10-A UI gate: digits render only when the server sent a
@@ -428,9 +508,7 @@ export default async function GroupLobbyPage({
               return (
                 <div
                   key={row.membership_id}
-                  className={`flex items-center gap-3 px-4 py-2.5 min-h-[56px] ${
-                    isSelf ? 'bg-[#E6F0FF]' : ''
-                  }`}
+                  className="flex items-center gap-3 py-2.5 min-h-[56px]"
                 >
                   <Avatar row={row} />
                   <span className="text-[#14304D] text-[14px] font-medium truncate">
@@ -456,19 +534,17 @@ export default async function GroupLobbyPage({
 
           {/* Waitlist subsection */}
           {waitlist.length > 0 && (
-            <div className="border-t border-[#CFE0F4]">
-              <p className="px-4 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[#5E80A3]">
+            <div className="border-t border-wash">
+              <p className="pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[#5E80A3]">
                 waitlist
               </p>
-              <div className="divide-y divide-[#CFE0F4]">
+              <div className="divide-y divide-wash">
                 {waitlist.map((row, i) => {
                   const isSelf = row.membership_id === selfId;
                   return (
                     <div
                       key={row.membership_id}
-                      className={`flex items-center gap-3 px-4 py-2.5 min-h-[56px] ${
-                        isSelf ? 'bg-[#E6F0FF]' : ''
-                      }`}
+                      className="flex items-center gap-3 py-2.5 min-h-[56px]"
                     >
                       {/* ordinal cell — kept on self rows (empty) so avatars align;
                           the self chip carries the ordinal instead */}
@@ -488,8 +564,9 @@ export default async function GroupLobbyPage({
           )}
         </div>
 
-        {/* Invite a friend — below the roster card, above the wall (Ruling 3:
-            header → date → your group → Invite → wall) */}
+        {/* Invite a friend — now INSIDE the group card (Ruling 3's order is
+            preserved: header → date → your group → Invite → wall; the invite
+            simply belongs to the group it fills). */}
         {canInvite && (
           <InviteControl
             qrSvg={inviteQrSvg}
@@ -498,7 +575,11 @@ export default async function GroupLobbyPage({
             subtitle={inviteSubtitle}
           />
         )}
+        </section>
+        {/* ── end CARD 2 ─────────────────────────────────────────────────── */}
 
+        {/* ── CARD 3 · CHAT — the card lives on LobbyWall's own <section>
+            (both the active and closed branches); see LobbyWall.tsx. ────── */}
         {/* D10-B lobby wall — joined members + host, below the roster */}
         {showWall && (
           <LobbyWall

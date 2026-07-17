@@ -366,7 +366,11 @@ test.describe('D10-B — lobby wall (live session)', () => {
     const chipBg = await page.getByTestId('wall-canned-here').evaluate((el) => getComputedStyle(el).backgroundColor);
     console.log(`[5] Send bg=${sendBg} (expect rgb(238, 94, 0)); canned chip bg=${chipBg} (expect white, NOT coral)`);
     expect(sendBg).toBe('rgb(238, 94, 0)');
-    expect(chipBg).toBe('rgb(255, 255, 255)');
+    // Asserts the stated invariant — a canned chip is NOT coral — rather than a
+    // literal white. The chip is bg-inset (#E6F0FF) since the chat card became a
+    // white surface; pinning the exact fill made this proof brittle to a retint
+    // it was never about.
+    expect(chipBg).not.toBe('rgb(238, 94, 0)');
 
     const shot = 'test-results/d10b-wall-active-390x844.png';
     await page.screenshot({ path: shot, fullPage: true });
