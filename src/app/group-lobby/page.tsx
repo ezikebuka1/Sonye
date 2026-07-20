@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/server';
 import {
   fetchSlotPreview,
   formatDallas,
-  formatTimeRange,
   type SkillLevel,
 } from '@/lib/slot-preview';
 import { getAvatar, type Gender } from '@/lib/avatar';
@@ -224,8 +223,7 @@ export default async function GroupLobbyPage({
   }
   const smsBody = `hey — it's ${selfFirstName} from the ${preview.venue_name} pickleball game`;
 
-  const { dayLabel, startLabel, endLabel } = formatDallas(preview.starts_at, preview.ends_at);
-  const timeRange = formatTimeRange(startLabel, endLabel);
+  const { dayLabel, startLabel } = formatDallas(preview.starts_at);
   const skill = SKILL_RAMP[preview.skill_level];
   // Keyed by venue NAME — no venue id/slug reaches this render site (see
   // venue-photos.ts). Venues without a photo (Churchill / LHN) → undefined →
@@ -434,7 +432,10 @@ export default async function GroupLobbyPage({
           )}
         </h1>
         <p className="mt-1 text-[#5E80A3] text-[13px]">
-          {dayLabel} · {timeRange}
+          Free public court — walk-up, park rules apply.
+        </p>
+        <p className="mt-1 text-[#5E80A3] text-[13px]">
+          {dayLabel} · {startLabel}
         </p>
 
         {/* Meta pills: skill ramp + gender category */}

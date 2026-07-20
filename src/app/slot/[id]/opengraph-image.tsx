@@ -75,7 +75,7 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
     );
   }
 
-  const { dayLabel, startLabel } = formatDallas(preview.starts_at, preview.ends_at);
+  const { dayLabel, startLabel } = formatDallas(preview.starts_at);
   const ds = deriveState(preview, id);
   const skill = SKILL_MAP[preview.skill_level];
 
@@ -144,6 +144,9 @@ export default async function OgImage({ params }: { params: Promise<{ id: string
             </span>
             <span style={{ fontFamily: 'NunitoSans', fontWeight: 400, fontSize: 26, color: venueColor }}>
               {preview.venue_name} · {preview.neighborhood}, Dallas
+            </span>
+            <span style={{ fontFamily: 'NunitoSans', fontWeight: 400, fontSize: 22, color: '#5E80A3' }}>
+              Free public court — walk-up, park rules apply.
             </span>
           </div>
 

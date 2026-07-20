@@ -42,7 +42,6 @@ export type DerivedState = {
 export type DallasFormat = {
   dayLabel: string;   // "Saturday, June 7"
   startLabel: string; // "8:00 AM"
-  endLabel: string;   // "9:30 AM"
   ogShortDay: string; // "Sat 8 AM"
 };
 
@@ -57,33 +56,19 @@ export async function fetchSlotPreview(id: string): Promise<SlotPreview | null> 
 
 // ── Timezone formatting ───────────────────────────────────────────────────────
 
-export function formatDallas(starts_at: string, ends_at: string): DallasFormat {
+export function formatDallas(starts_at: string): DallasFormat {
   const fmt = (iso: string, opts: Intl.DateTimeFormatOptions) =>
     new Intl.DateTimeFormat('en-US', { ...opts, timeZone: 'America/Chicago' }).format(new Date(iso));
 
   const dayLabel   = fmt(starts_at, { weekday: 'long', month: 'long', day: 'numeric' });
   const startLabel = fmt(starts_at, { hour: 'numeric', minute: '2-digit', hour12: true });
-  const endLabel   = fmt(ends_at,   { hour: 'numeric', minute: '2-digit', hour12: true });
 
   // Separate calls avoid the comma Intl emits when weekday + hour are combined
   const satDay = fmt(starts_at, { weekday: 'short' });
   const hour   = fmt(starts_at, { hour: 'numeric', hour12: true });
   const ogShortDay = `${satDay} ${hour}`;
 
-  return { dayLabel, startLabel, endLabel, ogShortDay };
-}
-
-// ── Time range formatting ─────────────────────────────────────────────────────
-
-// "8:00 AM" + "9:30 AM" → "8:00 – 9:30 AM"
-// "8:00 AM" + "1:30 PM" → "8:00 AM – 1:30 PM"
-export function formatTimeRange(startLabel: string, endLabel: string): string {
-  const startPeriod = startLabel.slice(-2);
-  const endPeriod   = endLabel.slice(-2);
-  if (startPeriod === endPeriod) {
-    return `${startLabel.slice(0, -3)} – ${endLabel}`;
-  }
-  return `${startLabel} – ${endLabel}`;
+  return { dayLabel, startLabel, ogShortDay };
 }
 
 // ── State machine ─────────────────────────────────────────────────────────────

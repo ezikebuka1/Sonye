@@ -5,7 +5,6 @@ import { MapPin, ArrowUpRight, ChevronRight } from 'lucide-react';
 import {
   fetchSlotPreview,
   formatDallas,
-  formatTimeRange,
   deriveState,
   type SkillLevel,
 } from '@/lib/slot-preview';
@@ -45,7 +44,7 @@ export async function generateMetadata({
   const preview = await getCachedPreview(id);
   if (!preview) return { title: 'Sonye' };
 
-  const { ogShortDay } = formatDallas(preview.starts_at, preview.ends_at);
+  const { ogShortDay } = formatDallas(preview.starts_at);
   const ds = deriveState(preview, id);
 
   // Absolute base for the OG image URL. Derive from env so prod share previews
@@ -116,8 +115,7 @@ export default async function SlotDetailPage({
     );
   }
 
-  const { dayLabel, startLabel, endLabel } = formatDallas(preview.starts_at, preview.ends_at);
-  const timeRange = formatTimeRange(startLabel, endLabel);
+  const { dayLabel, startLabel } = formatDallas(preview.starts_at);
   const ds      = deriveState(preview, id);
   const skill   = SKILL_RAMP[preview.skill_level];
 
@@ -177,7 +175,7 @@ export default async function SlotDetailPage({
               {dayLabel}
             </p>
             <p className={`font-serif text-[36px] font-bold leading-tight ${terminal ? 'text-steel' : 'text-ink'}`}>
-              {timeRange}
+              {startLabel}
             </p>
 
             {/* Venue line — tappable to Google Maps when the venue has court
@@ -282,7 +280,7 @@ export default async function SlotDetailPage({
                 </div>
                 <a
                   href={ds.ctaHref!}
-                  aria-label={`${ds.ctaLabel} — ${dayLabel} ${timeRange} at ${preview.venue_name}`}
+                  aria-label={`${ds.ctaLabel} — ${dayLabel} ${startLabel} at ${preview.venue_name}`}
                   className={`mt-2.5 flex min-h-[48px] items-center justify-center gap-1 rounded-full text-[19px] font-bold no-underline transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
                     ds.state === 'FULL'
                       ? 'bg-sky text-ink'
